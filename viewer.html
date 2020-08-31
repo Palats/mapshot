@@ -1,0 +1,34 @@
+<html>
+
+<head>
+  <title>Mapshot</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+    integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+    crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+    integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+    crossorigin=""></script>
+</head>
+
+<body>
+  <div id="map" style="height: 100%;"></div>
+  <script>
+    var mymap = L.map('map', {
+      crs: L.CRS.Simple,
+      minZoom: -4,
+      maxZoom: 4,
+    });
+    L.tileLayer("tile_{x}_{y}.jpg", {
+      tileSize: 128,
+      bounds: L.latLngBounds(L.latLng(-832, -864), L.latLng(832, 832)),
+      noWrap: true,
+      maxNativeZoom: 0,
+      minNativeZoom: 0,
+    }).addTo(mymap);
+    L.marker([0, 0], { title: "center" }).addTo(mymap);
+    L.marker([-832, 0], { title: "test" }).addTo(mymap);
+    mymap.setView([0, 0], 0);
+  </script>
+</body>
+
+</html>
