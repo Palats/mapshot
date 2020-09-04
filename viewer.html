@@ -13,21 +13,43 @@
 <body>
   <div id="map" style="height: 100%;"></div>
   <script>
-    var mymap = L.map('map', {
-      crs: L.CRS.Simple,
-      minZoom: -4,
-      maxZoom: 4,
-    });
-    L.tileLayer("tile_{x}_{y}.jpg", {
-      tileSize: 128,
-      bounds: L.latLngBounds(L.latLng(-832, -864), L.latLng(832, 832)),
-      noWrap: true,
-      maxNativeZoom: 0,
-      minNativeZoom: 0,
-    }).addTo(mymap);
-    L.marker([0, 0], { title: "center" }).addTo(mymap);
-    L.marker([-832, 0], { title: "test" }).addTo(mymap);
-    mymap.setView([0, 0], 0);
+    'use strict';
+
+    fetch('map.json')
+      .then(resp => resp.json())
+      .then(info => {
+        console.log("Map info", info);
+
+        const worldToLatLng = function (x, y) {
+          const ratio = info.render_size / info.tile_size;
+          return L.latLng(
+            -y * ratio,
+            x * ratio
+          );
+        };
+
+        const mymap = L.map('map', {
+          crs: L.CRS.Simple,
+        });
+
+        L.tileLayer("zoom_{z}/tile_{x}_{y}.jpg", {
+          tileSize: info.render_size,
+          bounds: L.latLngBounds(
+            worldToLatLng(info.world_min.x, info.world_min.y),
+            worldToLatLng(info.world_max.x, info.world_max.y),
+          ),
+          noWrap: true,
+          maxNativeZoom: info.zoom_max,
+          minNativeZoom: info.zoom_min,
+          minZoom: info.zoom_min - 4,
+          maxZoom: info.zoom_max + 4,
+        }).addTo(mymap);
+
+        L.marker([0, 0], { title: "Start" }).addTo(mymap);
+        L.marker(worldToLatLng(info.player.x, info.player.y), { title: "Player" }).addTo(mymap);
+
+        mymap.setView([0, 0], 0);
+      });
   </script>
 </body>
 
