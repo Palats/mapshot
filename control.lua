@@ -2,6 +2,12 @@ script.on_load(function()
   commands.add_command("mapshot", "screenshot the whole map", mapshot)
 end)
 
+function getSetting(name)
+  -- settings.player[xxx] does contain the value at the beginning of the game,
+  -- while get_player_settings contains the current value.
+  return settings.get_player_settings(game.get_player(game.player.index))[name].value
+end
+
 function mapshot(evt)
   game.player.print("Mapshot...")
 
@@ -17,13 +23,14 @@ function mapshot(evt)
   game.player.print("Map: (" .. world_min.x .. ", " .. world_min.y .. ")-(" .. world_max.x .. ", " .. world_max.y .. ")")
 
   -- Range of tiles to render, in power of 2.
-  local tile_range_min = 7
-  local tile_range_max = 10  -- 1024 meters for a tile.
+  local tile_range_min = math.log(getSetting("tilemin"), 2)
+  local tile_range_max = math.log(getSetting("tilemax"), 2)
 
   -- Size of a tile, in pixels
-  local render_size = 1024
+  local render_size = getSetting("resolution")
 
-  local prefix = "mapshot/"
+  -- Where to store the files.
+  local prefix = getSetting("prefix")
 
   -- Write metadata.
   game.write_file(prefix .. "map.json", game.table_to_json({
@@ -68,7 +75,7 @@ function gen_layer(tile_size, render_size, world_min, world_max, prefix)
         path = prefix .. "tile_" .. tile_x .. "_" .. tile_y .. ".jpg",
         show_gui = false,
         show_entity_info = true,
-        quality = 75,
+        quality = getSetting("jpgquality"),
         daytime = 0,
         water_tick = 0,
       }
