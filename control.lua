@@ -2,13 +2,22 @@ script.on_load(function()
   commands.add_command("mapshot", "screenshot the whole map", mapshot)
 end)
 
-function getSetting(name)
+-- All settings of the mod.
+local params = {}
+
+function updateParams(idx)
   -- settings.player[xxx] does contain the value at the beginning of the game,
   -- while get_player_settings contains the current value.
-  return settings.get_player_settings(game.get_player(game.player.index))[name].value
+  local s = settings.get_player_settings(game.get_player(idx))
+  params.prefix = s["prefix"].value
+  params.tilemin = s["tilemin"].value
+  params.tilemax = s["tilemax"].value
+  params.resolution = s["resolution"].value
+  params.jpgquality = s["jpgquality"].value
 end
 
 function mapshot(evt)
+  updateParams(evt.player_index)
   game.player.print("Mapshot...")
 
   -- Determine map min & max world coordinates based on existing chunks.
@@ -23,14 +32,14 @@ function mapshot(evt)
   game.player.print("Map: (" .. world_min.x .. ", " .. world_min.y .. ")-(" .. world_max.x .. ", " .. world_max.y .. ")")
 
   -- Range of tiles to render, in power of 2.
-  local tile_range_min = math.log(getSetting("tilemin"), 2)
-  local tile_range_max = math.log(getSetting("tilemax"), 2)
+  local tile_range_min = math.log(params.tilemin, 2)
+  local tile_range_max = math.log(params.tilemax, 2)
 
   -- Size of a tile, in pixels
-  local render_size = getSetting("resolution")
+  local render_size = params.resolution
 
   -- Where to store the files.
-  local prefix = getSetting("prefix")
+  local prefix = params.prefix
 
   -- Write metadata.
   game.write_file(prefix .. "mapshot.json", game.table_to_json({
@@ -75,7 +84,7 @@ function gen_layer(tile_size, render_size, world_min, world_max, prefix)
         path = prefix .. "tile_" .. tile_x .. "_" .. tile_y .. ".jpg",
         show_gui = false,
         show_entity_info = true,
-        quality = getSetting("jpgquality"),
+        quality = params.jpgquality,
         daytime = 0,
         water_tick = 0,
       }
