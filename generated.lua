@@ -1,3 +1,6 @@
+-- Automatically generated, do not modify
+local data = {}
+data.html = [==[
 <html>
 
 <head>
@@ -61,4 +64,5 @@
   </script>
 </body>
 
-</html>
+</html>]==]
+return data

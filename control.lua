@@ -1,3 +1,5 @@
+local generated = require("generated")
+
 script.on_load(function()
   commands.add_command("mapshot", "screenshot the whole map", mapshot)
 end)
@@ -44,9 +46,8 @@ function mapshot(evt)
   local tile_range_min = math.log(params.tilemin, 2)
   local tile_range_max = math.log(params.tilemax, 2)
 
-  -- Size of a tile, in pixels
+  -- Size of a tile, in pixels.
   local render_size = params.resolution
-
 
   -- Write metadata.
   game.write_file(prefix .. "mapshot.json", game.table_to_json({
@@ -59,6 +60,10 @@ function mapshot(evt)
     zoom_max = tile_range_max - tile_range_min,
   }))
 
+  -- Create the serving html.
+  game.write_file(prefix .. "index.html", generated.html)
+
+  -- Generate all the tiles.
   for tile_range = tile_range_max, tile_range_min, -1 do
     local tile_size = math.pow(2, tile_range)
     local render_zoom = tile_range_max - tile_range
