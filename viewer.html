@@ -14,11 +14,19 @@
   <div id="map" style="height: 100%;"></div>
   <script>
     'use strict';
+    const params = new URLSearchParams(window.location.search);
+    let path = params.get("path");
+    if (!!path && path[path.length - 1] != "/") {
+      path = path + "/";
+    }
+    console.log("Path", path);
 
-    fetch('mapshot.json')
+    fetch(path + 'mapshot.json')
       .then(resp => resp.json())
       .then(info => {
         console.log("Map info", info);
+
+
 
         const worldToLatLng = function (x, y) {
           const ratio = info.render_size / info.tile_size;
@@ -32,7 +40,7 @@
           crs: L.CRS.Simple,
         });
 
-        L.tileLayer("zoom_{z}/tile_{x}_{y}.jpg", {
+        L.tileLayer(path + "zoom_{z}/tile_{x}_{y}.jpg", {
           tileSize: info.render_size,
           bounds: L.latLngBounds(
             worldToLatLng(info.world_min.x, info.world_min.y),
