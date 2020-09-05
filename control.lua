@@ -18,7 +18,16 @@ end
 
 function mapshot(evt)
   updateParams(evt.player_index)
-  game.player.print("Mapshot...")
+  -- Name of this screenshot.
+  local name = "seed" .. game.default_map_gen_settings.seed .. "-" .. evt.tick
+  if evt.parameter ~= nil and #evt.parameter > 0 then
+    name = evt.parameter
+  end
+
+  -- Where to store the files.
+  local prefix = params.prefix .. name .. "/"
+
+  game.player.print("Mapshot '" .. prefix .. "' ...")
 
   -- Determine map min & max world coordinates based on existing chunks.
   local world_min = { x = 2^30, y = 2^30 }
@@ -38,8 +47,6 @@ function mapshot(evt)
   -- Size of a tile, in pixels
   local render_size = params.resolution
 
-  -- Where to store the files.
-  local prefix = params.prefix
 
   -- Write metadata.
   game.write_file(prefix .. "mapshot.json", game.table_to_json({
