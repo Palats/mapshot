@@ -33,7 +33,7 @@ function mapshot(evt)
   local prefix = getSetting("prefix")
 
   -- Write metadata.
-  game.write_file(prefix .. "map.json", game.table_to_json({
+  game.write_file(prefix .. "mapshot.json", game.table_to_json({
     tile_size = math.pow(2, tile_range_max),
     render_size = render_size,
     world_min = world_min,
