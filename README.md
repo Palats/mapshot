@@ -37,3 +37,8 @@ The most important parameter is the "Smallest tile size". It indicates the numbe
 * Check out the repository.
 * Link your checkout from the Factorio `mods` directory under the name `mapshot`.
 * To avoid having to regenerate Lua files when modifying the html part of the plugin, link `viewer.html` from `script-output`. Load `viewer.html` in your browser and add `?path=mapshot/<name>` to look directly at one of the generated map.
+
+Files in `embed/` and `generated.lua` are automatically generated from other files of the repository; to regenerate them:
+```
+go run genembed.go
+```
