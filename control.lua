@@ -1,9 +1,5 @@
 local generated = require("generated")
 
-script.on_load(function()
-  commands.add_command("mapshot", "screenshot the whole map", mapshot)
-end)
-
 -- All settings of the mod.
 local params = {}
 
@@ -103,3 +99,8 @@ function gen_layer(tile_size, render_size, world_min, world_max, prefix)
     end
   end
 end
+
+-- Register the command.
+-- It seems that on_init+on_load sometime don't trigger (neither of them) when
+-- doing weird things with --mod-directory and list of active mods.
+commands.add_command("mapshot", "screenshot the whole map", mapshot)
