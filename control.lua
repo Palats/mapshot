@@ -1,31 +1,38 @@
 local generated = require("generated")
+local overrides = require("overrides")
 
 -- All settings of the mod.
 local params = {}
 
-function updateParams(idx)
+-- Read all settings and update the params var, incl. overrides.
+function update_params(player)
   -- settings.player[xxx] does contain the value at the beginning of the game,
   -- while get_player_settings contains the current value.
-  local s = settings.get_player_settings(game.get_player(idx))
-  params.prefix = s["prefix"].value
-  params.tilemin = s["tilemin"].value
-  params.tilemax = s["tilemax"].value
-  params.resolution = s["resolution"].value
-  params.jpgquality = s["jpgquality"].value
+  local s = settings.get_player_settings(player)
+  for k, v in pairs(s) do
+    params[k] = v.value
+  end
+
+  for k,v in pairs(overrides) do
+    params[k] = v
+  end
+
+  log("mapshot update_params:\n" .. serpent.block(params))
 end
 
-function mapshot(evt)
-  updateParams(evt.player_index)
+-- Generate a full map screenshot.
+function mapshot(player, parameter, tick)
   -- Name of this screenshot.
-  local name = "seed" .. game.default_map_gen_settings.seed .. "-" .. evt.tick
-  if evt.parameter ~= nil and #evt.parameter > 0 then
-    name = evt.parameter
+  local name = "seed" .. game.default_map_gen_settings.seed .. "-" .. tick
+  if parameter ~= nil and #parameter > 0 then
+    name = parameter
   end
 
   -- Where to store the files.
   local prefix = params.prefix .. name .. "/"
 
-  game.player.print("Mapshot '" .. prefix .. "' ...")
+  player.print("Mapshot '" .. prefix .. "' ...")
+  log("Mapshot target " .. prefix)
 
   -- Determine map min & max world coordinates based on existing chunks.
   local world_min = { x = 2^30, y = 2^30 }
@@ -36,7 +43,7 @@ function mapshot(evt)
     world_max.x = math.max(world_max.x, chunk.area.right_bottom.x)
     world_max.y = math.max(world_max.y, chunk.area.right_bottom.y)
   end
-  game.player.print("Map: (" .. world_min.x .. ", " .. world_min.y .. ")-(" .. world_max.x .. ", " .. world_max.y .. ")")
+  player.print("Map: (" .. world_min.x .. ", " .. world_min.y .. ")-(" .. world_max.x .. ", " .. world_max.y .. ")")
 
   -- Range of tiles to render, in power of 2.
   local tile_range_min = math.log(params.tilemin, 2)
@@ -51,7 +58,7 @@ function mapshot(evt)
     render_size = render_size,
     world_min = world_min,
     world_max = world_max,
-    player = game.player.position,
+    player = player.position,
     zoom_min = 0,
     zoom_max = tile_range_max - tile_range_min,
   }))
@@ -63,13 +70,14 @@ function mapshot(evt)
   for tile_range = tile_range_max, tile_range_min, -1 do
     local tile_size = math.pow(2, tile_range)
     local render_zoom = tile_range_max - tile_range
-    gen_layer(tile_size, render_size, world_min, world_max, prefix .. "zoom_" .. render_zoom .. "/")
+    gen_layer(player, tile_size, render_size, world_min, world_max, prefix .. "zoom_" .. render_zoom .. "/")
   end
 
-  game.player.print("Mapshot done.")
+  player.print("Mapshot done.")
+  log("Mapshot done.")
 end
 
-function gen_layer(tile_size, render_size, world_min, world_max, prefix)
+function gen_layer(player, tile_size, render_size, world_min, world_max, prefix)
   -- Zoom. We want to have render_size pixels represent tile_size world unit.
   -- A zoom of 1.0 means that 32 pixels represent 1 world unit. A zoom of 2.0 means 64 pixels per world unit.
   local zoom = render_size / 32 / tile_size
@@ -77,7 +85,7 @@ function gen_layer(tile_size, render_size, world_min, world_max, prefix)
   local tile_min = { x = math.floor(world_min.x / tile_size), y = math.floor(world_min.y / tile_size) }
   local tile_max = { x = math.floor(world_max.x / tile_size), y = math.floor(world_max.y / tile_size) }
 
-  game.player.print("Tile size " .. tile_size .. ": " .. (tile_max.x - tile_min.x + 1) * (tile_max.y - tile_min.y + 1) .. " tiles to generate")
+  player.print("Tile size " .. tile_size .. ": " .. (tile_max.x - tile_min.x + 1) * (tile_max.y - tile_min.y + 1) .. " tiles to generate")
 
   for tile_y = tile_min.y, tile_max.y do
     for tile_x = tile_min.x, tile_max.x do
@@ -100,7 +108,26 @@ function gen_layer(tile_size, render_size, world_min, world_max, prefix)
   end
 end
 
+-- Detects if an on-startup screenshot is requested.
+script.on_event(defines.events.on_tick, function(evt)
+  -- Needs to run only once, so unregister immediately.
+  script.on_event(defines.events.on_tick, nil)
+
+  -- Assume player index 1 during startup.
+  local player = game.get_player(1)
+  update_params(player)
+  if params.onstartup then
+    log("onstartup requested")
+    mapshot(player, params.shotname .. "-" .. evt.tick, evt.tick)
+    game.write_file("mapshot-done", "done")
+  end
+end)
+
 -- Register the command.
 -- It seems that on_init+on_load sometime don't trigger (neither of them) when
 -- doing weird things with --mod-directory and list of active mods.
-commands.add_command("mapshot", "screenshot the whole map", mapshot)
+commands.add_command("mapshot", "screenshot the whole map", function(evt)
+  local player = game.get_player(evt.player_index)
+  update_params(player)
+  mapshot(player, evt.parameter, evt.tick)
+end)

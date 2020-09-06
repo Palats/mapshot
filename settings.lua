@@ -50,4 +50,28 @@ data:extend({
         localised_description = "Compression quality for jpg files.",
         order = "201",
     },
+
+    -- following settings are largely internal, for driving
+    -- from CLI.
+    {
+        type = "bool-setting",
+        name = "onstartup",
+        setting_type = "runtime-per-user",
+        default_value = false,
+        localised_name = "Trigger on start",
+        localised_description = "Automatically generate a shot on startup.",
+        hidden = true,
+        order = "301",
+    },
+    {
+        type = "string-setting",
+        name = "shotname",
+        setting_type = "runtime-per-user",
+        default_value = "",
+        allow_blank = true,
+        localised_name = "Shot name",
+        localised_description = "Name of the mapshot to create.",
+        hidden = true,
+        order = "302",
+    },
 })
