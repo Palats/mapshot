@@ -4,22 +4,31 @@ package main
 //go:generate go run embed.go
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 )
 
-var modFiles = []string{
-	"*.lua",
-	"changelog.txt",
-	"info.json",
-	"LICENSE",
-	"README.md",
-	"thumbnail.png",
+func getVersion() string {
+	raw, err := ioutil.ReadFile("info.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+	var data map[string]interface{}
+	if err := json.Unmarshal(raw, &data); err != nil {
+		log.Fatal(err)
+	}
+	version := data["version"].(string)
+	if version == "" {
+		log.Fatal("Missing version info")
+	}
+	return version
 }
 
 func genLua() {
@@ -65,7 +74,7 @@ func filenameToVar(fname string) string {
 	return s
 }
 
-func genGo() {
+func genGo(version string) {
 	f, err := os.Create("embed/generated.go")
 	if err != nil {
 		log.Fatal(err)
@@ -80,48 +89,66 @@ func genGo() {
 
 	write("// Package embed is AUTOMATICALLY GENERATED, DO NOT EDIT\n")
 	write("package embed\n\n")
+	write("// Version of the mod\n")
+	write(fmt.Sprintf("var Version = %q\n\n", version))
 
 	// https://stackoverflow.com/a/34863211
 
-	allFiles := make(map[string]string)
+	fileVarnames := make(map[string]string)
 
+	var modFiles = []string{
+		"*.lua",
+		"changelog.txt",
+		"info.json",
+		"LICENSE",
+		"README.md",
+		"thumbnail.png",
+	}
+
+	var filenames []string
 	for _, glob := range modFiles {
 		matches, err := filepath.Glob(glob)
 		if err != nil {
 			log.Fatal(err)
 		}
 		for _, m := range matches {
-			data, err := ioutil.ReadFile(m)
-			if err != nil {
-				log.Fatal(err)
-			}
-
+			filenames = append(filenames, m)
 			varName := "File" + filenameToVar(m)
-			allFiles[m] = varName
-
-			write(fmt.Sprintf("// %s is file %q\n", varName, m))
-			write(fmt.Sprintf("var %s =\n", varName))
-			for _, line := range strings.SplitAfter(string(data), "\n") {
-				for len(line) > 120 {
-					write(fmt.Sprintf("\t%q + // cont.\n", line[:120]))
-					line = line[120:]
-				}
-				write(fmt.Sprintf("\t%q +\n", line))
-			}
-			write("\t\"\"\n")
+			fileVarnames[m] = varName
 		}
-		write("\n")
 	}
 
+	sort.Strings(filenames)
+	for _, name := range filenames {
+		data, err := ioutil.ReadFile(name)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		varName := fileVarnames[name]
+		write(fmt.Sprintf("// %s is file %q\n", varName, name))
+		write(fmt.Sprintf("var %s =\n", varName))
+		for _, line := range strings.SplitAfter(string(data), "\n") {
+			for len(line) > 120 {
+				write(fmt.Sprintf("\t%q + // cont.\n", line[:120]))
+				line = line[120:]
+			}
+			write(fmt.Sprintf("\t%q +\n", line))
+		}
+		write("\t\"\"\n")
+	}
+	write("\n")
+
 	write("var ModFiles = map[string]string{\n")
-	for name, varname := range allFiles {
-		write(fmt.Sprintf("\t%q: %s,\n", "/"+name, varname))
+	for _, name := range filenames {
+		write(fmt.Sprintf("\t%q: %s,\n", "/"+name, fileVarnames[name]))
 	}
 	write("}\n")
 }
 
 func main() {
+	version := getVersion()
 	// Generate Lua file first as it will be embedded also in Go module files.
 	genLua()
-	genGo()
+	genGo(version)
 }
