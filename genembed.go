@@ -141,7 +141,7 @@ func genGo(version string) {
 
 	write("var ModFiles = map[string]string{\n")
 	for _, name := range filenames {
-		write(fmt.Sprintf("\t%q: %s,\n", "/"+name, fileVarnames[name]))
+		write(fmt.Sprintf("\t%q: %s,\n", name, fileVarnames[name]))
 	}
 	write("}\n")
 }

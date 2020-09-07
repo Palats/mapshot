@@ -980,13 +980,13 @@ var FileThumbnailPng =
 	""
 
 var ModFiles = map[string]string{
-	"/LICENSE": FileLicense,
-	"/README.md": FileReadmeMd,
-	"/changelog.txt": FileChangelogTxt,
-	"/control.lua": FileControlLua,
-	"/generated.lua": FileGeneratedLua,
-	"/info.json": FileInfoJson,
-	"/overrides.lua": FileOverridesLua,
-	"/settings.lua": FileSettingsLua,
-	"/thumbnail.png": FileThumbnailPng,
+	"LICENSE": FileLicense,
+	"README.md": FileReadmeMd,
+	"changelog.txt": FileChangelogTxt,
+	"control.lua": FileControlLua,
+	"generated.lua": FileGeneratedLua,
+	"info.json": FileInfoJson,
+	"overrides.lua": FileOverridesLua,
+	"settings.lua": FileSettingsLua,
+	"thumbnail.png": FileThumbnailPng,
 }
