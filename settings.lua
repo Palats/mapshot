@@ -12,7 +12,7 @@ data:extend({
         type = "int-setting",
         name = "tilemin",
         setting_type = "runtime-per-user",
-        default_value = 256,
+        default_value = 64,
         allowed_values = {16, 32, 64, 128, 256, 512, 1024, 2048, 4096},
         localised_name = "Smallest tile size",
         localised_description = "Size in in-game units of a tile for the most zoomed layer.",

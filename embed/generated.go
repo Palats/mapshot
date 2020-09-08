@@ -521,7 +521,7 @@ var FileSettingsLua =
 	"        type = \"int-setting\",\n" +
 	"        name = \"tilemin\",\n" +
 	"        setting_type = \"runtime-per-user\",\n" +
-	"        default_value = 256,\n" +
+	"        default_value = 64,\n" +
 	"        allowed_values = {16, 32, 64, 128, 256, 512, 1024, 2048, 4096},\n" +
 	"        localised_name = \"Smallest tile size\",\n" +
 	"        localised_description = \"Size in in-game units of a tile for the most zoomed layer.\",\n" +
@@ -583,7 +583,8 @@ var FileSettingsLua =
 	"        hidden = true,\n" +
 	"        order = \"302\",\n" +
 	"    },\n" +
-	"})" +
+	"})\n" +
+	"" +
 	""
 // FileThumbnailPng is file "thumbnail.png"
 var FileThumbnailPng =
