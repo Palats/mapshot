@@ -233,6 +233,12 @@ var cmdRender = &cobra.Command{
 			}
 		}
 		glog.Infof("done file %q now exists", doneFile)
+		rawDone, err := ioutil.ReadFile(doneFile)
+		if err != nil {
+			return fmt.Errorf("unable to read file %q: %w", doneFile, err)
+		}
+		resultPrefix := string(rawDone)
+		glog.Infof("output at %s", resultPrefix)
 
 		err = <-errCh
 		if err != nil && err.Error() != "signal: killed" {
@@ -244,6 +250,8 @@ var cmdRender = &cobra.Command{
 			return fmt.Errorf("unable to remove temp dir %q: %w", tmpdir, err)
 		}
 		glog.Infof("temp dir %q removed", tmpdir)
+
+		fmt.Println("Output:", path.Join(fact.ScriptOutput(), resultPrefix))
 		return nil
 	},
 }

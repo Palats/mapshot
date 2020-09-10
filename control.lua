@@ -21,16 +21,7 @@ function update_params(player)
 end
 
 -- Generate a full map screenshot.
-function mapshot(player, parameter, tick)
-  -- Name of this screenshot.
-  local name = "seed" .. game.default_map_gen_settings.seed .. "-" .. tick
-  if parameter ~= nil and #parameter > 0 then
-    name = parameter
-  end
-
-  -- Where to store the files.
-  local prefix = params.prefix .. name .. "/"
-
+function mapshot(player, prefix)
   player.print("Mapshot '" .. prefix .. "' ...")
   log("Mapshot target " .. prefix)
 
@@ -118,8 +109,10 @@ script.on_event(defines.events.on_tick, function(evt)
   update_params(player)
   if params.onstartup ~= "" then
     log("onstartup requested id=" .. params.onstartup)
-    mapshot(player, params.shotname .. "-" .. evt.tick, evt.tick)
-    game.write_file("mapshot-done-" .. params.onstartup, "done")
+    local name = params.shotname .. "-" .. evt.tick
+    local prefix = params.prefix .. name .. "/"
+    mapshot(player, prefix)
+    game.write_file("mapshot-done-" .. params.onstartup, prefix)
   end
 end)
 
@@ -129,5 +122,12 @@ end)
 commands.add_command("mapshot", "screenshot the whole map", function(evt)
   local player = game.get_player(evt.player_index)
   update_params(player)
-  mapshot(player, evt.parameter, evt.tick)
+
+  -- Where to store the output.
+  local name = "seed" .. game.default_map_gen_settings.seed .. "-" .. evt.tick
+  if parameter ~= nil and #parameter > 0 then
+    name = parameter
+  end
+  local prefix = params.prefix .. name .. "/"
+  mapshot(player, params.prefix .. name .. "/")
 end)

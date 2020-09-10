@@ -301,16 +301,7 @@ var FileControlLua =
 	"end\n" +
 	"\n" +
 	"-- Generate a full map screenshot.\n" +
-	"function mapshot(player, parameter, tick)\n" +
-	"  -- Name of this screenshot.\n" +
-	"  local name = \"seed\" .. game.default_map_gen_settings.seed .. \"-\" .. tick\n" +
-	"  if parameter ~= nil and #parameter > 0 then\n" +
-	"    name = parameter\n" +
-	"  end\n" +
-	"\n" +
-	"  -- Where to store the files.\n" +
-	"  local prefix = params.prefix .. name .. \"/\"\n" +
-	"\n" +
+	"function mapshot(player, prefix)\n" +
 	"  player.print(\"Mapshot '\" .. prefix .. \"' ...\")\n" +
 	"  log(\"Mapshot target \" .. prefix)\n" +
 	"\n" +
@@ -399,8 +390,10 @@ var FileControlLua =
 	"  update_params(player)\n" +
 	"  if params.onstartup ~= \"\" then\n" +
 	"    log(\"onstartup requested id=\" .. params.onstartup)\n" +
-	"    mapshot(player, params.shotname .. \"-\" .. evt.tick, evt.tick)\n" +
-	"    game.write_file(\"mapshot-done-\" .. params.onstartup, \"done\")\n" +
+	"    local name = params.shotname .. \"-\" .. evt.tick\n" +
+	"    local prefix = params.prefix .. name .. \"/\"\n" +
+	"    mapshot(player, prefix)\n" +
+	"    game.write_file(\"mapshot-done-\" .. params.onstartup, prefix)\n" +
 	"  end\n" +
 	"end)\n" +
 	"\n" +
@@ -410,7 +403,14 @@ var FileControlLua =
 	"commands.add_command(\"mapshot\", \"screenshot the whole map\", function(evt)\n" +
 	"  local player = game.get_player(evt.player_index)\n" +
 	"  update_params(player)\n" +
-	"  mapshot(player, evt.parameter, evt.tick)\n" +
+	"\n" +
+	"  -- Where to store the output.\n" +
+	"  local name = \"seed\" .. game.default_map_gen_settings.seed .. \"-\" .. evt.tick\n" +
+	"  if parameter ~= nil and #parameter > 0 then\n" +
+	"    name = parameter\n" +
+	"  end\n" +
+	"  local prefix = params.prefix .. name .. \"/\"\n" +
+	"  mapshot(player, params.prefix .. name .. \"/\")\n" +
 	"end)" +
 	""
 // FileGeneratedLua is file "generated.lua"
