@@ -14,6 +14,7 @@ import (
 	"github.com/Palats/mapshot/embed"
 	"github.com/Palats/mapshot/factorio"
 	"github.com/golang/glog"
+	"github.com/google/uuid"
 	"github.com/otiai10/copy"
 	"github.com/spf13/cobra"
 	flag "github.com/spf13/pflag"
@@ -92,8 +93,11 @@ var cmdRender = &cobra.Command{
 			return err
 		}
 
+		runID := uuid.New().String()
+		glog.Infof("runid: %s", runID)
+
 		name := args[0]
-		fmt.Printf("Generating screenshot for save %q\n", name)
+		fmt.Printf("Generating mapshot for savegame %q\n", name)
 
 		tmpdir, err := ioutil.TempDir("", "mapshot")
 		if err != nil {
@@ -175,11 +179,11 @@ var cmdRender = &cobra.Command{
 
 		overrides := fmt.Sprintf(`
 		return {
-			onstartup = true,
+			onstartup = "%s",
 			shotname = "%s",
 			tilemin = 64,
 		}
-		`, name)
+		`, runID, name)
 		overridesFilename := path.Join(dstMapshot, "overrides.lua")
 		if err := ioutil.WriteFile(overridesFilename, []byte(overrides), 0644); err != nil {
 			return fmt.Errorf("unable to write overrides file %q: %w", overridesFilename, err)
@@ -187,7 +191,7 @@ var cmdRender = &cobra.Command{
 		glog.Infof("overrides file created at %q", overridesFilename)
 
 		// Remove done marker if still present
-		doneFile := path.Join(fact.ScriptOutput(), "mapshot-done")
+		doneFile := path.Join(fact.ScriptOutput(), "mapshot-done-"+runID)
 		err = os.Remove(doneFile)
 		glog.Infof("removed done-file %q: %v", doneFile, err)
 

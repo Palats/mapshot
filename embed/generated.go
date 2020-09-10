@@ -397,10 +397,10 @@ var FileControlLua =
 	"  -- Assume player index 1 during startup.\n" +
 	"  local player = game.get_player(1)\n" +
 	"  update_params(player)\n" +
-	"  if params.onstartup then\n" +
-	"    log(\"onstartup requested\")\n" +
+	"  if params.onstartup ~= \"\" then\n" +
+	"    log(\"onstartup requested id=\" .. params.onstartup)\n" +
 	"    mapshot(player, params.shotname .. \"-\" .. evt.tick, evt.tick)\n" +
-	"    game.write_file(\"mapshot-done\", \"done\")\n" +
+	"    game.write_file(\"mapshot-done-\" .. params.onstartup, \"done\")\n" +
 	"  end\n" +
 	"end)\n" +
 	"\n" +
@@ -563,12 +563,13 @@ var FileSettingsLua =
 	"    -- following settings are largely internal, for driving\n" +
 	"    -- from CLI.\n" +
 	"    {\n" +
-	"        type = \"bool-setting\",\n" +
+	"        type = \"string-setting\",\n" +
 	"        name = \"onstartup\",\n" +
 	"        setting_type = \"runtime-per-user\",\n" +
-	"        default_value = false,\n" +
+	"        default_value = \"\",\n" +
+	"        allow_blank = true,\n" +
 	"        localised_name = \"Trigger on start\",\n" +
-	"        localised_description = \"Automatically generate a shot on startup.\",\n" +
+	"        localised_description = \"Automatically generate a shot on startup. Content is used as an identifier.\",\n" +
 	"        hidden = true,\n" +
 	"        order = \"301\",\n" +
 	"    },\n" +

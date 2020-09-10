@@ -54,12 +54,13 @@ data:extend({
     -- following settings are largely internal, for driving
     -- from CLI.
     {
-        type = "bool-setting",
+        type = "string-setting",
         name = "onstartup",
         setting_type = "runtime-per-user",
-        default_value = false,
+        default_value = "",
+        allow_blank = true,
         localised_name = "Trigger on start",
-        localised_description = "Automatically generate a shot on startup.",
+        localised_description = "Automatically generate a shot on startup. Content is used as an identifier.",
         hidden = true,
         order = "301",
     },

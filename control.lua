@@ -116,10 +116,10 @@ script.on_event(defines.events.on_tick, function(evt)
   -- Assume player index 1 during startup.
   local player = game.get_player(1)
   update_params(player)
-  if params.onstartup then
-    log("onstartup requested")
+  if params.onstartup ~= "" then
+    log("onstartup requested id=" .. params.onstartup)
     mapshot(player, params.shotname .. "-" .. evt.tick, evt.tick)
-    game.write_file("mapshot-done", "done")
+    game.write_file("mapshot-done-" .. params.onstartup, "done")
   end
 end)
 
