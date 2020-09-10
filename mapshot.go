@@ -20,7 +20,7 @@ import (
 	flag "github.com/spf13/pflag"
 )
 
-var factorioSettings = factorio.RegisterFlags(goflag.CommandLine, "")
+var factorioSettings = factorio.RegisterFlags(goflag.CommandLine, "factorio_")
 
 var rootCmd = &cobra.Command{
 	Use:   "mapshot",
@@ -204,8 +204,12 @@ var cmdRender = &cobra.Command{
 		}
 		glog.Infof("Factorio args: %v", args)
 
-		ctx, cancel := context.WithCancel(cmd.Context())
-		defer cancel()
+		ctx := cmd.Context()
+		cancel := func() {}
+		if !keepRunning {
+			ctx, cancel = context.WithCancel(ctx)
+			defer cancel()
+		}
 		errCh := make(chan error)
 		fmt.Println("Starting Factorio...")
 		go func() {
@@ -256,14 +260,22 @@ var cmdRender = &cobra.Command{
 	},
 }
 
+var keepRunning bool
+
 func main() {
 	flag.CommandLine.AddGoFlagSet(goflag.CommandLine)
-	flag.Parse()
+	cmdRender.PersistentFlags().BoolVar(&keepRunning, "keep_running", false, "If true, wait for Factorio to exit instead of stopping it.")
 
 	rootCmd.AddCommand(cmdPackage)
 	rootCmd.AddCommand(cmdVersion)
 	rootCmd.AddCommand(cmdInfo)
 	rootCmd.AddCommand(cmdRender)
+
+	// Fake parse the default Go flags - that appease glog, which otherwise
+	// complains on each line. goflag.CommandLine do get parsed in parsed
+	// through pflag and `AddGoFlagSet`.
+	goflag.CommandLine.Parse(nil)
+
 	if err := rootCmd.ExecuteContext(context.Background()); err != nil {
 		// Root cmd already prints errors of subcommands.
 		os.Exit(1)

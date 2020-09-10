@@ -29,6 +29,7 @@ const (
 type Factorio struct {
 	datadir string
 	binary  string
+	verbose bool
 }
 
 // New creates a new Factorio instance from the settings.
@@ -44,6 +45,7 @@ func New(s *Settings) (*Factorio, error) {
 	return &Factorio{
 		datadir: datadir,
 		binary:  binary,
+		verbose: s.verbose,
 	}, nil
 }
 
@@ -77,6 +79,10 @@ func (f *Factorio) SaveFile(name string) string {
 func (f *Factorio) Run(ctx context.Context, args []string) error {
 	glog.Infof("Running factorio with args: %v", args)
 	cmd := exec.CommandContext(ctx, f.binary, args...)
+	if f.verbose {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+	}
 	err := cmd.Run()
 	glog.Infof("Factorio returned: %v", err)
 	return err
@@ -86,14 +92,15 @@ func (f *Factorio) Run(ctx context.Context, args []string) error {
 type Settings struct {
 	datadir string
 	binary  string
+	verbose bool
 }
 
 // RegisterFlags registers a series of flags to configure Factorio (e.g., location).
 func RegisterFlags(flags *flag.FlagSet, prefix string) *Settings {
 	s := &Settings{}
 	flags.StringVar(&s.datadir, prefix+"datadir", "", "Path to factorio data dir. Tries default locations if empty.")
-	flags.StringVar(&s.binary, "binary", "", "Path to factorio binary. Tries default locations if empty.")
-
+	flags.StringVar(&s.binary, prefix+"binary", "", "Path to factorio binary. Tries default locations if empty.")
+	flags.BoolVar(&s.verbose, prefix+"verbose", false, "If true, stream Factorio stdout/stderr to the console.")
 	return s
 }
 
