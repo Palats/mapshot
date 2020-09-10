@@ -27,9 +27,10 @@ const (
 
 // Factorio offers methods to manipulate a Factorio install.
 type Factorio struct {
-	datadir string
-	binary  string
-	verbose bool
+	datadir     string
+	binary      string
+	verbose     bool
+	keepRunning bool
 }
 
 // New creates a new Factorio instance from the settings.
@@ -78,21 +79,37 @@ func (f *Factorio) SaveFile(name string) string {
 // Run factorio.
 func (f *Factorio) Run(ctx context.Context, args []string) error {
 	glog.Infof("Running factorio with args: %v", args)
-	cmd := exec.CommandContext(ctx, f.binary, args...)
+	cmd := exec.Command(f.binary, args...)
 	if f.verbose {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 	}
+	done := make(chan struct{})
+	go func() {
+		select {
+		case <-done:
+			return
+		case <-ctx.Done():
+			glog.Infof("interrupt requested")
+			// When killing immediately, some files will not be written, even
+			// when the `done` file is already visible. Instead, ask to
+			// shutdown politely.
+			// Unfortunately, that will be an issue for windows.
+			cmd.Process.Signal(os.Interrupt)
+		}
+	}()
 	err := cmd.Run()
+	close(done)
 	glog.Infof("Factorio returned: %v", err)
 	return err
 }
 
 // Settings for creating a Factorio helper instance.
 type Settings struct {
-	datadir string
-	binary  string
-	verbose bool
+	datadir     string
+	binary      string
+	verbose     bool
+	keepRunning bool
 }
 
 // RegisterFlags registers a series of flags to configure Factorio (e.g., location).
@@ -101,6 +118,7 @@ func RegisterFlags(flags *flag.FlagSet, prefix string) *Settings {
 	flags.StringVar(&s.datadir, prefix+"datadir", "", "Path to factorio data dir. Tries default locations if empty.")
 	flags.StringVar(&s.binary, prefix+"binary", "", "Path to factorio binary. Tries default locations if empty.")
 	flags.BoolVar(&s.verbose, prefix+"verbose", false, "If true, stream Factorio stdout/stderr to the console.")
+	flags.BoolVar(&s.keepRunning, prefix+"keep_running", false, "If true, wait for Factorio to exit instead of stopping it.")
 	return s
 }
 

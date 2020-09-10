@@ -76,7 +76,9 @@ function gen_layer(player, tile_size, render_size, world_min, world_max, prefix)
   local tile_min = { x = math.floor(world_min.x / tile_size), y = math.floor(world_min.y / tile_size) }
   local tile_max = { x = math.floor(world_max.x / tile_size), y = math.floor(world_max.y / tile_size) }
 
-  player.print("Tile size " .. tile_size .. ": " .. (tile_max.x - tile_min.x + 1) * (tile_max.y - tile_min.y + 1) .. " tiles to generate")
+  local msg =  "Tile size " .. tile_size .. ": " .. (tile_max.x - tile_min.x + 1) * (tile_max.y - tile_min.y + 1) .. " tiles to generate"
+  player.print(msg)
+  log(msg)
 
   for tile_y = tile_min.y, tile_max.y do
     for tile_x = tile_min.x, tile_max.x do

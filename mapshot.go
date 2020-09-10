@@ -204,12 +204,8 @@ var cmdRender = &cobra.Command{
 		}
 		glog.Infof("Factorio args: %v", args)
 
-		ctx := cmd.Context()
-		cancel := func() {}
-		if !keepRunning {
-			ctx, cancel = context.WithCancel(ctx)
-			defer cancel()
-		}
+		ctx, cancel := context.WithCancel(cmd.Context())
+		defer cancel()
 		errCh := make(chan error)
 		fmt.Println("Starting Factorio...")
 		go func() {
@@ -243,9 +239,10 @@ var cmdRender = &cobra.Command{
 		}
 		resultPrefix := string(rawDone)
 		glog.Infof("output at %s", resultPrefix)
+		fmt.Println("Output:", path.Join(fact.ScriptOutput(), resultPrefix))
 
 		err = <-errCh
-		if err != nil && err.Error() != "signal: killed" {
+		if err != nil {
 			return fmt.Errorf("error while running Factorio: %w", err)
 		}
 
@@ -255,16 +252,12 @@ var cmdRender = &cobra.Command{
 		}
 		glog.Infof("temp dir %q removed", tmpdir)
 
-		fmt.Println("Output:", path.Join(fact.ScriptOutput(), resultPrefix))
 		return nil
 	},
 }
 
-var keepRunning bool
-
 func main() {
 	flag.CommandLine.AddGoFlagSet(goflag.CommandLine)
-	cmdRender.PersistentFlags().BoolVar(&keepRunning, "keep_running", false, "If true, wait for Factorio to exit instead of stopping it.")
 
 	rootCmd.AddCommand(cmdPackage)
 	rootCmd.AddCommand(cmdVersion)
