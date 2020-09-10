@@ -3,110 +3,29 @@ package main
 import (
 	"archive/zip"
 	"context"
-	"encoding/json"
-	"errors"
 	goflag "flag"
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path"
 	"strings"
 	"time"
 
 	"github.com/Palats/mapshot/embed"
+	"github.com/Palats/mapshot/factorio"
 	"github.com/golang/glog"
-	"github.com/mitchellh/go-homedir"
 	"github.com/otiai10/copy"
 	"github.com/spf13/cobra"
 	flag "github.com/spf13/pflag"
 )
+
+var factorioSettings = factorio.RegisterFlags(goflag.CommandLine, "")
 
 var rootCmd = &cobra.Command{
 	Use:   "mapshot",
 	Short: "mapshot generates zoomable screenshot for Factorio",
 	// Do not show help if not requested - e.g., when an error is generated.
 	SilenceUsage: true,
-}
-
-var factorioDataDir = rootCmd.PersistentFlags().String("datadir", "", "Path to factorio data dir. Try default locations if empty.")
-var factorioBinary = rootCmd.PersistentFlags().String("binary", "", "Path to factorio binary. Try default locations if empty.")
-
-func findDataDir() (string, error) {
-	candidates := []string{
-		`~/factorio`,
-		`~/.factorio`,
-		`~/Library/Application Support/factorio`,
-		`%appdata%\Factorio`,
-	}
-	if *factorioDataDir != "" {
-		candidates = []string{*factorioDataDir}
-
-	}
-	for _, c := range candidates {
-		s, err := homedir.Expand(c)
-		if err != nil {
-			glog.Infof("Unable to expand %s: %v", c, err)
-			continue
-		}
-		info, err := os.Stat(s)
-		if os.IsNotExist(err) {
-			glog.Infof("Path %s does not exists, skipped", s)
-			continue
-		}
-		if !info.IsDir() {
-			glog.Infof("Path %s is a file, skipped", s)
-		}
-		glog.Infof("Found factorio data dir: %s", s)
-		return s, nil
-	}
-	glog.Infof("No Factorio data dir found")
-	return "", errors.New("no factorio data dir found; use --alsologtostderr for more info and --datadir to specify its location")
-}
-
-func findBinary() (string, error) {
-	candidates := []string{
-		`~/.factorio/bin/x64/factorio`,
-		`~/factorio/bin/x64/factorio`,
-		`~/Library/Application Support/Steam/steamapps/common/Factorio/factorio.app/Contents`,
-		`/Applications/factorio.app/Contents`,
-		`C:\Program Files (x86)\Steam\steamapps\common\Factorio`,
-		`C:\Program Files\Factorio`,
-	}
-	if *factorioBinary != "" {
-		candidates = []string{*factorioBinary}
-	}
-	for _, c := range candidates {
-		s, err := homedir.Expand(c)
-		if err != nil {
-			glog.Infof("Unable to expand %s: %v", c, err)
-			continue
-		}
-		info, err := os.Stat(s)
-		if os.IsNotExist(err) {
-			glog.Infof("Path %s does not exists, skipped", s)
-			continue
-		}
-		if info.IsDir() {
-			glog.Infof("Path %s is a directory, skipped", s)
-			continue
-		}
-		glog.Infof("Factorio binary found: %s", s)
-		return s, nil
-	}
-	glog.Infof("No factorio binary found")
-	return "", errors.New("no factorio binary found; use --alsologtostderr for more info and --binary to specify its location")
-}
-
-// ModList represents the content of `mod-list.json` file in Factorio.
-type ModList struct {
-	Mods []ModListEntry `json:"mods"`
-}
-
-// ModListEntry is a single mod entry in the `mod-list.json` file.
-type ModListEntry struct {
-	Name    string `json:"name"`
-	Enabled bool   `json:"enabled"`
 }
 
 var cmdVersion = &cobra.Command{
@@ -153,10 +72,12 @@ var cmdInfo = &cobra.Command{
 	Short: "Show info about what mapshot knows.",
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		datadir, _ := findDataDir()
-		fmt.Println("datadir:", datadir)
-		binary, _ := findBinary()
-		fmt.Println("binary:", binary)
+		fact, err := factorio.New(factorioSettings)
+		if err != nil {
+			return err
+		}
+		fmt.Println("datadir:", fact.DataDir())
+		fmt.Println("binary:", fact.Binary())
 		return nil
 	},
 }
@@ -166,17 +87,13 @@ var cmdRender = &cobra.Command{
 	Short: "Create a screenshot from a save.",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		fact, err := factorio.New(factorioSettings)
+		if err != nil {
+			return err
+		}
+
 		name := args[0]
 		fmt.Printf("Generating screenshot for save %q\n", name)
-
-		datadir, err := findDataDir()
-		if err != nil {
-			return err
-		}
-		binary, err := findBinary()
-		if err != nil {
-			return err
-		}
 
 		tmpdir, err := ioutil.TempDir("", "mapshot")
 		if err != nil {
@@ -185,7 +102,7 @@ var cmdRender = &cobra.Command{
 		glog.Info("temp dir: ", tmpdir)
 
 		// Copy game save
-		srcSavegame := path.Join(datadir, "saves", name+".zip")
+		srcSavegame := fact.SaveFile(name)
 		dstSavegame := path.Join(tmpdir, name+".zip")
 		if err := copy.Copy(srcSavegame, dstSavegame); err != nil {
 			return fmt.Errorf("unable to copy file %q: %w", srcSavegame, err)
@@ -193,7 +110,7 @@ var cmdRender = &cobra.Command{
 		glog.Infof("copied save from %q to %q", srcSavegame, dstSavegame)
 
 		// Copy mods
-		srcMods := path.Join(datadir, "mods")
+		srcMods := fact.ModsDir()
 		dstMods := path.Join(tmpdir, "mods")
 		dstMapshot := path.Join(dstMods, "mapshot")
 		foundModList := false
@@ -220,35 +137,14 @@ var cmdRender = &cobra.Command{
 			}
 			// Fiddle with the mod list to activate mapshot automatically.
 			if sub.Name() == "mod-list.json" {
-				raw, err := ioutil.ReadFile(src)
+				mlist, err := factorio.LoadModList(src)
 				if err != nil {
-					return fmt.Errorf("unable to read %q: %w", src, err)
+					return err
 				}
+				mlist.Enable("mapshot")
 
-				var data ModList
-				if err := json.Unmarshal(raw, &data); err != nil {
-					return fmt.Errorf("unable to decode json from %q: %w", src, err)
-				}
-
-				var mods []ModListEntry
-				for _, mod := range data.Mods {
-					if mod.Name == "mapshot" {
-						continue
-					}
-					mods = append(mods, mod)
-				}
-				mods = append(mods, ModListEntry{
-					Name:    "mapshot",
-					Enabled: true,
-				})
-				data.Mods = mods
-
-				raw, err = json.Marshal(data)
-				if err != nil {
-					return fmt.Errorf("unable to encode json: %w", err)
-				}
-				if err := ioutil.WriteFile(dst, raw, 0644); err != nil {
-					return fmt.Errorf("unable to write file %q: %w", dst, err)
+				if err := mlist.Write(dst); err != nil {
+					return err
 				}
 				glog.Infof("created mod-list.json")
 				foundModList = true
@@ -291,7 +187,7 @@ var cmdRender = &cobra.Command{
 		glog.Infof("overrides file created at %q", overridesFilename)
 
 		// Remove done marker if still present
-		doneFile := path.Join(datadir, "script-output", "mapshot-done")
+		doneFile := path.Join(fact.ScriptOutput(), "mapshot-done")
 		err = os.Remove(doneFile)
 		glog.Infof("removed done-file %q: %v", doneFile, err)
 
@@ -304,15 +200,12 @@ var cmdRender = &cobra.Command{
 		}
 		glog.Infof("Factorio args: %v", args)
 
-		ctx, cancel := context.WithCancel(context.Background())
+		ctx, cancel := context.WithCancel(cmd.Context())
 		defer cancel()
 		errCh := make(chan error)
 		go func() {
 			fmt.Println("Starting Factorio...")
-			factorioCmd := exec.CommandContext(ctx, binary, factorioArgs...)
-			err := factorioCmd.Run()
-			glog.Infof("Run factorio result: %v", err)
-			errCh <- err
+			errCh <- fact.Run(ctx, factorioArgs)
 		}()
 
 		for {
@@ -352,7 +245,7 @@ func main() {
 	rootCmd.AddCommand(cmdVersion)
 	rootCmd.AddCommand(cmdInfo)
 	rootCmd.AddCommand(cmdRender)
-	if err := rootCmd.Execute(); err != nil {
+	if err := rootCmd.ExecuteContext(context.Background()); err != nil {
 		// Root cmd already prints errors of subcommands.
 		os.Exit(1)
 	}
