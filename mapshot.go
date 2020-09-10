@@ -207,32 +207,39 @@ var cmdRender = &cobra.Command{
 		ctx, cancel := context.WithCancel(cmd.Context())
 		defer cancel()
 		errCh := make(chan error)
+		fmt.Println("Starting Factorio...")
 		go func() {
-			fmt.Println("Starting Factorio...")
 			errCh <- fact.Run(ctx, factorioArgs)
 		}()
 
+		// Wait for the `done` file to be created, indicating that the work is
+		// done.
 		for {
 			_, err := os.Stat(doneFile)
-			if err == nil {
-				break
-			}
-			if !os.IsNotExist(err) {
+			if err != nil && !os.IsNotExist(err) {
 				return fmt.Errorf("unable to stat file %q: %w", doneFile, err)
 			}
+			if err == nil {
+				cancel()
+				break
+			}
 
-			<-time.After(time.Second)
+			// Context cancellation should terminate Factorio, which is detected
+			// through errCh, so no need to wait on context.
+			select {
+			case <-time.After(time.Second):
+			case err := <-errCh:
+				return fmt.Errorf("factorio exited early: %w", err)
+			}
 		}
 		glog.Infof("done file %q now exists", doneFile)
 
-		cancel()
 		err = <-errCh
-		if err != nil {
-			if err.Error() != "signal: killed" {
-				return fmt.Errorf("error while running Factorio: %w", err)
-			}
+		if err != nil && err.Error() != "signal: killed" {
+			return fmt.Errorf("error while running Factorio: %w", err)
 		}
 
+		// Remove temporary directory.
 		if err := os.RemoveAll(tmpdir); err != nil {
 			return fmt.Errorf("unable to remove temp dir %q: %w", tmpdir, err)
 		}
