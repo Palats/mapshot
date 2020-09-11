@@ -200,7 +200,6 @@ var cmdRender = &cobra.Command{
 			"--disable-prototype-history",
 			"--load-game", dstSavegame,
 			"--mod-directory", dstMods,
-			"--force-graphics-preset", "very-low",
 		}
 		glog.Infof("Factorio args: %v", args)
 

@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"strings"
 
 	"github.com/golang/glog"
 	"github.com/mitchellh/go-homedir"
@@ -31,6 +32,7 @@ type Factorio struct {
 	binary      string
 	verbose     bool
 	keepRunning bool
+	extraArgs   []string
 }
 
 // New creates a new Factorio instance from the settings.
@@ -43,10 +45,19 @@ func New(s *Settings) (*Factorio, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	var extraArgs []string
+	for _, s := range strings.Split(s.extraArgs, " ") {
+		s = strings.TrimSpace(s)
+		if s != "" {
+			extraArgs = append(extraArgs, s)
+		}
+	}
 	return &Factorio{
-		datadir: datadir,
-		binary:  binary,
-		verbose: s.verbose,
+		datadir:   datadir,
+		binary:    binary,
+		verbose:   s.verbose,
+		extraArgs: extraArgs,
 	}, nil
 }
 
@@ -78,6 +89,7 @@ func (f *Factorio) SaveFile(name string) string {
 
 // Run factorio.
 func (f *Factorio) Run(ctx context.Context, args []string) error {
+	args = append(append([]string{}, args...), f.extraArgs...)
 	glog.Infof("Running factorio with args: %v", args)
 	cmd := exec.Command(f.binary, args...)
 	if f.verbose {
@@ -110,6 +122,7 @@ type Settings struct {
 	binary      string
 	verbose     bool
 	keepRunning bool
+	extraArgs   string
 }
 
 // RegisterFlags registers a series of flags to configure Factorio (e.g., location).
@@ -119,6 +132,7 @@ func RegisterFlags(flags *flag.FlagSet, prefix string) *Settings {
 	flags.StringVar(&s.binary, prefix+"binary", "", "Path to factorio binary. Tries default locations if empty.")
 	flags.BoolVar(&s.verbose, prefix+"verbose", false, "If true, stream Factorio stdout/stderr to the console.")
 	flags.BoolVar(&s.keepRunning, prefix+"keep_running", false, "If true, wait for Factorio to exit instead of stopping it.")
+	flags.StringVar(&s.extraArgs, prefix+"extra_args", "", "Extra args to give to Factorio; e.g., '--force-graphics-preset very-low'. Split on spaces.")
 	return s
 }
 
