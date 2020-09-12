@@ -266,10 +266,32 @@ var FileReadmeMd =
 	":\n" +
 	"```\n" +
 	"go run genembed.go\n" +
-	"```" +
+	"```\n" +
+	"\n" +
+	"### Releasing\n" +
+	"\n" +
+	"* Update changelog\n" +
+	"* Update version in: `changelog.txt` (incl. date), `info.json`\n" +
+	"* Regenerate files: `go run genembed.go`\n" +
+	"* Commit and push\n" +
+	"* Build CLI: `go build mapshot.go`\n" +
+	"* Build mod: `./mapshot package`\n" +
+	"* Create release in Github\n" +
+	"* Update Factorio mods portal (new zip, update doc)" +
 	""
 // FileChangelogTxt is file "changelog.txt"
 var FileChangelogTxt =
+	"---------------------------------------------------------------------------------------------------\n" +
+	"Version: 0.0.2\n" +
+	"  Features:\n" +
+	"    - CLI to automatically create mapshot without impacting saves (incl. achievements).\n" +
+	"  Fixes:\n" +
+	"    - Fix command registration (it was not registered in some cases).\n" +
+	"    - Changed default max details to something prettier (and still not too slow).\n" +
+	"  Internal:\n" +
+	"    - Add a command line tool.\n" +
+	"    - Move tooling to Go.\n" +
+	"\n" +
 	"---------------------------------------------------------------------------------------------------\n" +
 	"Version: 0.0.1\n" +
 	"Date: 2020.09.05\n" +

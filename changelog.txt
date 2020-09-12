@@ -1,4 +1,15 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.0.2
+  Features:
+    - CLI to automatically create mapshot without impacting saves (incl. achievements).
+  Fixes:
+    - Fix command registration (it was not registered in some cases).
+    - Changed default max details to something prettier (and still not too slow).
+  Internal:
+    - Add a command line tool.
+    - Move tooling to Go.
+
+---------------------------------------------------------------------------------------------------
 Version: 0.0.1
 Date: 2020.09.05
   Info:

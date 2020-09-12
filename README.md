@@ -42,3 +42,14 @@ Files in `embed/` and `generated.lua` are automatically generated from other fil
 ```
 go run genembed.go
 ```
+
+### Releasing
+
+* Update changelog
+* Update version in: `changelog.txt` (incl. date), `info.json`
+* Regenerate files: `go run genembed.go`
+* Commit and push
+* Build CLI: `go build mapshot.go`
+* Build mod: `./mapshot package`
+* Create release in Github
+* Update Factorio mods portal (new zip, update doc)
