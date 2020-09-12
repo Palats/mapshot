@@ -211,27 +211,75 @@ var FileLicense =
 	""
 // FileReadmeMd is file "README.md"
 var FileReadmeMd =
-	"# `mapshot` for Factorio\n" +
-	"Factorio mod to generate a screenshot of the whole map. The screenshot is created as a website, allowing to zoom-in and " + // cont.
-	"navigate the map.\n" +
+	"# Mapshot for Factorio\n" +
 	"\n" +
-	"## Usage\n" +
+	"*Mapshot* generates zoomable screenshots of Factorio maps. It can be used in 2 ways:\n" +
 	"\n" +
-	"### Generating a map screenshot\n" +
+	"* As a regular Factorio mod, providing an extra command to create a screenshot.\n" +
+	"* As a tool (CLI) generating a screenshot of any saved game - without having to activate mods on your game. Factorio is " + // cont.
+	"still used for rendering.\n" +
+	"\n" +
+	"The zoomable screenshots are exported as static files (html, javascript, jpg). They can be served through any HTTP serve" + // cont.
+	"r - see below.\n" +
+	"\n" +
+	"***Warning: Generation can take quite a while. Factorio UI will appear frozen during that time; this is normal.***\n" +
+	"\n" +
+	"See https://github.com/Palats/mapshot for more details.\n" +
+	"\n" +
+	"## Usage: Factorio mod\n" +
+	"\n" +
 	"In the Factorio [console](https://wiki.factorio.com/Console), run:\n" +
 	"```\n" +
 	"/mapshot <name>\n" +
 	"```\n" +
 	"\n" +
-	"***Warning: This can take quite a while. Factorio UI will appear frozen during that time; this is normal.***\n" +
-	"\n" +
 	"It will create a website in the Factorio [script output directory](https://wiki.factorio.com/Application_directory#User_" + // cont.
-	"data_directory), in a subdirectory called `mapshot/<name>/`.\n" +
+	"data_directory), in a subdirectory called `mapshot/<name>/`. If `<name>` is not specified, a name based on the seed and " + // cont.
+	"current tick will be generated (modding API does not gives access to savename, hence no good default naming).\n" +
 	"\n" +
-	"If `<name>` is not specified, a name based on the seed and current tick will be generated (modding API does not gives ac" + // cont.
-	"cess to savename, hence no good default naming).\n" +
+	"## Usage: CLI\n" +
 	"\n" +
-	"### Serving the generated content\n" +
+	"You can download the latest binary in https://github.com/Palats/mapshot/releases . The CLI is a standalone binary, curre" + // cont.
+	"ntly only for linux. To generate a screenshot:\n" +
+	"\n" +
+	"```\n" +
+	"./mapshot render <savename>\n" +
+	"```\n" +
+	"where `savename` is the name of the save you want to render. It will not modify the file - specifically, despite mod usa" + // cont.
+	"ge, it will not impact achievements for example. This will run Factorio to generate the mapshot - let it run, it will sh" + // cont.
+	"ut it down when finished. As with the regular mod, the output will be somewhere in the `script-output` directory.\n" +
+	"\n" +
+	"If your Factorio data dir or binary location are not detected automatically, you can specify them with `--factorio_datad" + // cont.
+	"ir` and `--factorio_binary`.\n" +
+	"\n" +
+	"## Generation parameters\n" +
+	"\n" +
+	"You can tune parameters such as many layers to generate, their resolution and a few more details. Those parameters are:\n" +
+	"\n" +
+	"* ... in Factorio per-player mod settings interface (in the menu, `settings/Mod settings/Per player`).\n" +
+	"* ... command line arguments for the CLI.\n" +
+	"\n" +
+	"Parameters:\n" +
+	"\n" +
+	"* _Smallest tile size_ (`tilemin`) : Indicates the number of in-game units the most detailed layer should contain per ge" + // cont.
+	"nerated tile. For example, if it is set to 256 while the \"Tile Resolution\" is 1024, it means that the most detailed laye" + // cont.
+	"r will use 4 pixels (=1024/256) per in-game tile. Many assets in Factorio seem to allow for up to 64 pixels per game til" + // cont.
+	"e - so, to have the maximum resolution, you will want to have \"Smallest tile size\" set to 16 (=1024/64) - careful, that " + // cont.
+	"is slow.\n" +
+	"* _Largest tile size_ (`tilemax`) : Number of in-game units per generated tile for the least detailed layer. See `tilemi" + // cont.
+	"n` for more details. Mapshot will generates all layers from `tilemax` to `tilemin` (included).\n" +
+	"* _Prefix to add to all generated filenames._ (`prefix`) : Mapshot will prefix all files it creates with that value. Fac" + // cont.
+	"torio mods only allow writing within `script-output` subdirectory of Factorio data dir; the prefix is relative to that d" + // cont.
+	"irectory.\n" +
+	"* _Pixel size for generated tiles._ (`resolution`) : Size in pixels for the generated images. There is not a lot of reas" + // cont.
+	"ons to change this value - if you want more or less details, change `tilemin`.\n" +
+	"* _Pixel size for generated tiles._ (`jpgquality`) : Compression quality for the generated image.\n" +
+	"\n" +
+	"*Warning: the generation time & disk usage increases very quickly. At maximum resolution, it will take forever to genera" + // cont.
+	"te and use up several gigabytes of space.*\n" +
+	"\n" +
+	"\n" +
+	"## Serving the generated content\n" +
 	"The mod itself does not provide any facility to serve the content. You must make the content available through a standar" + // cont.
 	"d http server. All the content is static, so any http file server can do the trick. For example, if you go in `script-ou" + // cont.
 	"tput/mapshot/<name>`, you can run a simple server using Python:\n" +
@@ -241,26 +289,15 @@ var FileReadmeMd =
 	"\n" +
 	"You can also upload the result on your favorite web file hosting.\n" +
 	"\n" +
-	"### Generation parameters\n" +
-	"\n" +
-	"You can tune parameters such as many layers to generate, their resolution and a few more details. Those parameters are a" + // cont.
-	"ccessible in Factorio per-player mod settings interface (in the menu, `settings/Mod settings/Per player`).\n" +
-	"\n" +
-	"The most important parameter is the \"Smallest tile size\". It indicates the number of in-game units the most detailed lay" + // cont.
-	"er should contain. For example, if it is set to 256 while the \"Tile Resolution\" is 1024, it means that the most detailed" + // cont.
-	" layer will use 4 pixels (=1024/256) per in-game tile. Afaik, assets in Factorio allow for up to 64 pixels per game tile" + // cont.
-	" - so, to have the maximum resolution, you will want to have \"Smallest tile size\" set to 16 (=1024/64).\n" +
-	"\n" +
-	"***Warning: the generation time & disk usage increases very quickly. At maximum resolution, it will take forever to gene" + // cont.
-	"rate and use up several gigabytes of space.***\n" +
-	"\n" +
-	"\n" +
 	"## Development\n" +
 	"\n" +
-	"* Check out the repository.\n" +
-	"* Link your checkout from the Factorio `mods` directory under the name `mapshot`.\n" +
-	"* To avoid having to regenerate Lua files when modifying the html part of the plugin, link `viewer.html` from `script-ou" + // cont.
-	"tput`. Load `viewer.html` in your browser and add `?path=mapshot/<name>` to look directly at one of the generated map.\n" +
+	"### Running as a live mod\n" +
+	"\n" +
+	"The files in a checkout of the repository can be used directly by Factorio. This allows to a quick edit/test cycle. For " + // cont.
+	"that, simply your checkout from the Factorio `mods` directory under the name `mapshot`.\n" +
+	"\n" +
+	"To avoid having to regenerate Lua files when modifying the html part of the plugin, link `viewer.html` from `script-outp" + // cont.
+	"ut`. Load `viewer.html` in your browser and add `?path=mapshot/<name>` to look directly at one of the generated map.\n" +
 	"\n" +
 	"Files in `embed/` and `generated.lua` are automatically generated from other files of the repository; to regenerate them" + // cont.
 	":\n" +
@@ -268,11 +305,21 @@ var FileReadmeMd =
 	"go run genembed.go\n" +
 	"```\n" +
 	"\n" +
+	"### The CLI\n" +
+	"\n" +
+	"To run it from a checkout of the repository:\n" +
+	"```\n" +
+	"go run genembed.go && go run mapshot.go <parameters...>\n" +
+	"```\n" +
+	"\n" +
+	"By default, it will show the help, including all the available subcommands.\n" +
+	"\n" +
 	"### Releasing\n" +
 	"\n" +
 	"* Update changelog\n" +
 	"* Update version in: `changelog.txt` (incl. date), `info.json`\n" +
 	"* Regenerate files: `go run genembed.go`\n" +
+	"* Run tests\n" +
 	"* Commit and push\n" +
 	"* Build CLI: `go build mapshot.go`\n" +
 	"* Build mod: `./mapshot package`\n" +

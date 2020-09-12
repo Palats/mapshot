@@ -1,7 +1,7 @@
 // Regenerate the mod data for embedding in Go/Lua.
 package main
 
-//go:generate go run embed.go
+//go:generate go run genembed.go
 
 import (
 	"encoding/json"

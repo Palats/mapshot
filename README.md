@@ -67,14 +67,14 @@ To avoid having to regenerate Lua files when modifying the html part of the plug
 
 Files in `embed/` and `generated.lua` are automatically generated from other files of the repository; to regenerate them:
 ```
-go run genembed.go
+go generate ./...
 ```
 
 ### The CLI
 
 To run it from a checkout of the repository:
 ```
-go run genembed.go && go run mapshot.go <parameters...>
+go generate ./... && go run mapshot.go <parameters...>
 ```
 
 By default, it will show the help, including all the available subcommands.
@@ -83,7 +83,7 @@ By default, it will show the help, including all the available subcommands.
 
 * Update changelog
 * Update version in: `changelog.txt` (incl. date), `info.json`
-* Regenerate files: `go run genembed.go`
+* Regenerate files: `go generate ./...`
 * Run tests
 * Commit and push
 * Build CLI: `go build mapshot.go`
