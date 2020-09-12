@@ -96,8 +96,10 @@ var cmdRender = &cobra.Command{
 		runID := uuid.New().String()
 		glog.Infof("runid: %s", runID)
 
-		name := args[0]
-		fmt.Printf("Generating mapshot for savegame %q\n", name)
+		// The parameter can be a filename, so extract a name.
+		rawname := args[0]
+		name := path.Base(rawname)
+		name = name[:len(name)-len(path.Ext(name))]
 
 		tmpdir, err := ioutil.TempDir("", "mapshot")
 		if err != nil {
@@ -106,7 +108,12 @@ var cmdRender = &cobra.Command{
 		glog.Info("temp dir: ", tmpdir)
 
 		// Copy game save
-		srcSavegame := fact.SaveFile(name)
+		srcSavegame, err := fact.FindSaveFile(rawname)
+		if err != nil {
+			return fmt.Errorf("unable to find savegame %q: %w", rawname, err)
+		}
+		fmt.Printf("Generating mapshot %q using file %s\n", name, srcSavegame)
+
 		dstSavegame := path.Join(tmpdir, name+".zip")
 		if err := copy.Copy(srcSavegame, dstSavegame); err != nil {
 			return fmt.Errorf("unable to copy file %q: %w", srcSavegame, err)

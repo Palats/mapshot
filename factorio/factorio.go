@@ -81,10 +81,27 @@ func (f *Factorio) ScriptOutput() string {
 	return path.Join(f.DataDir(), ScriptOutput)
 }
 
-// SaveFile gives the full path of the named savegame.
-// Parameter is the name of the game save, without the .zip.
-func (f *Factorio) SaveFile(name string) string {
-	return path.Join(f.DataDir(), SavesDir, name+".zip")
+// FindSaveFile try to find the savegame with the given name. It will look in
+// current directory, in Factorio directory, with and without .zip.
+func (f *Factorio) FindSaveFile(name string) (string, error) {
+	candidates := []string{
+		name,
+		name + ".zip",
+		path.Join(f.DataDir(), SavesDir, name+".zip"),
+		path.Join(f.DataDir(), SavesDir, name),
+	}
+	for _, c := range candidates {
+		_, err := os.Stat(c)
+		if err == nil {
+			glog.Infof("Looking for save %q; %s exists.", name, c)
+			return c, nil
+		}
+		if !os.IsNotExist(err) {
+			return "", nil
+		}
+		glog.Infof("Looking for save %q; %s does not exists.", name, c)
+	}
+	return "", os.ErrNotExist
 }
 
 // Run factorio.

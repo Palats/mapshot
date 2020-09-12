@@ -302,14 +302,14 @@ var FileReadmeMd =
 	"Files in `embed/` and `generated.lua` are automatically generated from other files of the repository; to regenerate them" + // cont.
 	":\n" +
 	"```\n" +
-	"go run genembed.go\n" +
+	"go generate ./...\n" +
 	"```\n" +
 	"\n" +
 	"### The CLI\n" +
 	"\n" +
 	"To run it from a checkout of the repository:\n" +
 	"```\n" +
-	"go run genembed.go && go run mapshot.go <parameters...>\n" +
+	"go generate ./... && go run mapshot.go <parameters...>\n" +
 	"```\n" +
 	"\n" +
 	"By default, it will show the help, including all the available subcommands.\n" +
@@ -318,7 +318,7 @@ var FileReadmeMd =
 	"\n" +
 	"* Update changelog\n" +
 	"* Update version in: `changelog.txt` (incl. date), `info.json`\n" +
-	"* Regenerate files: `go run genembed.go`\n" +
+	"* Regenerate files: `go generate ./...`\n" +
 	"* Run tests\n" +
 	"* Commit and push\n" +
 	"* Build CLI: `go build mapshot.go`\n" +
