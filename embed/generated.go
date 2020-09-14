@@ -2,7 +2,7 @@
 package embed
 
 // Version of the mod
-var Version = "0.0.1"
+var Version = "0.0.2"
 
 // FileLicense is file "LICENSE"
 var FileLicense =
@@ -567,7 +567,7 @@ var FileGeneratedLua =
 var FileInfoJson =
 	"{\n" +
 	"  \"name\": \"mapshot\",\n" +
-	"  \"version\": \"0.0.1\",\n" +
+	"  \"version\": \"0.0.2\",\n" +
 	"  \"title\": \"Mapshot\",\n" +
 	"  \"author\": \"pierre@palatin.fr\",\n" +
 	"  \"factorio_version\": \"1.0\",\n" +
