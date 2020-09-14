@@ -29,7 +29,7 @@ You can download the latest binary in https://github.com/Palats/mapshot/releases
 ```
 where `savename` is the name of the save you want to render. It will not modify the file - specifically, despite mod usage, it will not impact achievements for example. This will run Factorio to generate the mapshot - let it run, it will shut it down when finished. As with the regular mod, the output will be somewhere in the `script-output` directory.
 
-If your Factorio data dir or binary location are not detected automatically, you can specify them with `--factorio_datadir` and `--factorio_binary`.
+If your Factorio data dir or binary location are not detected automatically, you can specify them with `--factorio_datadir` and `--factorio_binary`. You can also override the rendering parameters - see CLI help for the specific flag names.
 
 ## Generation parameters
 
