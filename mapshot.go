@@ -3,6 +3,7 @@ package main
 import (
 	"archive/zip"
 	"context"
+	"encoding/json"
 	goflag "flag"
 	"fmt"
 	"io/ioutil"
@@ -81,6 +82,19 @@ var cmdInfo = &cobra.Command{
 		fmt.Println("binary:", fact.Binary())
 		return nil
 	},
+}
+
+var (
+	renderFlags     = flag.NewFlagSet("render", flag.ExitOnError)
+	paramTileMin    = renderFlags.Int64("tilemin", 0, "Size in in-game units of a tile for the most zoomed layer. If 0, use value from the game.")
+	paramTileMax    = renderFlags.Int64("tilemax", 0, "Size in in-game units of a tile for the least zoomed layer. If 0, use value from the game.")
+	paramPrefix     = renderFlags.String("prefix", "", "Prefix to add to all generated filenames. If empty, use value from the game.")
+	paramResolution = renderFlags.Int64("resolution", 0, "Pixel size for generated tiles. If 0, use value from the game.")
+	paramJPGQuality = renderFlags.Int64("jpgquality", 0, "Compression quality for jpg files. If 0, use value from the game.")
+)
+
+func init() {
+	cmdRender.PersistentFlags().AddFlagSet(renderFlags)
 }
 
 var cmdRender = &cobra.Command{
@@ -184,13 +198,30 @@ var cmdRender = &cobra.Command{
 		}
 		glog.Infof("mod created at %q", dstMapshot)
 
-		overrides := fmt.Sprintf(`
-		return {
-			onstartup = "%s",
-			shotname = "%s",
-			tilemin = 64,
+		// Generates overrides to the parameters. This is done by creating a Lua file, as mods don't have any way of loading data.
+		overridesData := map[string]interface{}{}
+		overridesData["onstartup"] = runID
+		overridesData["shotname"] = name
+		if *paramTileMin != 0 {
+			overridesData["tilemin"] = *paramTileMin
 		}
-		`, runID, name)
+		if *paramTileMax != 0 {
+			overridesData["tilemax"] = *paramTileMax
+		}
+		if *paramPrefix != "" {
+			overridesData["prefix"] = *paramPrefix
+		}
+		if *paramResolution != 0 {
+			overridesData["resolution"] = *paramResolution
+		}
+		if *paramJPGQuality != 0 {
+			overridesData["jpqquality"] = *paramJPGQuality
+		}
+		inline, err := json.Marshal(overridesData)
+		if err != nil {
+			return err
+		}
+		overrides := "return [===[" + string(inline) + "]===]\n"
 		overridesFilename := path.Join(dstMapshot, "overrides.lua")
 		if err := ioutil.WriteFile(overridesFilename, []byte(overrides), 0644); err != nil {
 			return fmt.Errorf("unable to write overrides file %q: %w", overridesFilename, err)
@@ -235,7 +266,7 @@ var cmdRender = &cobra.Command{
 			select {
 			case <-time.After(time.Second):
 			case err := <-errCh:
-				return fmt.Errorf("factorio exited early: %w", err)
+				return fmt.Errorf("factorio exited early; err=%w", err)
 			}
 		}
 		glog.Infof("done file %q now exists", doneFile)

@@ -362,7 +362,7 @@ var FileControlLua =
 	"    params[k] = v.value\n" +
 	"  end\n" +
 	"\n" +
-	"  for k,v in pairs(overrides) do\n" +
+	"  for k,v in pairs(game.json_to_table(overrides)) do\n" +
 	"    params[k] = v\n" +
 	"  end\n" +
 	"\n" +
@@ -572,9 +572,9 @@ var FileInfoJson =
 	""
 // FileOverridesLua is file "overrides.lua"
 var FileOverridesLua =
-	"-- Override parameters / settings of the mod.\n" +
+	"-- Override parameters / settings of the mod, as JSON.\n" +
 	"-- This gets overwritten when using autoshot mode.\n" +
-	"return {}" +
+	"return \"{}\"" +
 	""
 // FileSettingsLua is file "settings.lua"
 var FileSettingsLua =

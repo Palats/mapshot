@@ -13,7 +13,7 @@ function update_params(player)
     params[k] = v.value
   end
 
-  for k,v in pairs(overrides) do
+  for k,v in pairs(game.json_to_table(overrides)) do
     params[k] = v
   end
 
