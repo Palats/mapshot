@@ -54,10 +54,11 @@ func New(s *Settings) (*Factorio, error) {
 		}
 	}
 	return &Factorio{
-		datadir:   datadir,
-		binary:    binary,
-		verbose:   s.verbose,
-		extraArgs: extraArgs,
+		datadir:     datadir,
+		binary:      binary,
+		verbose:     s.verbose,
+		extraArgs:   extraArgs,
+		keepRunning: s.keepRunning,
 	}, nil
 }
 
@@ -119,12 +120,16 @@ func (f *Factorio) Run(ctx context.Context, args []string) error {
 		case <-done:
 			return
 		case <-ctx.Done():
-			glog.Infof("interrupt requested")
-			// When killing immediately, some files will not be written, even
-			// when the `done` file is already visible. Instead, ask to
-			// shutdown politely.
-			// Unfortunately, that will be an issue for windows.
-			cmd.Process.Signal(os.Interrupt)
+			if f.keepRunning {
+				glog.Infof("interrupt requested, but keep_running specified")
+			} else {
+				glog.Infof("interrupt requested")
+				// When killing immediately, some files will not be written, even
+				// when the `done` file is already visible. Instead, ask to
+				// shutdown politely.
+				// Unfortunately, that will be an issue for windows.
+				cmd.Process.Signal(os.Interrupt)
+			}
 		}
 	}()
 	err := cmd.Run()
