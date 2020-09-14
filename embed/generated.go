@@ -330,14 +330,15 @@ var FileReadmeMd =
 var FileChangelogTxt =
 	"---------------------------------------------------------------------------------------------------\n" +
 	"Version: 0.0.2\n" +
+	"Date: 2020.09.14\n" +
 	"  Features:\n" +
 	"    - CLI to automatically create mapshot without impacting saves (incl. achievements).\n" +
 	"  Fixes:\n" +
-	"    - Fix command registration (it was not registered in some cases).\n" +
+	"    - Fixed mod command registration (it was not registered in some cases).\n" +
 	"    - Changed default max details to something prettier (and still not too slow).\n" +
 	"  Internal:\n" +
-	"    - Add a command line tool.\n" +
-	"    - Move tooling to Go.\n" +
+	"    - Added a command line tool.\n" +
+	"    - Moved tooling to Go.\n" +
 	"\n" +
 	"---------------------------------------------------------------------------------------------------\n" +
 	"Version: 0.0.1\n" +
