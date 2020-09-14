@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -16,7 +17,7 @@ import (
 )
 
 func getVersion() string {
-	raw, err := ioutil.ReadFile("info.json")
+	raw, err := ioutil.ReadFile("mod/info.json")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -41,7 +42,7 @@ func genLua() {
 		log.Fatal("dumb Lua encoding cannot proceed")
 	}
 
-	f, err := os.Create("generated.lua")
+	f, err := os.Create("mod/generated.lua")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -97,9 +98,9 @@ func genGo(version string) {
 	fileVarnames := make(map[string]string)
 
 	var modFiles = []string{
-		"*.lua",
+		"mod/*.lua",
+		"mod/info.json",
 		"changelog.txt",
-		"info.json",
 		"LICENSE",
 		"README.md",
 		"thumbnail.png",
@@ -119,14 +120,14 @@ func genGo(version string) {
 	}
 
 	sort.Strings(filenames)
-	for _, name := range filenames {
-		data, err := ioutil.ReadFile(name)
+	for _, fullname := range filenames {
+		data, err := ioutil.ReadFile(fullname)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		varName := fileVarnames[name]
-		write(fmt.Sprintf("// %s is file %q\n", varName, name))
+		varName := fileVarnames[fullname]
+		write(fmt.Sprintf("// %s is file %q\n", varName, fullname))
 		write(fmt.Sprintf("var %s =\n", varName))
 		for _, line := range strings.SplitAfter(string(data), "\n") {
 			for len(line) > 120 {
@@ -140,8 +141,11 @@ func genGo(version string) {
 	write("\n")
 
 	write("var ModFiles = map[string]string{\n")
-	for _, name := range filenames {
-		write(fmt.Sprintf("\t%q: %s,\n", name, fileVarnames[name]))
+	for _, fullname := range filenames {
+		// Remove subpaths - this is used to generate the mod files, which is
+		// flat structure.
+		name := path.Base(fullname)
+		write(fmt.Sprintf("\t%q: %s,\n", name, fileVarnames[fullname]))
 	}
 	write("}\n")
 }

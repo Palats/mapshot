@@ -346,8 +346,8 @@ var FileChangelogTxt =
 	"  Info:\n" +
 	"    - Initial release" +
 	""
-// FileControlLua is file "control.lua"
-var FileControlLua =
+// FileModControlLua is file "mod/control.lua"
+var FileModControlLua =
 	"local generated = require(\"generated\")\n" +
 	"local overrides = require(\"overrides\")\n" +
 	"\n" +
@@ -485,8 +485,8 @@ var FileControlLua =
 	"  mapshot(player, params.prefix .. name .. \"/\")\n" +
 	"end)" +
 	""
-// FileGeneratedLua is file "generated.lua"
-var FileGeneratedLua =
+// FileModGeneratedLua is file "mod/generated.lua"
+var FileModGeneratedLua =
 	"-- Automatically generated, do not modify\n" +
 	"local data = {}\n" +
 	"data.html = [==[\n" +
@@ -563,8 +563,8 @@ var FileGeneratedLua =
 	"return data\n" +
 	"" +
 	""
-// FileInfoJson is file "info.json"
-var FileInfoJson =
+// FileModInfoJson is file "mod/info.json"
+var FileModInfoJson =
 	"{\n" +
 	"  \"name\": \"mapshot\",\n" +
 	"  \"version\": \"0.0.2\",\n" +
@@ -577,14 +577,14 @@ var FileInfoJson =
 	"  \"description\": \"Generates a zoomable render of the whole map.\"\n" +
 	"}" +
 	""
-// FileOverridesLua is file "overrides.lua"
-var FileOverridesLua =
+// FileModOverridesLua is file "mod/overrides.lua"
+var FileModOverridesLua =
 	"-- Override parameters / settings of the mod, as JSON.\n" +
 	"-- This gets overwritten when using autoshot mode.\n" +
 	"return \"{}\"" +
 	""
-// FileSettingsLua is file "settings.lua"
-var FileSettingsLua =
+// FileModSettingsLua is file "mod/settings.lua"
+var FileModSettingsLua =
 	"data:extend({\n" +
 	"    {\n" +
 	"        type = \"string-setting\",\n" +
@@ -1128,10 +1128,10 @@ var ModFiles = map[string]string{
 	"LICENSE": FileLicense,
 	"README.md": FileReadmeMd,
 	"changelog.txt": FileChangelogTxt,
-	"control.lua": FileControlLua,
-	"generated.lua": FileGeneratedLua,
-	"info.json": FileInfoJson,
-	"overrides.lua": FileOverridesLua,
-	"settings.lua": FileSettingsLua,
+	"control.lua": FileModControlLua,
+	"generated.lua": FileModGeneratedLua,
+	"info.json": FileModInfoJson,
+	"overrides.lua": FileModOverridesLua,
+	"settings.lua": FileModSettingsLua,
 	"thumbnail.png": FileThumbnailPng,
 }
