@@ -330,6 +330,8 @@ var FileReadmeMd =
 var FileChangelogTxt =
 	"---------------------------------------------------------------------------------------------------\n" +
 	"Version: 0.0.3\n" +
+	"  CLI:\n" +
+	"    - Added a \"mapshot dev\" to run Factorio with the mod setup for a dev workflow.\n" +
 	"  Internal:\n" +
 	"    - Split commands implementations.\n" +
 	"    - Moved mod code to its own subdirectory, and reworked generator location.\n" +
@@ -419,8 +421,8 @@ var FileModControlLua =
 	"    gen_layer(player, tile_size, render_size, world_min, world_max, prefix .. \"zoom_\" .. render_zoom .. \"/\")\n" +
 	"  end\n" +
 	"\n" +
-	"  player.print(\"Mapshot done.\")\n" +
-	"  log(\"Mapshot done.\")\n" +
+	"  player.print(\"Mapshot done at \" .. prefix)\n" +
+	"  log(\"Mapshot done at \" .. prefix)\n" +
 	"end\n" +
 	"\n" +
 	"function gen_layer(player, tile_size, render_size, world_min, world_max, prefix)\n" +

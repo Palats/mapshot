@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"strings"
 	"time"
 
 	"github.com/Palats/mapshot/embed"
@@ -58,6 +57,33 @@ func (rf *RenderFlags) genOverrides() map[string]interface{} {
 	return ov
 }
 
+func copyMod(dstMapshot string) error {
+	if err := os.MkdirAll(dstMapshot, 0755); err != nil {
+		return fmt.Errorf("unable to create dir %q: %w", dstMapshot, err)
+	}
+	for name, content := range embed.ModFiles {
+		dst := path.Join(dstMapshot, name)
+		if err := ioutil.WriteFile(dst, []byte(content), 0644); err != nil {
+			return fmt.Errorf("unable to write file %q: %w", dst, err)
+		}
+	}
+	return nil
+}
+
+func writeOverrides(data map[string]interface{}, dstPath string) error {
+	inline, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+	overrides := "return [===[" + string(inline) + "]===]\n"
+	overridesFilename := path.Join(dstPath, "overrides.lua")
+	if err := ioutil.WriteFile(overridesFilename, []byte(overrides), 0644); err != nil {
+		return fmt.Errorf("unable to write overrides file %q: %w", overridesFilename, err)
+	}
+	glog.Infof("overrides file created at %q", overridesFilename)
+	return nil
+}
+
 func render(ctx context.Context, factorioSettings *factorio.Settings, rf *RenderFlags, rawname string) error {
 	fact, err := factorio.New(factorioSettings)
 	if err != nil {
@@ -91,86 +117,33 @@ func render(ctx context.Context, factorioSettings *factorio.Settings, rf *Render
 	glog.Infof("copied save from %q to %q", srcSavegame, dstSavegame)
 
 	// Copy mods
-	srcMods := fact.ModsDir()
 	dstMods := path.Join(tmpdir, "mods")
-	dstMapshot := path.Join(dstMods, "mapshot")
-	foundModList := false
-
-	// Create the mod directory first, in case the first file we encounter
-	// is the mod-list.json (otherwise, the copy mechanism would create what
-	// is needed).
-	if err := os.MkdirAll(dstMapshot, 0755); err != nil {
-		return fmt.Errorf("unable to create dir %q: %w", dstMapshot, err)
+	if err := fact.CopyMods(dstMods, []string{"mapshot"}); err != nil {
+		return err
 	}
-
-	subs, err := ioutil.ReadDir(srcMods)
-	if err != nil {
-		return fmt.Errorf("unable to read directory %q: %w", srcMods, err)
-	}
-	for _, sub := range subs {
-		src := path.Join(srcMods, sub.Name())
-		dst := path.Join(dstMods, sub.Name())
-
-		// Do not include existing mapshot plugin - it will be added afterward explictly.
-		if sub.Name() == "mapshot" || strings.HasPrefix(sub.Name(), "mapshot_") {
-			glog.Infof("ignoring mod file %q", src)
-			continue
-		}
-		// Fiddle with the mod list to activate mapshot automatically.
-		if sub.Name() == "mod-list.json" {
-			mlist, err := factorio.LoadModList(src)
-			if err != nil {
-				return err
-			}
-			mlist.Enable("mapshot")
-
-			if err := mlist.Write(dst); err != nil {
-				return err
-			}
-			glog.Infof("created mod-list.json")
-			foundModList = true
-			continue
-		}
-
-		// Other mods and file, just copy.
-		err = copy.Copy(src, dst, copy.Options{OnSymlink: func(string) copy.SymlinkAction { return copy.Deep }})
-		if err != nil {
-			return fmt.Errorf("unable to copy %q to %q: %w", src, dst, err)
-		}
-		glog.Infof("copied mod file %q to %q", src, dst)
-	}
-
-	if !foundModList {
-		return fmt.Errorf("unable to find `mod-list.json` in %q", srcMods)
-	}
-	glog.Infof("copied mods from %q to %q", srcMods, dstMods)
 
 	// Add the mod itself.
-	for name, content := range embed.ModFiles {
-		dst := path.Join(dstMapshot, name)
-		if err := ioutil.WriteFile(dst, []byte(content), 0644); err != nil {
-			return fmt.Errorf("unable to write file %q: %w", dst, err)
-		}
+	dstMapshot := path.Join(dstMods, "mapshot")
+	if err := copyMod(dstMapshot); err != nil {
+		return err
+	}
+	if err := factorio.EnableMod(dstMods, "mapshot"); err != nil {
+		return err
 	}
 	glog.Infof("mod created at %q", dstMapshot)
 
-	// Generates overrides to the parameters. This is done by creating a Lua file, as mods don't have any way of loading data.
+	// Generates overrides to the parameters. This is done by creating a Lua
+	// file, as mods don't have any way of loading data.
 	overridesData := rf.genOverrides()
 	overridesData["onstartup"] = runID
 	overridesData["shotname"] = name
-	inline, err := json.Marshal(overridesData)
-	if err != nil {
+	if err := writeOverrides(overridesData, dstMapshot); err != nil {
 		return err
 	}
-	overrides := "return [===[" + string(inline) + "]===]\n"
-	overridesFilename := path.Join(dstMapshot, "overrides.lua")
-	if err := ioutil.WriteFile(overridesFilename, []byte(overrides), 0644); err != nil {
-		return fmt.Errorf("unable to write overrides file %q: %w", overridesFilename, err)
-	}
-	glog.Infof("overrides file created at %q", overridesFilename)
 
 	// Remove done marker if still present
-	doneFile := path.Join(fact.ScriptOutput(), "mapshot-done-"+runID)
+	var doneFile string
+	doneFile = path.Join(fact.ScriptOutput(), "mapshot-done-"+runID)
 	err = os.Remove(doneFile)
 	glog.Infof("removed done-file %q: %v", doneFile, err)
 

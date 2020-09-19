@@ -14,6 +14,7 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/mitchellh/go-homedir"
+	"github.com/otiai10/copy"
 	"github.com/spf13/pflag"
 )
 
@@ -136,6 +137,76 @@ func (f *Factorio) Run(ctx context.Context, args []string) error {
 	close(done)
 	glog.Infof("Factorio returned: %v", err)
 	return err
+}
+
+// CopyMods creates a mods directory in the given location based on the current one.
+// This can serve as a base to forcefully enable a mod or similar.
+func (f *Factorio) CopyMods(dstMods string, filterOut []string) error {
+	srcMods := f.ModsDir()
+	foundModList := false
+
+	filtered := map[string]bool{}
+	for _, f := range filterOut {
+		filtered[f] = true
+	}
+
+	if err := os.MkdirAll(dstMods, 0755); err != nil {
+		return fmt.Errorf("unable to create dir %q: %w", dstMods, err)
+	}
+
+	subs, err := ioutil.ReadDir(srcMods)
+	if err != nil {
+		return fmt.Errorf("unable to read directory %q: %w", srcMods, err)
+	}
+	for _, sub := range subs {
+		src := path.Join(srcMods, sub.Name())
+		dst := path.Join(dstMods, sub.Name())
+
+		// Some plugins might be requested to exclude.
+		modName := sub.Name()
+		if idx := strings.LastIndex(modName, "_"); idx >= 0 {
+			modName = modName[:idx]
+		}
+		glog.Infof("copying mod %s from %s to %s", modName, src, dst)
+
+		if filtered[modName] {
+			glog.Infof("ignoring mod file %q", src)
+			continue
+		}
+		// Fiddle with the mod list to remove filtered mods.
+		if sub.Name() == "mod-list.json" {
+			mlist, err := LoadModList(src)
+			if err != nil {
+				return err
+			}
+			var mods []*ModListEntry
+			for _, mod := range mlist.Mods {
+				if !filtered[mod.Name] {
+					mods = append(mods, mod)
+				}
+			}
+			mlist.Mods = mods
+
+			if err := mlist.Write(dst); err != nil {
+				return err
+			}
+			glog.Infof("created mod-list.json")
+			foundModList = true
+			continue
+		}
+
+		// Other mods and file, just copy.
+		err = copy.Copy(src, dst, copy.Options{OnSymlink: func(string) copy.SymlinkAction { return copy.Deep }})
+		if err != nil {
+			return fmt.Errorf("unable to copy %q to %q: %w", src, dst, err)
+		}
+		glog.Infof("copied mod file %q to %q", src, dst)
+	}
+
+	if !foundModList {
+		return fmt.Errorf("unable to find `mod-list.json` in %q", srcMods)
+	}
+	return nil
 }
 
 // Settings for creating a Factorio helper instance.
@@ -275,4 +346,15 @@ func LoadModList(filename string) (*ModList, error) {
 	}
 
 	return data, nil
+}
+
+// EnableMod activate the named mod in the provided mod directory.
+func EnableMod(modsPath string, modName string) error {
+	modListFile := path.Join(modsPath, "mod-list.json")
+	mlist, err := LoadModList(modListFile)
+	if err != nil {
+		return err
+	}
+	mlist.Enable(modName)
+	return mlist.Write(modListFile)
 }

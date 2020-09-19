@@ -64,8 +64,8 @@ function mapshot(player, prefix)
     gen_layer(player, tile_size, render_size, world_min, world_max, prefix .. "zoom_" .. render_zoom .. "/")
   end
 
-  player.print("Mapshot done.")
-  log("Mapshot done.")
+  player.print("Mapshot done at " .. prefix)
+  log("Mapshot done at " .. prefix)
 end
 
 function gen_layer(player, tile_size, render_size, world_min, world_max, prefix)
