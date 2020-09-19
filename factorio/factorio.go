@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -15,6 +14,7 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/mitchellh/go-homedir"
+	"github.com/spf13/pflag"
 )
 
 const (
@@ -147,9 +147,8 @@ type Settings struct {
 	extraArgs   string
 }
 
-// RegisterFlags registers a series of flags to configure Factorio (e.g., location).
-func RegisterFlags(flags *flag.FlagSet, prefix string) *Settings {
-	s := &Settings{}
+// Register add flags to configure how to call Factorio on the flagset.
+func (s *Settings) Register(flags *pflag.FlagSet, prefix string) *Settings {
 	flags.StringVar(&s.datadir, prefix+"datadir", "", "Path to factorio data dir. Tries default locations if empty.")
 	flags.StringVar(&s.binary, prefix+"binary", "", "Path to factorio binary. Tries default locations if empty.")
 	flags.BoolVar(&s.verbose, prefix+"verbose", false, "If true, stream Factorio stdout/stderr to the console.")

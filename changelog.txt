@@ -1,5 +1,10 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.0.2
+  Internal:
+    - Split commands implementations.
+    - Moved mod code to its own subdirectory
+---------------------------------------------------------------------------------------------------
+Version: 0.0.2
 Date: 2020.09.14
   Features:
     - CLI to automatically create mapshot without impacting saves (incl. achievements).
