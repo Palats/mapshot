@@ -329,6 +329,11 @@ var FileReadmeMd =
 // FileChangelogTxt is file "changelog.txt"
 var FileChangelogTxt =
 	"---------------------------------------------------------------------------------------------------\n" +
+	"Version: 0.0.3\n" +
+	"  Internal:\n" +
+	"    - Split commands implementations.\n" +
+	"    - Moved mod code to its own subdirectory, and reworked generator location.\n" +
+	"---------------------------------------------------------------------------------------------------\n" +
 	"Version: 0.0.2\n" +
 	"Date: 2020.09.14\n" +
 	"  Features:\n" +
@@ -563,8 +568,8 @@ var FileModGeneratedLua =
 	"return data\n" +
 	"" +
 	""
-// FileModInfoJson is file "mod/info.json"
-var FileModInfoJson =
+// FileModInfoJSON is file "mod/info.json"
+var FileModInfoJSON =
 	"{\n" +
 	"  \"name\": \"mapshot\",\n" +
 	"  \"version\": \"0.0.2\",\n" +
@@ -1124,13 +1129,14 @@ var FileThumbnailPng =
 	"\xabU\xba\xb0/I%\x88\x9db\xbc\x8b>\x87\x94\x04\xc9\x05\x86Be-\x95+\xa4I\xf0\xe7\xd0#<eh*\xcdo˥p\xf7NK\x1e\xa02\x05\xeb\f\x0fﯘ\xb9\xc4v3\x92\x87s\xceV\xe7\x1c\x9f\x9crw\xd9\xd1\xedV\xe4\xb0\xe1_\x00\xe3\xd0!\xa31\x12\x9a\x89\x00\x00\x00\x00IEND\xaeB`\x82" +
 	""
 
+// ModFiles is the list of files for the Factorio mod.
 var ModFiles = map[string]string{
 	"LICENSE": FileLicense,
 	"README.md": FileReadmeMd,
 	"changelog.txt": FileChangelogTxt,
 	"control.lua": FileModControlLua,
 	"generated.lua": FileModGeneratedLua,
-	"info.json": FileModInfoJson,
+	"info.json": FileModInfoJSON,
 	"overrides.lua": FileModOverridesLua,
 	"settings.lua": FileModSettingsLua,
 	"thumbnail.png": FileThumbnailPng,

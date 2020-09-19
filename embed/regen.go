@@ -1,7 +1,7 @@
+// +build ignore
+
 // Regenerate the mod data for embedding in Go/Lua.
 package main
-
-//go:generate go run genembed.go
 
 import (
 	"encoding/json"
@@ -70,7 +70,12 @@ func filenameToVar(fname string) string {
 		if len(p) == 0 {
 			continue
 		}
-		s += strings.ToUpper(p[0:1]) + strings.ToLower(p[1:])
+		if p == "json" {
+			p = "JSON"
+		} else {
+			p = strings.ToUpper(p[0:1]) + strings.ToLower(p[1:])
+		}
+		s += p
 	}
 	return s
 }
@@ -140,6 +145,7 @@ func genGo(version string) {
 	}
 	write("\n")
 
+	write("// ModFiles is the list of files for the Factorio mod.\n")
 	write("var ModFiles = map[string]string{\n")
 	for _, fullname := range filenames {
 		// Remove subpaths - this is used to generate the mod files, which is
@@ -151,6 +157,11 @@ func genGo(version string) {
 }
 
 func main() {
+	// Expects to be called from the base repository directory. This is the case
+	// when called through "go generate", as Go uses the directory of the file
+	// containing the statement - which is mapshot.go, at the base of the
+	// repository.
+
 	version := getVersion()
 	// Generate Lua file first as it will be embedded also in Go module files.
 	genLua()

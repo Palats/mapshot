@@ -1,5 +1,7 @@
 package main
 
+//go:generate go run embed/regen.go
+
 import (
 	"context"
 	"flag"

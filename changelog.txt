@@ -1,8 +1,8 @@
 ---------------------------------------------------------------------------------------------------
-Version: 0.0.2
+Version: 0.0.3
   Internal:
     - Split commands implementations.
-    - Moved mod code to its own subdirectory
+    - Moved mod code to its own subdirectory, and reworked generator location.
 ---------------------------------------------------------------------------------------------------
 Version: 0.0.2
 Date: 2020.09.14
