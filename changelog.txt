@@ -1,7 +1,10 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.0.3
+  Fixes:
+    - Naming of the output from the mod command was ignoring the parameter.
   CLI:
     - Added a "mapshot dev" to run Factorio with the mod setup for a dev workflow.
+    - Choice of work directory if desired.
   Internal:
     - Split commands implementations.
     - Moved mod code to its own subdirectory, and reworked generator location.

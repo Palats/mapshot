@@ -127,8 +127,8 @@ commands.add_command("mapshot", "screenshot the whole map", function(evt)
 
   -- Where to store the output.
   local name = "seed" .. game.default_map_gen_settings.seed .. "-" .. evt.tick
-  if parameter ~= nil and #parameter > 0 then
-    name = parameter
+  if evt.parameter ~= nil and #evt.parameter > 0 then
+    name = evt.parameter
   end
   local prefix = params.prefix .. name .. "/"
   mapshot(player, params.prefix .. name .. "/")
