@@ -35,8 +35,6 @@ data.html = [==[
       .then(info => {
         console.log("Map info", info);
 
-
-
         const worldToLatLng = function (x, y) {
           const ratio = info.render_size / info.tile_size;
           return L.latLng(
@@ -45,11 +43,7 @@ data.html = [==[
           );
         };
 
-        const mymap = L.map('map', {
-          crs: L.CRS.Simple,
-        });
-
-        L.tileLayer(path + "zoom_{z}/tile_{x}_{y}.jpg", {
+        const baseLayer = L.tileLayer(path + "zoom_{z}/tile_{x}_{y}.jpg", {
           tileSize: info.render_size,
           bounds: L.latLngBounds(
             worldToLatLng(info.world_min.x, info.world_min.y),
@@ -60,10 +54,19 @@ data.html = [==[
           minNativeZoom: info.zoom_min,
           minZoom: info.zoom_min - 4,
           maxZoom: info.zoom_max + 4,
-        }).addTo(mymap);
+        });
 
-        L.marker([0, 0], { title: "Start" }).addTo(mymap);
-        L.marker(worldToLatLng(info.player.x, info.player.y), { title: "Player" }).addTo(mymap);
+        const debugLayer = L.layerGroup([
+          L.marker([0, 0], { title: "Start" }).bindPopup("Starting point"),
+          L.marker(worldToLatLng(info.player.x, info.player.y), { title: "Player" }).bindPopup("Player"),
+        ]);
+
+        const mymap = L.map('map', {
+          crs: L.CRS.Simple,
+          layers: [baseLayer],
+        });
+
+        L.control.layers({/* Only one default base layer */ }, { "Debug": debugLayer }).addTo(mymap);
 
         mymap.setView([0, 0], 0);
       });

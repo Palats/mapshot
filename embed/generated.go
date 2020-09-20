@@ -329,6 +329,10 @@ var FileReadmeMd =
 // FileChangelogTxt is file "changelog.txt"
 var FileChangelogTxt =
 	"---------------------------------------------------------------------------------------------------\n" +
+	"Version: 0.0.4\n" +
+	"  UI:\n" +
+	"    - Control for showing/hiding layers. For now, used for hiding debug info.\n" +
+	"---------------------------------------------------------------------------------------------------\n" +
 	"Version: 0.0.3\n" +
 	"Date: 2020.09.20\n" +
 	"  Fixes:\n" +
@@ -535,8 +539,6 @@ var FileModGeneratedLua =
 	"      .then(info => {\n" +
 	"        console.log(\"Map info\", info);\n" +
 	"\n" +
-	"\n" +
-	"\n" +
 	"        const worldToLatLng = function (x, y) {\n" +
 	"          const ratio = info.render_size / info.tile_size;\n" +
 	"          return L.latLng(\n" +
@@ -545,11 +547,7 @@ var FileModGeneratedLua =
 	"          );\n" +
 	"        };\n" +
 	"\n" +
-	"        const mymap = L.map('map', {\n" +
-	"          crs: L.CRS.Simple,\n" +
-	"        });\n" +
-	"\n" +
-	"        L.tileLayer(path + \"zoom_{z}/tile_{x}_{y}.jpg\", {\n" +
+	"        const baseLayer = L.tileLayer(path + \"zoom_{z}/tile_{x}_{y}.jpg\", {\n" +
 	"          tileSize: info.render_size,\n" +
 	"          bounds: L.latLngBounds(\n" +
 	"            worldToLatLng(info.world_min.x, info.world_min.y),\n" +
@@ -560,10 +558,19 @@ var FileModGeneratedLua =
 	"          minNativeZoom: info.zoom_min,\n" +
 	"          minZoom: info.zoom_min - 4,\n" +
 	"          maxZoom: info.zoom_max + 4,\n" +
-	"        }).addTo(mymap);\n" +
+	"        });\n" +
 	"\n" +
-	"        L.marker([0, 0], { title: \"Start\" }).addTo(mymap);\n" +
-	"        L.marker(worldToLatLng(info.player.x, info.player.y), { title: \"Player\" }).addTo(mymap);\n" +
+	"        const debugLayer = L.layerGroup([\n" +
+	"          L.marker([0, 0], { title: \"Start\" }).bindPopup(\"Starting point\"),\n" +
+	"          L.marker(worldToLatLng(info.player.x, info.player.y), { title: \"Player\" }).bindPopup(\"Player\"),\n" +
+	"        ]);\n" +
+	"\n" +
+	"        const mymap = L.map('map', {\n" +
+	"          crs: L.CRS.Simple,\n" +
+	"          layers: [baseLayer],\n" +
+	"        });\n" +
+	"\n" +
+	"        L.control.layers({/* Only one default base layer */ }, { \"Debug\": debugLayer }).addTo(mymap);\n" +
 	"\n" +
 	"        mymap.setView([0, 0], 0);\n" +
 	"      });\n" +
