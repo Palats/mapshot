@@ -1,5 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.0.4
+Date: 2020.09.20
   Features:
     - Capture automatically only the base by default. This avoids generating lots of useless tiles.
     - Host freely accessible example of generated output.

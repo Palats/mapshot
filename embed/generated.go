@@ -2,7 +2,7 @@
 package embed
 
 // Version of the mod
-var Version = "0.0.3"
+var Version = "0.0.4"
 
 // FileLicense is file "LICENSE"
 var FileLicense =
@@ -336,6 +336,7 @@ var FileReadmeMd =
 var FileChangelogTxt =
 	"---------------------------------------------------------------------------------------------------\n" +
 	"Version: 0.0.4\n" +
+	"Date: 2020.09.20\n" +
 	"  Features:\n" +
 	"    - Capture automatically only the base by default. This avoids generating lots of useless tiles.\n" +
 	"    - Host freely accessible example of generated output.\n" +
@@ -747,7 +748,7 @@ var FileModGeneratedLua =
 var FileModInfoJSON =
 	"{\n" +
 	"  \"name\": \"mapshot\",\n" +
-	"  \"version\": \"0.0.3\",\n" +
+	"  \"version\": \"0.0.4\",\n" +
 	"  \"title\": \"Mapshot\",\n" +
 	"  \"author\": \"pierre@palatin.fr\",\n" +
 	"  \"factorio_version\": \"1.0\",\n" +
