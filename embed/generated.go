@@ -213,7 +213,9 @@ var FileLicense =
 var FileReadmeMd =
 	"# Mapshot for Factorio\n" +
 	"\n" +
-	"*Mapshot* generates zoomable screenshots of Factorio maps. It can be used in 2 ways:\n" +
+	"*Mapshot* generates zoomable screenshots of Factorio maps - **[example](https://palats.github.io/mapshot-example/)**.\n" +
+	"\n" +
+	"It can be used in 2 ways:\n" +
 	"\n" +
 	"* As a regular Factorio mod, providing an extra command to create a screenshot.\n" +
 	"* As a tool (CLI) generating a screenshot of any saved game - without having to activate mods on your game. Factorio is " + // cont.
@@ -336,6 +338,7 @@ var FileChangelogTxt =
 	"Version: 0.0.4\n" +
 	"  Features:\n" +
 	"    - Capture automatically only the base by default. This avoids generating lots of useless tiles.\n" +
+	"    - Host freely accessible example of generated output.\n" +
 	"  UI:\n" +
 	"    - Control for showing/hiding layers. For now, used for hiding debug info.\n" +
 	"---------------------------------------------------------------------------------------------------\n" +

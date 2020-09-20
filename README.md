@@ -1,6 +1,8 @@
 # Mapshot for Factorio
 
-*Mapshot* generates zoomable screenshots of Factorio maps. It can be used in 2 ways:
+*Mapshot* generates zoomable screenshots of Factorio maps - **[example](https://palats.github.io/mapshot-example/)**.
+
+It can be used in 2 ways:
 
 * As a regular Factorio mod, providing an extra command to create a screenshot.
 * As a tool (CLI) generating a screenshot of any saved game - without having to activate mods on your game. Factorio is still used for rendering.
