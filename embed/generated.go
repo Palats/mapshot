@@ -2,7 +2,7 @@
 package embed
 
 // Version of the mod
-var Version = "0.0.2"
+var Version = "0.0.3"
 
 // FileLicense is file "LICENSE"
 var FileLicense =
@@ -330,8 +330,12 @@ var FileReadmeMd =
 var FileChangelogTxt =
 	"---------------------------------------------------------------------------------------------------\n" +
 	"Version: 0.0.3\n" +
+	"Date: 2020.09.20\n" +
+	"  Fixes:\n" +
+	"    - Naming of the output from the mod command was ignoring the parameter.\n" +
 	"  CLI:\n" +
 	"    - Added a \"mapshot dev\" to run Factorio with the mod setup for a dev workflow.\n" +
+	"    - Choice of work directory if desired.\n" +
 	"  Internal:\n" +
 	"    - Split commands implementations.\n" +
 	"    - Moved mod code to its own subdirectory, and reworked generator location.\n" +
@@ -485,8 +489,8 @@ var FileModControlLua =
 	"\n" +
 	"  -- Where to store the output.\n" +
 	"  local name = \"seed\" .. game.default_map_gen_settings.seed .. \"-\" .. evt.tick\n" +
-	"  if parameter ~= nil and #parameter > 0 then\n" +
-	"    name = parameter\n" +
+	"  if evt.parameter ~= nil and #evt.parameter > 0 then\n" +
+	"    name = evt.parameter\n" +
 	"  end\n" +
 	"  local prefix = params.prefix .. name .. \"/\"\n" +
 	"  mapshot(player, params.prefix .. name .. \"/\")\n" +
@@ -574,7 +578,7 @@ var FileModGeneratedLua =
 var FileModInfoJSON =
 	"{\n" +
 	"  \"name\": \"mapshot\",\n" +
-	"  \"version\": \"0.0.2\",\n" +
+	"  \"version\": \"0.0.3\",\n" +
 	"  \"title\": \"Mapshot\",\n" +
 	"  \"author\": \"pierre@palatin.fr\",\n" +
 	"  \"factorio_version\": \"1.0\",\n" +

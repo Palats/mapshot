@@ -1,5 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.0.3
+Date: 2020.09.20
   Fixes:
     - Naming of the output from the mod command was ignoring the parameter.
   CLI:
