@@ -261,6 +261,10 @@ var FileReadmeMd =
 	"\n" +
 	"Parameters:\n" +
 	"\n" +
+	"* _Area_ (`area`) : What to include in the screenshot. Options:\n" +
+	"  * `entities` [default]: Include all chunks which contain at least one entity of some interest. This should capture the" + // cont.
+	" base in practice.\n" +
+	"  * `all`: All chunks.\n" +
 	"* _Smallest tile size_ (`tilemin`) : Indicates the number of in-game units the most detailed layer should contain per ge" + // cont.
 	"nerated tile. For example, if it is set to 256 while the \"Tile Resolution\" is 1024, it means that the most detailed laye" + // cont.
 	"r will use 4 pixels (=1024/256) per in-game tile. Many assets in Factorio seem to allow for up to 64 pixels per game til" + // cont.
@@ -330,6 +334,8 @@ var FileReadmeMd =
 var FileChangelogTxt =
 	"---------------------------------------------------------------------------------------------------\n" +
 	"Version: 0.0.4\n" +
+	"  Features:\n" +
+	"    - Capture automatically only the base by default. This avoids generating lots of useless tiles.\n" +
 	"  UI:\n" +
 	"    - Control for showing/hiding layers. For now, used for hiding debug info.\n" +
 	"---------------------------------------------------------------------------------------------------\n" +
@@ -365,6 +371,7 @@ var FileChangelogTxt =
 var FileModControlLua =
 	"local generated = require(\"generated\")\n" +
 	"local overrides = require(\"overrides\")\n" +
+	"local entities = require(\"entities\")\n" +
 	"\n" +
 	"-- All settings of the mod.\n" +
 	"local params = {}\n" +
@@ -393,11 +400,25 @@ var FileModControlLua =
 	"  -- Determine map min & max world coordinates based on existing chunks.\n" +
 	"  local world_min = { x = 2^30, y = 2^30 }\n" +
 	"  local world_max = { x = -2^30, y = -2^30 }\n" +
-	"  for chunk in game.surfaces[\"nauvis\"].get_chunks() do\n" +
-	"    world_min.x = math.min(world_min.x, chunk.area.left_top.x)\n" +
-	"    world_min.y = math.min(world_min.y, chunk.area.left_top.y)\n" +
-	"    world_max.x = math.max(world_max.x, chunk.area.right_bottom.x)\n" +
-	"    world_max.y = math.max(world_max.y, chunk.area.right_bottom.y)\n" +
+	"  local s = game.surfaces[\"nauvis\"]\n" +
+	"  local chunk_count = 0\n" +
+	"  for chunk in s.get_chunks() do\n" +
+	"    local c = s.is_chunk_generated(chunk)\n" +
+	"    if params.area == \"entities\" then\n" +
+	"      c = c and s.count_entities_filtered({ area = chunk.area, limit = 1, type = entities.includes}) > 0\n" +
+	"    end\n" +
+	"    if c then\n" +
+	"      world_min.x = math.min(world_min.x, chunk.area.left_top.x)\n" +
+	"      world_min.y = math.min(world_min.y, chunk.area.left_top.y)\n" +
+	"      world_max.x = math.max(world_max.x, chunk.area.right_bottom.x)\n" +
+	"      world_max.y = math.max(world_max.y, chunk.area.right_bottom.y)\n" +
+	"      chunk_count = chunk_count + 1\n" +
+	"    end\n" +
+	"  end\n" +
+	"  if chunk_count == 0 then\n" +
+	"    log(\"no matching chunk\")\n" +
+	"    player.print(\"No matching chunk\")\n" +
+	"    return\n" +
 	"  end\n" +
 	"  player.print(\"Map: (\" .. world_min.x .. \", \" .. world_min.y .. \")-(\" .. world_max.x .. \", \" .. world_max.y .. \")\")\n" +
 	"\n" +
@@ -500,6 +521,136 @@ var FileModControlLua =
 	"  mapshot(player, params.prefix .. name .. \"/\")\n" +
 	"end)" +
 	""
+// FileModEntitiesLua is file "mod/entities.lua"
+var FileModEntitiesLua =
+	"-- All entities of those type will be used to determine the screenshot area (in\n" +
+	"-- area mode = \"entities\").\n" +
+	"-- From https://wiki.factorio.com/Prototype/Entity\n" +
+	"local includes = {\n" +
+	"  \"character-corpse\", -- Prototype/CharacterCorpse\n" +
+	"  \"corpse\", -- Prototype/Corpse\n" +
+	"  \"rail-remnants\", -- Prototype/RailRemnants\n" +
+	"  \"accumulator\", -- Prototype/Accumulator\n" +
+	"  \"artillery-turret\", -- Prototype/ArtilleryTurret\n" +
+	"  \"beacon\", -- Prototype/Beacon\n" +
+	"  \"boiler\", -- Prototype/Boiler\n" +
+	"  \"burner-generator\", -- Prototype/BurnerGenerator\n" +
+	"  \"character\", -- Prototype/Character\n" +
+	"  \"arithmetic-combinator\", -- Prototype/ArithmeticCombinator\n" +
+	"  \"decider-combinator\", -- Prototype/DeciderCombinator\n" +
+	"  \"constant-combinator\", -- Prototype/ConstantCombinator\n" +
+	"  \"container\", -- Prototype/Container\n" +
+	"  \"logistic-container\", -- Prototype/LogisticContainer\n" +
+	"  \"infinity-container\", -- Prototype/InfinityContainer\n" +
+	"  \"assembling-machine\", -- Prototype/AssemblingMachine\n" +
+	"  \"rocket-silo\", -- Prototype/RocketSilo\n" +
+	"  \"furnace\", -- Prototype/Furnace\n" +
+	"  \"electric-pole\", -- Prototype/ElectricPole\n" +
+	"  \"electric-energy-interface\", -- Prototype/ElectricEnergyInterface\n" +
+	"  \"combat-robot\", -- Prototype/CombatRobot\n" +
+	"  \"construction-robot\", -- Prototype/ConstructionRobot\n" +
+	"  \"logistic-robot\", -- Prototype/LogisticRobot\n" +
+	"  \"gate\", -- Prototype/Gate\n" +
+	"  \"generator\", -- Prototype/Generator\n" +
+	"  \"heat-interface\", -- Prototype/HeatInterface\n" +
+	"  \"heat-pipe\", -- Prototype/HeatPipe\n" +
+	"  \"inserter\", -- Prototype/Inserter\n" +
+	"  \"lab\", -- Prototype/Lab\n" +
+	"  \"lamp\", -- Prototype/Lamp\n" +
+	"  \"land-mine\", -- Prototype/LandMine\n" +
+	"  \"market\", -- Prototype/Market\n" +
+	"  \"mining-drill\", -- Prototype/MiningDrill\n" +
+	"  \"offshore-pump\", -- Prototype/OffshorePump\n" +
+	"  \"pipe\", -- Prototype/Pipe\n" +
+	"  \"infinity-pipe\", -- Prototype/InfinityPipe\n" +
+	"  \"pipe-to-ground\", -- Prototype/PipeToGround\n" +
+	"  \"player-port\", -- Prototype/PlayerPort\n" +
+	"  \"power-switch\", -- Prototype/PowerSwitch\n" +
+	"  \"programmable-speaker\", -- Prototype/ProgrammableSpeaker\n" +
+	"  \"pump\", -- Prototype/Pump\n" +
+	"  \"radar\", -- Prototype/Radar\n" +
+	"  \"curved-rail\", -- Prototype/CurvedRail\n" +
+	"  \"straight-rail\", -- Prototype/StraightRail\n" +
+	"  \"rail-chain-signal\", -- Prototype/RailChainSignal\n" +
+	"  \"rail-signal\", -- Prototype/RailSignal\n" +
+	"  \"reactor\", -- Prototype/Reactor\n" +
+	"  \"roboport\", -- Prototype/Roboport\n" +
+	"  \"solar-panel\", -- Prototype/SolarPanel\n" +
+	"  \"spider-leg\", -- Prototype/SpiderLeg\n" +
+	"  \"storage-tank\", -- Prototype/StorageTank\n" +
+	"  \"train-stop\", -- Prototype/TrainStop\n" +
+	"  \"loader-1x1\", -- Prototype/Loader1x1\n" +
+	"  \"loader\", -- Prototype/Loader1x2\n" +
+	"  \"splitter\", -- Prototype/Splitter\n" +
+	"  \"transport-belt\", -- Prototype/TransportBelt\n" +
+	"  \"underground-belt\", -- Prototype/UndergroundBelt\n" +
+	"  \"ammo-turret\", -- Prototype/AmmoTurret\n" +
+	"  \"electric-turret\", -- Prototype/ElectricTurret\n" +
+	"  \"fluid-turret\", -- Prototype/FluidTurret\n" +
+	"  \"car\", -- Prototype/Car\n" +
+	"  \"artillery-wagon\", -- Prototype/ArtilleryWagon\n" +
+	"  \"cargo-wagon\", -- Prototype/CargoWagon\n" +
+	"  \"fluid-wagon\", -- Prototype/FluidWagon\n" +
+	"  \"locomotive\", -- Prototype/Locomotive\n" +
+	"  \"spider-vehicle\", -- Prototype/SpiderVehicle\n" +
+	"  \"wall\", -- Prototype/Wall\n" +
+	"  \"rocket-silo-rocket\", -- Prototype/RocketSiloRocket\n" +
+	"  \"rocket-silo-rocket-shadow\", -- Prototype/RocketSiloRocketShadow\n" +
+	"  \"speech-bubble\", -- Prototype/SpeechBubble\n" +
+	"}\n" +
+	"\n" +
+	"local excludes = {\n" +
+	"  \"arrow\", -- Prototype/Arrow\n" +
+	"  \"artillery-flare\", -- Prototype/ArtilleryFlare\n" +
+	"  \"artillery-projectile\", -- Prototype/ArtilleryProjectile\n" +
+	"  \"beam\", -- Prototype/Beam\n" +
+	"  \"cliff\", -- Prototype/Cliff\n" +
+	"  \"deconstructible-tile-proxy\", -- Prototype/DeconstructibleTileProxy\n" +
+	"  \"entity-ghost\", -- Prototype/EntityGhost\n" +
+	"  \"particle\", -- Prototype/EntityParticle\n" +
+	"  \"leaf-particle\", -- Prototype/LeafParticle\n" +
+	"  -- \"<abstract>\", -- Prototype/EntityWithHealth\n" +
+	"  -- \"<abstract>\", -- Prototype/Combinator\n" +
+	"  -- \"<abstract>\", -- Prototype/CraftingMachine\n" +
+	"  \"unit-spawner\", -- Prototype/EnemySpawner\n" +
+	"  \"fish\", -- Prototype/Fish\n" +
+	"  -- \"<abstract>\", -- Prototype/FlyingRobot\n" +
+	"  -- \"<abstract>\", -- Prototype/RobotWithLogisticInterface\n" +
+	"  -- \"<abstract>\", -- Prototype/Rail\n" +
+	"  -- \"<abstract>\", -- Prototype/RailSignalBase\n" +
+	"  \"simple-entity\", -- Prototype/SimpleEntity\n" +
+	"  \"simple-entity-with-owner\", -- Prototype/SimpleEntityWithOwner\n" +
+	"  \"simple-entity-with-force\", -- Prototype/SimpleEntityWithForce\n" +
+	"  -- \"<abstract>\", -- Prototype/TransportBeltConnectable\n" +
+	"  \"tree\", -- Prototype/Tree\n" +
+	"  \"turret\", -- Prototype/Turret [includes biters]\n" +
+	"  \"unit\", -- Prototype/Unit\n" +
+	"  -- \"<abstract>\", -- Prototype/Vehicle\n" +
+	"  -- \"<abstract>\", -- Prototype/RollingStock\n" +
+	"  \"explosion\", -- Prototype/Explosion\n" +
+	"  \"flame-thrower-explosion\", -- Prototype/FlameThrowerExplosion\n" +
+	"  \"fire\", -- Prototype/FireFlame\n" +
+	"  \"stream\", -- Prototype/FluidStream\n" +
+	"  \"flying-text\", -- Prototype/FlyingText\n" +
+	"  \"highlight-box\", -- Prototype/HighlightBoxEntity\n" +
+	"  \"item-entity\", -- Prototype/ItemEntity\n" +
+	"  \"item-request-proxy\", -- Prototype/ItemRequestProxy\n" +
+	"  \"decorative\", -- Prototype/LegacyDecorative\n" +
+	"  \"particle-source\", -- Prototype/ParticleSource\n" +
+	"  \"projectile\", -- Prototype/Projectile\n" +
+	"  \"resource\", -- Prototype/ResourceEntity\n" +
+	"  -- \"<abstract>\", -- Prototype/Smoke\n" +
+	"  \"smoke\", -- Prototype/SimpleSmoke\n" +
+	"  \"smoke-with-trigger\", -- Prototype/SmokeWithTrigger\n" +
+	"  \"sticker\", -- Prototype/Sticker\n" +
+	"  \"tile-ghost\", -- Prototype/TileGhost\n" +
+	"}\n" +
+	"\n" +
+	"return {\n" +
+	"  includes = includes,\n" +
+	"  excludes = excludes,\n" +
+	"}" +
+	""
 // FileModGeneratedLua is file "mod/generated.lua"
 var FileModGeneratedLua =
 	"-- Automatically generated, do not modify\n" +
@@ -563,6 +714,14 @@ var FileModGeneratedLua =
 	"        const debugLayer = L.layerGroup([\n" +
 	"          L.marker([0, 0], { title: \"Start\" }).bindPopup(\"Starting point\"),\n" +
 	"          L.marker(worldToLatLng(info.player.x, info.player.y), { title: \"Player\" }).bindPopup(\"Player\"),\n" +
+	"          L.marker(worldToLatLng(info.world_min.x, info.world_min.y), { title: `${info.world_min.x}, ${info.world_min.y}" + // cont.
+	"` }),\n" +
+	"          L.marker(worldToLatLng(info.world_min.x, info.world_max.y), { title: `${info.world_min.x}, ${info.world_max.y}" + // cont.
+	"` }),\n" +
+	"          L.marker(worldToLatLng(info.world_max.x, info.world_min.y), { title: `${info.world_max.x}, ${info.world_min.y}" + // cont.
+	"` }),\n" +
+	"          L.marker(worldToLatLng(info.world_max.x, info.world_max.y), { title: `${info.world_max.x}, ${info.world_max.y}" + // cont.
+	"` }),\n" +
 	"        ]);\n" +
 	"\n" +
 	"        const mymap = L.map('map', {\n" +
@@ -606,12 +765,23 @@ var FileModSettingsLua =
 	"data:extend({\n" +
 	"    {\n" +
 	"        type = \"string-setting\",\n" +
+	"        name = \"area\",\n" +
+	"        setting_type = \"runtime-per-user\",\n" +
+	"        default_value = \"entities\",\n" +
+	"        allowed_values = {\"all\", \"entities\"},\n" +
+	"        localised_name = \"Area\",\n" +
+	"        localised_description = \"How to pick the area to render. `all`=all existing chunks; `entities`=chunks including " + // cont.
+	"artifical build.\",\n" +
+	"        order = \"000\",\n" +
+	"    },\n" +
+	"    {\n" +
+	"        type = \"string-setting\",\n" +
 	"        name = \"prefix\",\n" +
 	"        setting_type = \"runtime-per-user\",\n" +
 	"        default_value = \"mapshot/\",\n" +
 	"        localised_name = \"Prefix\",\n" +
 	"        localised_description = \"Prefix to add to all generated filenames.\",\n" +
-	"        order = \"000\",\n" +
+	"        order = \"001\",\n" +
 	"    },\n" +
 	"    {\n" +
 	"        type = \"int-setting\",\n" +
@@ -1148,6 +1318,7 @@ var ModFiles = map[string]string{
 	"README.md": FileReadmeMd,
 	"changelog.txt": FileChangelogTxt,
 	"control.lua": FileModControlLua,
+	"entities.lua": FileModEntitiesLua,
 	"generated.lua": FileModGeneratedLua,
 	"info.json": FileModInfoJSON,
 	"overrides.lua": FileModOverridesLua,

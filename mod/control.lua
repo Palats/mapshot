@@ -1,5 +1,6 @@
 local generated = require("generated")
 local overrides = require("overrides")
+local entities = require("entities")
 
 -- All settings of the mod.
 local params = {}
@@ -28,11 +29,25 @@ function mapshot(player, prefix)
   -- Determine map min & max world coordinates based on existing chunks.
   local world_min = { x = 2^30, y = 2^30 }
   local world_max = { x = -2^30, y = -2^30 }
-  for chunk in game.surfaces["nauvis"].get_chunks() do
-    world_min.x = math.min(world_min.x, chunk.area.left_top.x)
-    world_min.y = math.min(world_min.y, chunk.area.left_top.y)
-    world_max.x = math.max(world_max.x, chunk.area.right_bottom.x)
-    world_max.y = math.max(world_max.y, chunk.area.right_bottom.y)
+  local s = game.surfaces["nauvis"]
+  local chunk_count = 0
+  for chunk in s.get_chunks() do
+    local c = s.is_chunk_generated(chunk)
+    if params.area == "entities" then
+      c = c and s.count_entities_filtered({ area = chunk.area, limit = 1, type = entities.includes}) > 0
+    end
+    if c then
+      world_min.x = math.min(world_min.x, chunk.area.left_top.x)
+      world_min.y = math.min(world_min.y, chunk.area.left_top.y)
+      world_max.x = math.max(world_max.x, chunk.area.right_bottom.x)
+      world_max.y = math.max(world_max.y, chunk.area.right_bottom.y)
+      chunk_count = chunk_count + 1
+    end
+  end
+  if chunk_count == 0 then
+    log("no matching chunk")
+    player.print("No matching chunk")
+    return
   end
   player.print("Map: (" .. world_min.x .. ", " .. world_min.y .. ")-(" .. world_max.x .. ", " .. world_max.y .. ")")
 

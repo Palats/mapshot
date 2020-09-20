@@ -1,12 +1,22 @@
 data:extend({
     {
         type = "string-setting",
+        name = "area",
+        setting_type = "runtime-per-user",
+        default_value = "entities",
+        allowed_values = {"all", "entities"},
+        localised_name = "Area",
+        localised_description = "How to pick the area to render. `all`=all existing chunks; `entities`=chunks including artifical build.",
+        order = "000",
+    },
+    {
+        type = "string-setting",
         name = "prefix",
         setting_type = "runtime-per-user",
         default_value = "mapshot/",
         localised_name = "Prefix",
         localised_description = "Prefix to add to all generated filenames.",
-        order = "000",
+        order = "001",
     },
     {
         type = "int-setting",

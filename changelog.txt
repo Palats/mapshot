@@ -1,5 +1,7 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.0.4
+  Features:
+    - Capture automatically only the base by default. This avoids generating lots of useless tiles.
   UI:
     - Control for showing/hiding layers. For now, used for hiding debug info.
 ---------------------------------------------------------------------------------------------------
