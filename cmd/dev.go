@@ -3,7 +3,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 
@@ -18,11 +17,8 @@ func dev(ctx context.Context, factorioSettings *factorio.Settings) error {
 		return err
 	}
 
-	tmpdir, err := ioutil.TempDir("", "mapshot")
-	if err != nil {
-		return fmt.Errorf("unable to create temp dir: %w", err)
-	}
-	glog.Info("temp dir: ", tmpdir)
+	tmpdir, cleanup := getWorkDir()
+	defer cleanup()
 
 	// Copy mods
 	dstMods := path.Join(tmpdir, "mods")
@@ -47,19 +43,11 @@ func dev(ctx context.Context, factorioSettings *factorio.Settings) error {
 		"--disable-prototype-history",
 		"--mod-directory", dstMods,
 	}
-	glog.Infof("Factorio args: %v", factorioArgs)
 
 	fmt.Println("Starting Factorio...")
 	if err := fact.Run(ctx, factorioArgs); err != nil {
 		return fmt.Errorf("error while running Factorio: %w", err)
 	}
-
-	// Remove temporary directory.
-	if err := os.RemoveAll(tmpdir); err != nil {
-		return fmt.Errorf("unable to remove temp dir %q: %w", tmpdir, err)
-	}
-	glog.Infof("temp dir %q removed", tmpdir)
-
 	return nil
 }
 

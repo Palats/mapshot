@@ -97,11 +97,8 @@ func render(ctx context.Context, factorioSettings *factorio.Settings, rf *Render
 	name := path.Base(rawname)
 	name = name[:len(name)-len(path.Ext(name))]
 
-	tmpdir, err := ioutil.TempDir("", "mapshot")
-	if err != nil {
-		return fmt.Errorf("unable to create temp dir: %w", err)
-	}
-	glog.Info("temp dir: ", tmpdir)
+	tmpdir, cleanup := getWorkDir()
+	defer cleanup()
 
 	// Copy game save
 	srcSavegame, err := fact.FindSaveFile(rawname)
@@ -153,7 +150,6 @@ func render(ctx context.Context, factorioSettings *factorio.Settings, rf *Render
 		"--load-game", dstSavegame,
 		"--mod-directory", dstMods,
 	}
-	glog.Infof("Factorio args: %v", factorioArgs)
 
 	execCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -196,12 +192,6 @@ func render(ctx context.Context, factorioSettings *factorio.Settings, rf *Render
 	if err != nil {
 		return fmt.Errorf("error while running Factorio: %w", err)
 	}
-
-	// Remove temporary directory.
-	if err := os.RemoveAll(tmpdir); err != nil {
-		return fmt.Errorf("unable to remove temp dir %q: %w", tmpdir, err)
-	}
-	glog.Infof("temp dir %q removed", tmpdir)
 
 	return nil
 }
