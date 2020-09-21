@@ -234,11 +234,10 @@ func (s *Settings) DataDir() (string, error) {
 		`~/factorio`,
 		`~/.factorio`,
 		`~/Library/Application Support/factorio`,
-		`%appdata%\Factorio`,
+		path.Join(os.Getenv("APPDATA"), "Factorio"),
 	}
 	if s.datadir != "" {
 		candidates = []string{s.datadir}
-
 	}
 	for _, c := range candidates {
 		s, err := homedir.Expand(c)
@@ -268,8 +267,8 @@ func (s *Settings) Binary() (string, error) {
 		`~/factorio/bin/x64/factorio`,
 		`~/Library/Application Support/Steam/steamapps/common/Factorio/factorio.app/Contents`,
 		`/Applications/factorio.app/Contents`,
-		`C:\Program Files (x86)\Steam\steamapps\common\Factorio`,
-		`C:\Program Files\Factorio`,
+		path.Join(os.Getenv("ProgramFiles(x86)"), "Steam", "steamapps", "common", "Factorio", "bin", "x64", "factorio.exe"),
+		path.Join(os.Getenv("ProgramW6432"), "Factorio", "bin", "x64", "factorio.exe"),
 	}
 	if s.binary != "" {
 		candidates = []string{s.binary}
