@@ -230,15 +230,21 @@ func (s *Settings) Register(flags *pflag.FlagSet, prefix string) *Settings {
 
 // DataDir returns the place where saves, mods and others are located.
 func (s *Settings) DataDir() (string, error) {
+	// List is in reverse order of priority - last one will be preferred.
 	candidates := []string{
-		`~/factorio`,
 		`~/.factorio`,
+		`~/factorio`,
 		`~/Library/Application Support/factorio`,
-		path.Join(os.Getenv("APPDATA"), "Factorio"),
 	}
+	if e := os.Getenv("APPDATA"); e != "" {
+		candidates = append(candidates, path.Join(e, "Factorio"))
+	}
+
 	if s.datadir != "" {
 		candidates = []string{s.datadir}
 	}
+
+	match := ""
 	for _, c := range candidates {
 		s, err := homedir.Expand(c)
 		if err != nil {
@@ -252,27 +258,39 @@ func (s *Settings) DataDir() (string, error) {
 		}
 		if !info.IsDir() {
 			glog.Infof("Path %s is a file, skipped", s)
+			continue
 		}
 		glog.Infof("Found factorio data dir: %s", s)
-		return s, nil
+		match = s
 	}
-	glog.Infof("No Factorio data dir found")
-	return "", errors.New("no factorio data dir found; use --alsologtostderr for more info and --datadir to specify its location")
+	if s == nil {
+		glog.Infof("No Factorio data dir found")
+		return "", errors.New("no factorio data dir found; use --alsologtostderr for more info and --datadir to specify its location")
+	}
+	glog.Infof("Using Factorio data dir: %s", match)
+	return match, nil
 }
 
 // Binary returns the path to the Factorio binary.
 func (s *Settings) Binary() (string, error) {
+	// List is in reverse order of priority - last one will be preferred.
 	candidates := []string{
-		`~/.factorio/bin/x64/factorio`,
-		`~/factorio/bin/x64/factorio`,
 		`~/Library/Application Support/Steam/steamapps/common/Factorio/factorio.app/Contents`,
+		`~/factorio/bin/x64/factorio`,
+		`~/.factorio/bin/x64/factorio`,
 		`/Applications/factorio.app/Contents`,
-		path.Join(os.Getenv("ProgramFiles(x86)"), "Steam", "steamapps", "common", "Factorio", "bin", "x64", "factorio.exe"),
-		path.Join(os.Getenv("ProgramW6432"), "Factorio", "bin", "x64", "factorio.exe"),
 	}
+	if e := os.Getenv("ProgramFiles(x86)"); e != "" {
+		candidates = append(candidates, path.Join(e, "Steam", "steamapps", "common", "Factorio", "bin", "x64", "factorio.exe"))
+	}
+	if e := os.Getenv("ProgramW6432"); e != "" {
+		candidates = append(candidates, path.Join(e, "Factorio", "bin", "x64", "factorio.exe"))
+	}
+
 	if s.binary != "" {
 		candidates = []string{s.binary}
 	}
+	match := ""
 	for _, c := range candidates {
 		s, err := homedir.Expand(c)
 		if err != nil {
@@ -289,10 +307,14 @@ func (s *Settings) Binary() (string, error) {
 			continue
 		}
 		glog.Infof("Factorio binary found: %s", s)
-		return s, nil
+		match = s
 	}
-	glog.Infof("No factorio binary found")
-	return "", errors.New("no factorio binary found; use --alsologtostderr for more info and --binary to specify its location")
+	if match == "" {
+		glog.Infof("No factorio binary found")
+		return "", errors.New("no factorio binary found; use --alsologtostderr for more info and --binary to specify its location")
+	}
+	glog.Infof("Using Factorio binary: %s", match)
+	return match, nil
 }
 
 // ModList represents the content of `mod-list.json` file in Factorio.
