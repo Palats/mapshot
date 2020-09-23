@@ -193,6 +193,11 @@ func render(ctx context.Context, factorioSettings *factorio.Settings, rf *Render
 	glog.Infof("output at %s", resultPrefix)
 	fmt.Println("Output:", path.Join(fact.ScriptOutput(), resultPrefix))
 
+	// Cleaning up done file now that we've read it.
+	err = os.Remove(doneFile)
+	glog.Infof("removed done-file %q: %v", doneFile, err)
+
+	// Wait for Factorio to terminate.
 	err = <-errCh
 	if err != nil {
 		return fmt.Errorf("error while running Factorio: %w", err)
