@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"runtime"
 	"strings"
 
 	"github.com/golang/glog"
@@ -125,11 +126,12 @@ func (f *Factorio) Run(ctx context.Context, args []string) error {
 				glog.Infof("interrupt requested, but keep_running specified")
 			} else {
 				glog.Infof("interrupt requested")
-				// When killing immediately, some files will not be written, even
-				// when the `done` file is already visible. Instead, ask to
-				// shutdown politely.
-				// Unfortunately, that will be an issue for windows.
-				cmd.Process.Signal(os.Interrupt)
+				if runtime.GOOS == "windows" {
+					// On Windows, os.Interrupt is a no-op, so be a bit more direct.
+					cmd.Process.Signal(os.Kill)
+				} else {
+					cmd.Process.Signal(os.Interrupt)
+				}
 			}
 		}
 	}()

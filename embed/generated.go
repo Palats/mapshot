@@ -494,6 +494,7 @@ var FileModControlLua =
 	"\n" +
 	"-- Detects if an on-startup screenshot is requested.\n" +
 	"script.on_event(defines.events.on_tick, function(evt)\n" +
+	"  log(\"onstartup check @\" .. evt.tick)\n" +
 	"  -- Needs to run only once, so unregister immediately.\n" +
 	"  script.on_event(defines.events.on_tick, nil)\n" +
 	"\n" +
@@ -505,7 +506,17 @@ var FileModControlLua =
 	"    local name = params.shotname .. \"-\" .. evt.tick\n" +
 	"    local prefix = params.prefix .. name .. \"/\"\n" +
 	"    mapshot(player, prefix)\n" +
-	"    game.write_file(\"mapshot-done-\" .. params.onstartup, prefix)\n" +
+	"\n" +
+	"    -- Write the `done` marker on the next tick - that seems to be\n" +
+	"    -- enough to guarantee ordering. Otherwise, the `done` file might\n" +
+	"    -- be written before the screenshots, leading to killing Factorio\n" +
+	"    -- too early. On Linux, using signal Interrupt helps a lot, but\n" +
+	"    -- that does not guarantee it - and it is not available on Windows.\n" +
+	"    script.on_event(defines.events.on_tick, function(evt)\n" +
+	"      log(\"marking as done @\" .. evt.tick)\n" +
+	"      script.on_event(defines.events.on_tick, nil)\n" +
+	"      game.write_file(\"mapshot-done-\" .. params.onstartup, prefix)\n" +
+	"    end)\n" +
 	"  end\n" +
 	"end)\n" +
 	"\n" +

@@ -118,6 +118,7 @@ end
 
 -- Detects if an on-startup screenshot is requested.
 script.on_event(defines.events.on_tick, function(evt)
+  log("onstartup check @" .. evt.tick)
   -- Needs to run only once, so unregister immediately.
   script.on_event(defines.events.on_tick, nil)
 
@@ -129,7 +130,17 @@ script.on_event(defines.events.on_tick, function(evt)
     local name = params.shotname .. "-" .. evt.tick
     local prefix = params.prefix .. name .. "/"
     mapshot(player, prefix)
-    game.write_file("mapshot-done-" .. params.onstartup, prefix)
+
+    -- Write the `done` marker on the next tick - that seems to be
+    -- enough to guarantee ordering. Otherwise, the `done` file might
+    -- be written before the screenshots, leading to killing Factorio
+    -- too early. On Linux, using signal Interrupt helps a lot, but
+    -- that does not guarantee it - and it is not available on Windows.
+    script.on_event(defines.events.on_tick, function(evt)
+      log("marking as done @" .. evt.tick)
+      script.on_event(defines.events.on_tick, nil)
+      game.write_file("mapshot-done-" .. params.onstartup, prefix)
+    end)
   end
 end)
 
