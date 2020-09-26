@@ -1,4 +1,5 @@
 tmp/
+build/
 .vscode
 mapshot_*.zip
 mapshot

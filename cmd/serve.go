@@ -37,7 +37,7 @@ func findShots(baseDir string) ([]shotInfo, error) {
 		shotPath := filepath.Dir(path)
 		name, err := filepath.Rel(realDir, shotPath)
 		if err != nil {
-			glog.Infof("unable to get relative path of %q: %w", shotPath, err)
+			glog.Infof("unable to get relative path of %q: %v", shotPath, err)
 			return nil
 		}
 		shots = append(shots, shotInfo{

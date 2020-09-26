@@ -330,8 +330,7 @@ var FileReadmeMd =
 	"* Regenerate files: `go generate ./...`\n" +
 	"* Run tests\n" +
 	"* Commit and push\n" +
-	"* Build CLI: `go build mapshot.go`\n" +
-	"* Build mod: `./mapshot package`\n" +
+	"* Build release: `./build.sh`\n" +
 	"* Create release in Github\n" +
 	"* Update Factorio mods portal (new zip, update doc)" +
 	""
@@ -339,12 +338,15 @@ var FileReadmeMd =
 var FileChangelogTxt =
 	"---------------------------------------------------------------------------------------------------\n" +
 	"Version: 0.0.5\n" +
+	"  Features:\n" +
+	"    - Built-in HTTP server with listing of files.\n" +
 	"  CLI:\n" +
 	"    - Fix paths on Windows.\n" +
 	"    - Do not look for Steam version as it does not integrate well with auto launcher.\n" +
 	"    - Improve detection of generation completion.\n" +
 	"  Internal:\n" +
 	"    - `go generate` runs properly on Windows.\n" +
+	"    - Build script for releases.\n" +
 	"---------------------------------------------------------------------------------------------------\n" +
 	"Version: 0.0.4\n" +
 	"Date: 2020.09.20\n" +

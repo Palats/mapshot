@@ -91,9 +91,7 @@ By default, it will show the help, including all the available subcommands.
 * Update changelog
 * Update version in: `changelog.txt` (incl. date), `info.json`
 * Regenerate files: `go generate ./...`
-* Run tests
 * Commit and push
-* Build CLI: `go build mapshot.go`
-* Build mod: `./mapshot package`
+* Build release: `./build.sh`
 * Create release in Github
 * Update Factorio mods portal (new zip, update doc)

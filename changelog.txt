@@ -1,11 +1,14 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.0.5
+  Features:
+    - Built-in HTTP server with listing of files.
   CLI:
     - Fix paths on Windows.
     - Do not look for Steam version as it does not integrate well with auto launcher.
     - Improve detection of generation completion.
   Internal:
     - `go generate` runs properly on Windows.
+    - Build script for releases.
 ---------------------------------------------------------------------------------------------------
 Version: 0.0.4
 Date: 2020.09.20

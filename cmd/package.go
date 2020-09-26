@@ -4,15 +4,16 @@ import (
 	"archive/zip"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 
 	"github.com/Palats/mapshot/embed"
 	"github.com/spf13/cobra"
 )
 
-func genPackage() error {
+func genPackage(targetDir string) error {
 	name := fmt.Sprintf("mapshot_%s", embed.Version)
-	zipfilename := name + ".zip"
+	zipfilename := filepath.Join(targetDir, name+".zip")
 	zipfile, err := os.Create(zipfilename)
 	if err != nil {
 		return fmt.Errorf("unable to open file %s for creation: %w", zipfilename, err)
@@ -21,7 +22,7 @@ func genPackage() error {
 
 	w := zip.NewWriter(zipfile)
 	for filename, content := range embed.ModFiles {
-		f, err := w.Create(filepath.Join(name, filename))
+		f, err := w.Create(path.Join(name, filename))
 		if err != nil {
 			return fmt.Errorf("unable to add %q to zip file: %w", filename, err)
 		}
@@ -38,9 +39,13 @@ func genPackage() error {
 var cmdPackage = &cobra.Command{
 	Use:   "package",
 	Short: "Generates the zip file of the Factorio mod.",
-	Args:  cobra.NoArgs,
+	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return genPackage()
+		target := ""
+		if len(args) > 0 {
+			target = args[0]
+		}
+		return genPackage(target)
 	},
 }
 
