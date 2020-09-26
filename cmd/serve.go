@@ -72,8 +72,6 @@ func serve(ctx context.Context, factorioSettings *factorio.Settings, port int) e
 			"name": s.name,
 			"path": s.httpPath,
 		})
-
-		fmt.Printf("Serving shot at %s: %s\n", s.httpPath, s.fsPath)
 		mux.Handle(s.httpPath, http.StripPrefix(s.httpPath, http.FileServer(http.Dir(s.fsPath))))
 	}
 
