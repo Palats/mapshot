@@ -33,6 +33,8 @@ where `savename` is the name of the save you want to render. It will not modify 
 
 If your Factorio data dir or binary location are not detected automatically, you can specify them with `--factorio_datadir` and `--factorio_binary`. You can also override the rendering parameters - see CLI help for the specific flag names.
 
+Steam version of Factorio is not supported for now. If you have only a Steam version, you can still get a standalone version on factorio.com by linking your Steam account.
+
 ## Generation parameters
 
 You can tune parameters such as many layers to generate, their resolution and a few more details. Those parameters are:

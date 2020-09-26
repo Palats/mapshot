@@ -277,14 +277,16 @@ func (s *Settings) DataDir() (string, error) {
 func (s *Settings) Binary() (string, error) {
 	// List is in reverse order of priority - last one will be preferred.
 	candidates := []string{
-		`~/Library/Application Support/Steam/steamapps/common/Factorio/factorio.app/Contents`,
+		// Steam is a bit tricky to start/stop automatically, so ignore it for now.
+		// `~/Library/Application Support/Steam/steamapps/common/Factorio/factorio.app/Contents`,
 		`~/factorio/bin/x64/factorio`,
 		`~/.factorio/bin/x64/factorio`,
 		`/Applications/factorio.app/Contents`,
 	}
-	if e := os.Getenv("ProgramFiles(x86)"); e != "" {
-		candidates = append(candidates, path.Join(e, "Steam", "steamapps", "common", "Factorio", "bin", "x64", "factorio.exe"))
-	}
+	// Steam is a bit tricky to start/stop automatically, so ignore it for now.
+	// if e := os.Getenv("ProgramFiles(x86)"); e != "" {
+	//	candidates = append(candidates, path.Join(e, "Steam", "steamapps", "common", "Factorio", "bin", "x64", "factorio.exe"))
+	// }
 	if e := os.Getenv("ProgramW6432"); e != "" {
 		candidates = append(candidates, path.Join(e, "Factorio", "bin", "x64", "factorio.exe"))
 	}

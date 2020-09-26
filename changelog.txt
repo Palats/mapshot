@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.0.5
+  CLI:
+    - Fix paths on Windows.
+    - Do not look for Steam version as it does not integrate well with auto launcher.
+    - Improve detection of generation completion.
+  Internal:
+    - `go generate` runs properly on Windows.
+---------------------------------------------------------------------------------------------------
 Version: 0.0.4
 Date: 2020.09.20
   Features:
