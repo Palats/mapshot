@@ -328,7 +328,6 @@ var FileReadmeMd =
 	"* Update changelog\n" +
 	"* Update version in: `changelog.txt` (incl. date), `info.json`\n" +
 	"* Regenerate files: `go generate ./...`\n" +
-	"* Run tests\n" +
 	"* Commit and push\n" +
 	"* Build release: `./build.sh`\n" +
 	"* Create release in Github\n" +

@@ -94,6 +94,9 @@ var indexHTML = template.Must(template.New("name").Parse(`
 	<title>Mapshot for Factorio</title>
 </head>
 <body>
+	{{if not .}}
+	No mapshots have been found. Create some and re-start mapshot server.
+	{{end}}
 	<ul>
 	{{range .}}
 	<li><a href="{{.path}}">{{.name}}</a></li>
