@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/Palats/mapshot/embed"
@@ -67,7 +67,7 @@ func copyMod(dstMapshot string) error {
 		return fmt.Errorf("unable to create dir %q: %w", dstMapshot, err)
 	}
 	for name, content := range embed.ModFiles {
-		dst := path.Join(dstMapshot, name)
+		dst := filepath.Join(dstMapshot, name)
 		if err := ioutil.WriteFile(dst, []byte(content), 0644); err != nil {
 			return fmt.Errorf("unable to write file %q: %w", dst, err)
 		}
@@ -81,7 +81,7 @@ func writeOverrides(data map[string]interface{}, dstPath string) error {
 		return err
 	}
 	overrides := "return [===[" + string(inline) + "]===]\n"
-	overridesFilename := path.Join(dstPath, "overrides.lua")
+	overridesFilename := filepath.Join(dstPath, "overrides.lua")
 	if err := ioutil.WriteFile(overridesFilename, []byte(overrides), 0644); err != nil {
 		return fmt.Errorf("unable to write overrides file %q: %w", overridesFilename, err)
 	}
@@ -99,8 +99,8 @@ func render(ctx context.Context, factorioSettings *factorio.Settings, rf *Render
 	glog.Infof("runid: %s", runID)
 
 	// The parameter can be a filename, so extract a name.
-	name := path.Base(rawname)
-	name = name[:len(name)-len(path.Ext(name))]
+	name := filepath.Base(rawname)
+	name = name[:len(name)-len(filepath.Ext(name))]
 
 	tmpdir, cleanup := getWorkDir()
 	defer cleanup()
@@ -112,20 +112,20 @@ func render(ctx context.Context, factorioSettings *factorio.Settings, rf *Render
 	}
 	fmt.Printf("Generating mapshot %q using file %s\n", name, srcSavegame)
 
-	dstSavegame := path.Join(tmpdir, name+".zip")
+	dstSavegame := filepath.Join(tmpdir, name+".zip")
 	if err := copy.Copy(srcSavegame, dstSavegame); err != nil {
 		return fmt.Errorf("unable to copy file %q: %w", srcSavegame, err)
 	}
 	glog.Infof("copied save from %q to %q", srcSavegame, dstSavegame)
 
 	// Copy mods
-	dstMods := path.Join(tmpdir, "mods")
+	dstMods := filepath.Join(tmpdir, "mods")
 	if err := fact.CopyMods(dstMods, []string{"mapshot"}); err != nil {
 		return err
 	}
 
 	// Add the mod itself.
-	dstMapshot := path.Join(dstMods, "mapshot")
+	dstMapshot := filepath.Join(dstMods, "mapshot")
 	if err := copyMod(dstMapshot); err != nil {
 		return err
 	}
@@ -145,7 +145,7 @@ func render(ctx context.Context, factorioSettings *factorio.Settings, rf *Render
 
 	// Remove done marker if still present
 	var doneFile string
-	doneFile = path.Join(fact.ScriptOutput(), "mapshot-done-"+runID)
+	doneFile = filepath.Join(fact.ScriptOutput(), "mapshot-done-"+runID)
 	err = os.Remove(doneFile)
 	glog.Infof("removed done-file %q: %v", doneFile, err)
 
@@ -191,7 +191,7 @@ func render(ctx context.Context, factorioSettings *factorio.Settings, rf *Render
 	}
 	resultPrefix := string(rawDone)
 	glog.Infof("output at %s", resultPrefix)
-	fmt.Println("Output:", path.Join(fact.ScriptOutput(), resultPrefix))
+	fmt.Println("Output:", filepath.Join(fact.ScriptOutput(), resultPrefix))
 
 	// Cleaning up done file now that we've read it.
 	err = os.Remove(doneFile)

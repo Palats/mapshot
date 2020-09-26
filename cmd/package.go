@@ -4,7 +4,7 @@ import (
 	"archive/zip"
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/Palats/mapshot/embed"
 	"github.com/spf13/cobra"
@@ -21,7 +21,7 @@ func genPackage() error {
 
 	w := zip.NewWriter(zipfile)
 	for filename, content := range embed.ModFiles {
-		f, err := w.Create(path.Join(name, filename))
+		f, err := w.Create(filepath.Join(name, filename))
 		if err != nil {
 			return fmt.Errorf("unable to add %q to zip file: %w", filename, err)
 		}

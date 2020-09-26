@@ -254,6 +254,9 @@ var FileReadmeMd =
 	"If your Factorio data dir or binary location are not detected automatically, you can specify them with `--factorio_datad" + // cont.
 	"ir` and `--factorio_binary`. You can also override the rendering parameters - see CLI help for the specific flag names.\n" +
 	"\n" +
+	"Steam version of Factorio is not supported for now. If you have only a Steam version, you can still get a standalone ver" + // cont.
+	"sion on factorio.com by linking your Steam account.\n" +
+	"\n" +
 	"## Generation parameters\n" +
 	"\n" +
 	"You can tune parameters such as many layers to generate, their resolution and a few more details. Those parameters are:\n" +
@@ -334,6 +337,14 @@ var FileReadmeMd =
 	""
 // FileChangelogTxt is file "changelog.txt"
 var FileChangelogTxt =
+	"---------------------------------------------------------------------------------------------------\n" +
+	"Version: 0.0.5\n" +
+	"  CLI:\n" +
+	"    - Fix paths on Windows.\n" +
+	"    - Do not look for Steam version as it does not integrate well with auto launcher.\n" +
+	"    - Improve detection of generation completion.\n" +
+	"  Internal:\n" +
+	"    - `go generate` runs properly on Windows.\n" +
 	"---------------------------------------------------------------------------------------------------\n" +
 	"Version: 0.0.4\n" +
 	"Date: 2020.09.20\n" +

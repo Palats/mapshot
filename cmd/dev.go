@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/Palats/mapshot/factorio"
 	"github.com/golang/glog"
@@ -21,18 +21,18 @@ func dev(ctx context.Context, factorioSettings *factorio.Settings) error {
 	defer cleanup()
 
 	// Copy mods
-	dstMods := path.Join(tmpdir, "mods")
+	dstMods := filepath.Join(tmpdir, "mods")
 	if err := fact.CopyMods(dstMods, []string{"mapshot"}); err != nil {
 		return err
 	}
 
 	// Add the mod itself.
-	dstMapshot := path.Join(dstMods, "mapshot")
+	dstMapshot := filepath.Join(dstMods, "mapshot")
 	cwd, err := os.Getwd()
 	if err != nil {
 		return fmt.Errorf("unable to find current directory: %w", err)
 	}
-	modDir := path.Join(cwd, "mod")
+	modDir := filepath.Join(cwd, "mod")
 	if err := os.Symlink(modDir, dstMapshot); err != nil {
 		return fmt.Errorf("unable to symlink %q: %w", modDir, err)
 	}

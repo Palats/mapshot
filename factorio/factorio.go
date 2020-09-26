@@ -9,7 +9,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 	"runtime"
 	"strings"
 
@@ -76,12 +76,12 @@ func (f *Factorio) Binary() string {
 
 // ModsDir is the directory where all the mods are located.
 func (f *Factorio) ModsDir() string {
-	return path.Join(f.DataDir(), ModsDir)
+	return filepath.Join(f.DataDir(), ModsDir)
 }
 
 // ScriptOutput is the place where mods can write data.
 func (f *Factorio) ScriptOutput() string {
-	return path.Join(f.DataDir(), ScriptOutput)
+	return filepath.Join(f.DataDir(), ScriptOutput)
 }
 
 // FindSaveFile try to find the savegame with the given name. It will look in
@@ -90,8 +90,8 @@ func (f *Factorio) FindSaveFile(name string) (string, error) {
 	candidates := []string{
 		name,
 		name + ".zip",
-		path.Join(f.DataDir(), SavesDir, name+".zip"),
-		path.Join(f.DataDir(), SavesDir, name),
+		filepath.Join(f.DataDir(), SavesDir, name+".zip"),
+		filepath.Join(f.DataDir(), SavesDir, name),
 	}
 	for _, c := range candidates {
 		_, err := os.Stat(c)
@@ -161,8 +161,8 @@ func (f *Factorio) CopyMods(dstMods string, filterOut []string) error {
 		return fmt.Errorf("unable to read directory %q: %w", srcMods, err)
 	}
 	for _, sub := range subs {
-		src := path.Join(srcMods, sub.Name())
-		dst := path.Join(dstMods, sub.Name())
+		src := filepath.Join(srcMods, sub.Name())
+		dst := filepath.Join(dstMods, sub.Name())
 
 		// Some plugins might be requested to exclude.
 		modName := sub.Name()
@@ -239,7 +239,7 @@ func (s *Settings) DataDir() (string, error) {
 		`~/Library/Application Support/factorio`,
 	}
 	if e := os.Getenv("APPDATA"); e != "" {
-		candidates = append(candidates, path.Join(e, "Factorio"))
+		candidates = append(candidates, filepath.Join(e, "Factorio"))
 	}
 
 	if s.datadir != "" {
@@ -285,10 +285,10 @@ func (s *Settings) Binary() (string, error) {
 	}
 	// Steam is a bit tricky to start/stop automatically, so ignore it for now.
 	// if e := os.Getenv("ProgramFiles(x86)"); e != "" {
-	//	candidates = append(candidates, path.Join(e, "Steam", "steamapps", "common", "Factorio", "bin", "x64", "factorio.exe"))
+	//	candidates = append(candidates, filepath.Join(e, "Steam", "steamapps", "common", "Factorio", "bin", "x64", "factorio.exe"))
 	// }
 	if e := os.Getenv("ProgramW6432"); e != "" {
-		candidates = append(candidates, path.Join(e, "Factorio", "bin", "x64", "factorio.exe"))
+		candidates = append(candidates, filepath.Join(e, "Factorio", "bin", "x64", "factorio.exe"))
 	}
 
 	if s.binary != "" {
@@ -375,7 +375,7 @@ func LoadModList(filename string) (*ModList, error) {
 
 // EnableMod activate the named mod in the provided mod directory.
 func EnableMod(modsPath string, modName string) error {
-	modListFile := path.Join(modsPath, "mod-list.json")
+	modListFile := filepath.Join(modsPath, "mod-list.json")
 	mlist, err := LoadModList(modListFile)
 	if err != nil {
 		return err
