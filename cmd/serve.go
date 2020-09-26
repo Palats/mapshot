@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"html/template"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -12,13 +13,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func findShots(baseDir string) ([]string, error) {
+type shotInfo struct {
+	name     string
+	fsPath   string
+	httpPath string
+}
+
+func findShots(baseDir string) ([]shotInfo, error) {
 	realDir, err := filepath.EvalSymlinks(baseDir)
 	if err != nil {
 		return nil, fmt.Errorf("unable to eval symlinks for %s: %w", baseDir, err)
 	}
 	glog.Infof("Looking for shots in %s", realDir)
-	var paths []string
+	var shots []shotInfo
 	err = filepath.Walk(realDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -27,14 +34,23 @@ func findShots(baseDir string) ([]string, error) {
 			return nil
 		}
 		glog.Infof("found mapshot.json: %s", path)
-		shotpath := filepath.Dir(path)
-		paths = append(paths, shotpath)
+		shotPath := filepath.Dir(path)
+		name, err := filepath.Rel(realDir, shotPath)
+		if err != nil {
+			glog.Infof("unable to get relative path of %q: %w", shotPath, err)
+			return nil
+		}
+		shots = append(shots, shotInfo{
+			fsPath:   shotPath,
+			name:     name,
+			httpPath: "/" + filepath.ToSlash(name) + "/",
+		})
 		return nil
 	})
 	if err != nil {
 		return nil, err
 	}
-	return paths, nil
+	return shots, nil
 }
 
 func serve(ctx context.Context, factorioSettings *factorio.Settings, port int) error {
@@ -43,18 +59,50 @@ func serve(ctx context.Context, factorioSettings *factorio.Settings, port int) e
 		return err
 	}
 	baseDir := fact.ScriptOutput()
-	paths, err := findShots(baseDir)
+	shots, err := findShots(baseDir)
 	if err != nil {
 		return err
 	}
-	for _, p := range paths {
-		fmt.Printf("Found shot: %s\n", p)
+
+	mux := http.NewServeMux()
+
+	data := []map[string]string{}
+	for _, s := range shots {
+		data = append(data, map[string]string{
+			"name": s.name,
+			"path": s.httpPath,
+		})
+
+		fmt.Printf("Serving shot at %s: %s\n", s.httpPath, s.fsPath)
+		mux.Handle(s.httpPath, http.StripPrefix(s.httpPath, http.FileServer(http.Dir(s.fsPath))))
 	}
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
+		if err := indexHTML.Execute(w, data); err != nil {
+			http.Error(w, fmt.Sprintf("unable to generate file: %v", err), http.StatusInternalServerError)
+			return
+		}
+	})
+
 	addr := fmt.Sprintf(":%d", port)
 	fmt.Printf("Serving data from %s\n", baseDir)
 	fmt.Printf("Listening on %s ...\n", addr)
-	return http.ListenAndServe(addr, http.FileServer(http.Dir(baseDir)))
+	return http.ListenAndServe(addr, mux)
 }
+
+var indexHTML = template.Must(template.New("name").Parse(`
+<html>
+<head>
+	<title>Mapshot for Factorio</title>
+</head>
+<body>
+	<ul>
+	{{range .}}
+	<li><a href="{{.path}}">{{.name}}</a></li>
+	{{end}}
+	</ul>
+</body>
+`))
 
 var cmdServe = &cobra.Command{
 	Use:   "serve",
