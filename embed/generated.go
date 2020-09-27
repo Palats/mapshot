@@ -215,20 +215,37 @@ var FileReadmeMd =
 	"\n" +
 	"*Mapshot* generates zoomable screenshots of Factorio maps - **[example](https://palats.github.io/mapshot-example/)**.\n" +
 	"\n" +
-	"It can be used in 2 ways:\n" +
+	"They can be created in 2 ways:\n" +
 	"\n" +
-	"* As a regular Factorio mod, providing an extra command to create a screenshot.\n" +
-	"* As a tool (CLI) generating a screenshot of any saved game - without having to activate mods on your game. Factorio is " + // cont.
-	"still used for rendering.\n" +
+	"* Through a regular Factorio mod, providing an extra command to create a mapshot.\n" +
+	"* Through a CLI tool generating a mapshot of any saved game - without having to activate mods on your game. Factorio is " + // cont.
+	"used for rendering.\n" +
 	"\n" +
-	"The zoomable screenshots are exported as static files (html, javascript, jpg). They can be served through any HTTP serve" + // cont.
-	"r - see below.\n" +
+	"The generated zoomable screenshots can be explored through a web browser, using the CLI tool to serve them. As those map" + // cont.
+	"shots are exported as static files (html, javascript, jpg), they can also be served through any HTTP server - see below." + // cont.
+	"\n" +
 	"\n" +
 	"***Warning: Generation can take quite a while. Factorio UI will appear frozen during that time; this is normal.***\n" +
 	"\n" +
 	"See https://github.com/Palats/mapshot for more details.\n" +
 	"\n" +
-	"## Usage: Factorio mod\n" +
+	"## Installing\n" +
+	"\n" +
+	"The Factorio mod can be installed like any other mod from the Factorio UI.\n" +
+	"\n" +
+	"The optional CLI is used for serving generated mapshots and generating mapshots from outside the game. The standalone bi" + // cont.
+	"naries can be downloaded from https://github.com/Palats/mapshot/releases; then:\n" +
+	"\n" +
+	" * Linux: Mark as executable if needed and run - this is a standard command line tool.\n" +
+	" * Windows: For convenience, if `.exe` file is launched directly from Explorer, it will automatically start the serving " + // cont.
+	"mode. Otherwise, you need a way to give the tool parameters - either by launching it from the `cmd` console, or by creat" + // cont.
+	"ing a shortcut (with extra parameters in the properties).\n" +
+	" * MacOS: A binary is provided (\"darwin\" version), but is completely untested as I have no access to a MacOS system.\n" +
+	"\n" +
+	"\n" +
+	"## Creating a mapshot\n" +
+	"\n" +
+	"### In Factorio\n" +
 	"\n" +
 	"In the Factorio [console](https://wiki.factorio.com/Console), run:\n" +
 	"```\n" +
@@ -239,10 +256,9 @@ var FileReadmeMd =
 	"data_directory), in a subdirectory called `mapshot/<name>/`. If `<name>` is not specified, a name based on the seed and " + // cont.
 	"current tick will be generated (modding API does not gives access to savename, hence no good default naming).\n" +
 	"\n" +
-	"## Usage: CLI\n" +
+	"### With the CLI\n" +
 	"\n" +
-	"You can download the latest binary in https://github.com/Palats/mapshot/releases . The CLI is a standalone binary, curre" + // cont.
-	"ntly only for linux. To generate a screenshot:\n" +
+	"To generate a mapshot:\n" +
 	"\n" +
 	"```\n" +
 	"./mapshot render <savename>\n" +
@@ -257,7 +273,7 @@ var FileReadmeMd =
 	"Steam version of Factorio is not supported for now. If you have only a Steam version, you can still get a standalone ver" + // cont.
 	"sion on factorio.com by linking your Steam account.\n" +
 	"\n" +
-	"## Generation parameters\n" +
+	"### Parameters\n" +
 	"\n" +
 	"You can tune parameters such as many layers to generate, their resolution and a few more details. Those parameters are:\n" +
 	"\n" +
@@ -266,7 +282,7 @@ var FileReadmeMd =
 	"\n" +
 	"Parameters:\n" +
 	"\n" +
-	"* _Area_ (`area`) : What to include in the screenshot. Options:\n" +
+	"* _Area_ (`area`) : What to include in the mapshot. Options:\n" +
 	"  * `entities` [default]: Include all chunks which contain at least one entity of some interest. This should capture the" + // cont.
 	" base in practice.\n" +
 	"  * `all`: All chunks.\n" +
@@ -289,14 +305,20 @@ var FileReadmeMd =
 	"\n" +
 	"\n" +
 	"## Serving the generated content\n" +
-	"The mod itself does not provide any facility to serve the content. You must make the content available through a standar" + // cont.
-	"d http server. All the content is static, so any http file server can do the trick. For example, if you go in `script-ou" + // cont.
-	"tput/mapshot/<name>`, you can run a simple server using Python:\n" +
+	"\n" +
+	"The CLI can be used to serve the mapshots:\n" +
+	"\n" +
 	"```\n" +
-	"python3 -m http.server 8080\n" +
+	"./mapshot serve\n" +
 	"```\n" +
 	"\n" +
-	"You can also upload the result on your favorite web file hosting.\n" +
+	"By default, it serves on port 8080 - thus accessible at http://localhost:8080 if it is running on your local machine. It" + // cont.
+	" serves all the mapshots available in the `script-output` directory of Factorio. It provides a very basic list of availa" + // cont.
+	"ble mapshots and refreshes this list every few seconds.\n" +
+	"\n" +
+	"The generated content is made of static files. This means you can also serve the content through any HTTP server (e.g., " + // cont.
+	"`python3 -m http.server 8080` from the `script-output` directory) or your favorite web file hosting.\n" +
+	"\n" +
 	"\n" +
 	"## Development\n" +
 	"\n" +
@@ -338,11 +360,15 @@ var FileChangelogTxt =
 	"---------------------------------------------------------------------------------------------------\n" +
 	"Version: 0.0.5\n" +
 	"  Features:\n" +
-	"    - Built-in HTTP server with listing of files.\n" +
+	"    - Built-in HTTP server with listing of available mapshots, refreshing as new one are created.\n" +
+	"    - Windows build.\n" +
+	"    - Untested MacOS build.\n" +
 	"  CLI:\n" +
-	"    - Fix paths on Windows.\n" +
 	"    - Do not look for Steam version as it does not integrate well with auto launcher.\n" +
 	"    - Improve detection of generation completion.\n" +
+	"    - Windows: fixed paths.\n" +
+	"    - Windows: do not close the console when run from explorer.\n" +
+	"    - Windows: when launch from explorer with no args, run in `serve` mode as a sane default.\n" +
 	"  Internal:\n" +
 	"    - `go generate` runs properly on Windows.\n" +
 	"    - Build script for releases.\n" +

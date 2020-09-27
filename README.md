@@ -2,18 +2,31 @@
 
 *Mapshot* generates zoomable screenshots of Factorio maps - **[example](https://palats.github.io/mapshot-example/)**.
 
-It can be used in 2 ways:
+They can be created in 2 ways:
 
-* As a regular Factorio mod, providing an extra command to create a screenshot.
-* As a tool (CLI) generating a screenshot of any saved game - without having to activate mods on your game. Factorio is still used for rendering.
+* Through a regular Factorio mod, providing an extra command to create a mapshot.
+* Through a CLI tool generating a mapshot of any saved game - without having to activate mods on your game. Factorio is used for rendering.
 
-The zoomable screenshots are exported as static files (html, javascript, jpg). They can be served through any HTTP server - see below.
+The generated zoomable screenshots can be explored through a web browser, using the CLI tool to serve them. As those mapshots are exported as static files (html, javascript, jpg), they can also be served through any HTTP server - see below.
 
 ***Warning: Generation can take quite a while. Factorio UI will appear frozen during that time; this is normal.***
 
 See https://github.com/Palats/mapshot for more details.
 
-## Usage: Factorio mod
+## Installing
+
+The Factorio mod can be installed like any other mod from the Factorio UI.
+
+The optional CLI is used for serving generated mapshots and generating mapshots from outside the game. The standalone binaries can be downloaded from https://github.com/Palats/mapshot/releases; then:
+
+ * Linux: Mark as executable if needed and run - this is a standard command line tool.
+ * Windows: For convenience, if `.exe` file is launched directly from Explorer, it will automatically start the serving mode. Otherwise, you need a way to give the tool parameters - either by launching it from the `cmd` console, or by creating a shortcut (with extra parameters in the properties).
+ * MacOS: A binary is provided ("darwin" version), but is completely untested as I have no access to a MacOS system.
+
+
+## Creating a mapshot
+
+### In Factorio
 
 In the Factorio [console](https://wiki.factorio.com/Console), run:
 ```
@@ -22,9 +35,9 @@ In the Factorio [console](https://wiki.factorio.com/Console), run:
 
 It will create a website in the Factorio [script output directory](https://wiki.factorio.com/Application_directory#User_data_directory), in a subdirectory called `mapshot/<name>/`. If `<name>` is not specified, a name based on the seed and current tick will be generated (modding API does not gives access to savename, hence no good default naming).
 
-## Usage: CLI
+### With the CLI
 
-You can download the latest binary in https://github.com/Palats/mapshot/releases . The CLI is a standalone binary, currently only for linux. To generate a screenshot:
+To generate a mapshot:
 
 ```
 ./mapshot render <savename>
@@ -35,7 +48,7 @@ If your Factorio data dir or binary location are not detected automatically, you
 
 Steam version of Factorio is not supported for now. If you have only a Steam version, you can still get a standalone version on factorio.com by linking your Steam account.
 
-## Generation parameters
+### Parameters
 
 You can tune parameters such as many layers to generate, their resolution and a few more details. Those parameters are:
 
@@ -44,7 +57,7 @@ You can tune parameters such as many layers to generate, their resolution and a 
 
 Parameters:
 
-* _Area_ (`area`) : What to include in the screenshot. Options:
+* _Area_ (`area`) : What to include in the mapshot. Options:
   * `entities` [default]: Include all chunks which contain at least one entity of some interest. This should capture the base in practice.
   * `all`: All chunks.
 * _Smallest tile size_ (`tilemin`) : Indicates the number of in-game units the most detailed layer should contain per generated tile. For example, if it is set to 256 while the "Tile Resolution" is 1024, it means that the most detailed layer will use 4 pixels (=1024/256) per in-game tile. Many assets in Factorio seem to allow for up to 64 pixels per game tile - so, to have the maximum resolution, you will want to have "Smallest tile size" set to 16 (=1024/64) - careful, that is slow.
@@ -57,12 +70,17 @@ Parameters:
 
 
 ## Serving the generated content
-The mod itself does not provide any facility to serve the content. You must make the content available through a standard http server. All the content is static, so any http file server can do the trick. For example, if you go in `script-output/mapshot/<name>`, you can run a simple server using Python:
+
+The CLI can be used to serve the mapshots:
+
 ```
-python3 -m http.server 8080
+./mapshot serve
 ```
 
-You can also upload the result on your favorite web file hosting.
+By default, it serves on port 8080 - thus accessible at http://localhost:8080 if it is running on your local machine. It serves all the mapshots available in the `script-output` directory of Factorio. It provides a very basic list of available mapshots and refreshes this list every few seconds.
+
+The generated content is made of static files. This means you can also serve the content through any HTTP server (e.g., `python3 -m http.server 8080` from the `script-output` directory) or your favorite web file hosting.
+
 
 ## Development
 

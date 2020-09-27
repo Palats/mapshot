@@ -1,11 +1,15 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.0.5
   Features:
-    - Built-in HTTP server with listing of files.
+    - Built-in HTTP server with listing of available mapshots, refreshing as new one are created.
+    - Windows build.
+    - Untested MacOS build.
   CLI:
-    - Fix paths on Windows.
     - Do not look for Steam version as it does not integrate well with auto launcher.
     - Improve detection of generation completion.
+    - Windows: fixed paths.
+    - Windows: do not close the console when run from explorer.
+    - Windows: when launch from explorer with no args, run in `serve` mode as a sane default.
   Internal:
     - `go generate` runs properly on Windows.
     - Build script for releases.
