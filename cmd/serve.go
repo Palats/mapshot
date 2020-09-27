@@ -4,9 +4,12 @@ import (
 	"context"
 	"fmt"
 	"html/template"
+	"math/rand"
 	"net/http"
 	"os"
 	"path/filepath"
+	"sync"
+	"time"
 
 	"github.com/Palats/mapshot/factorio"
 	"github.com/golang/glog"
@@ -53,17 +56,56 @@ func findShots(baseDir string) ([]shotInfo, error) {
 	return shots, nil
 }
 
-func serve(ctx context.Context, factorioSettings *factorio.Settings, port int) error {
-	fact, err := factorio.New(factorioSettings)
-	if err != nil {
-		return err
-	}
-	baseDir := fact.ScriptOutput()
-	shots, err := findShots(baseDir)
-	if err != nil {
-		return err
-	}
+// Server implements a server presenting available mapshots and serving their
+// content.
+type Server struct {
+	baseDir string
 
+	m   sync.Mutex
+	mux *http.ServeMux
+}
+
+func newServer(baseDir string) *Server {
+	s := &Server{
+		baseDir: baseDir,
+	}
+	s.updateMux()
+	return s
+}
+
+// watch regularly updates the list of available maps. Current implementation is
+// the dumbest possible one - it just rescan files every few seconds and
+// recreate a completely new mux in that case.
+func (s *Server) watch(ctx context.Context) {
+	for {
+		// Update list of maps regular, with some fuzzing.
+		delay := time.Duration(8000+rand.Int63n(2000)) * time.Millisecond
+		select {
+		case <-time.After(delay):
+		case <-ctx.Done():
+			return
+		}
+		s.updateMux()
+	}
+}
+
+func (s *Server) updateMux() {
+	shots, err := findShots(s.baseDir)
+	if err != nil {
+		shots = nil
+		glog.Errorf("unable to find mapshots at %s: %v", s.baseDir, err)
+	}
+	mux := s.buildMux(shots)
+	s.m.Lock()
+	defer s.m.Unlock()
+	// Only update if reading did not fail - or if it was the first call, to
+	// make sure we always have a mux.
+	if shots != nil || s.mux == nil {
+		s.mux = mux
+	}
+}
+
+func (s *Server) buildMux(shots []shotInfo) *http.ServeMux {
 	mux := http.NewServeMux()
 
 	data := []map[string]string{}
@@ -82,10 +124,14 @@ func serve(ctx context.Context, factorioSettings *factorio.Settings, port int) e
 		}
 	})
 
-	addr := fmt.Sprintf(":%d", port)
-	fmt.Printf("Serving data from %s\n", baseDir)
-	fmt.Printf("Listening on %s ...\n", addr)
-	return http.ListenAndServe(addr, mux)
+	return mux
+}
+
+func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	s.m.Lock()
+	mux := s.mux
+	s.m.Unlock()
+	mux.ServeHTTP(w, req)
 }
 
 var indexHTML = template.Must(template.New("name").Parse(`
@@ -114,7 +160,19 @@ It serves data from Factorio script-output directory.
 	`,
 	Args: cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return serve(cmd.Context(), factorioSettings, port)
+		fact, err := factorio.New(factorioSettings)
+		if err != nil {
+			return err
+		}
+
+		baseDir := fact.ScriptOutput()
+		fmt.Printf("Serving data from %s\n", baseDir)
+		s := newServer(baseDir)
+		go s.watch(cmd.Context())
+
+		addr := fmt.Sprintf(":%d", port)
+		fmt.Printf("Listening on %s ...\n", addr)
+		return http.ListenAndServe(addr, s)
 	},
 }
 
