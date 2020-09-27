@@ -74,6 +74,21 @@ function mapshot(player, prefix, name)
     })
   end
 
+  -- Find all chart tags - aka, map labels.
+  local tags = {}
+  for _, force in pairs(game.forces) do
+    for _, tag in ipairs(force.find_chart_tags(surface, area)) do
+      table.insert(tags, {
+        force_name = force.name,
+        force_index = force.index,
+        icon = tag.icon,
+        tag_number = tag.tag_number,
+        position = tag.position,
+        text = tag.text,
+      })
+    end
+  end
+
   -- Write metadata.
   game.write_file(prefix .. "mapshot.json", game.table_to_json({
     name = name,
@@ -88,6 +103,7 @@ function mapshot(player, prefix, name)
     seed = game.default_map_gen_settings.seed,
     map_exchange = game.get_map_exchange_string(),
     stations = stations,
+    tags = tags,
   }))
 
   -- Create the serving html.
