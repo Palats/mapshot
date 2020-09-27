@@ -442,15 +442,16 @@ var FileModControlLua =
 	"  player.print(\"Mapshot '\" .. prefix .. \"' ...\")\n" +
 	"  log(\"Mapshot target \" .. prefix)\n" +
 	"\n" +
+	"  local surface = game.surfaces[\"nauvis\"]\n" +
+	"\n" +
 	"  -- Determine map min & max world coordinates based on existing chunks.\n" +
 	"  local world_min = { x = 2^30, y = 2^30 }\n" +
 	"  local world_max = { x = -2^30, y = -2^30 }\n" +
-	"  local s = game.surfaces[\"nauvis\"]\n" +
 	"  local chunk_count = 0\n" +
-	"  for chunk in s.get_chunks() do\n" +
-	"    local c = s.is_chunk_generated(chunk)\n" +
+	"  for chunk in surface.get_chunks() do\n" +
+	"    local c = surface.is_chunk_generated(chunk)\n" +
 	"    if params.area == \"entities\" then\n" +
-	"      c = c and s.count_entities_filtered({ area = chunk.area, limit = 1, type = entities.includes}) > 0\n" +
+	"      c = c and surface.count_entities_filtered({ area = chunk.area, limit = 1, type = entities.includes}) > 0\n" +
 	"    end\n" +
 	"    if c then\n" +
 	"      world_min.x = math.min(world_min.x, chunk.area.left_top.x)\n" +
@@ -466,6 +467,10 @@ var FileModControlLua =
 	"    return\n" +
 	"  end\n" +
 	"  player.print(\"Map: (\" .. world_min.x .. \", \" .. world_min.y .. \")-(\" .. world_max.x .. \", \" .. world_max.y .. \")\")\n" +
+	"  local area = {\n" +
+	"    left_top = {world_min.x, world_min.y},\n" +
+	"    right_bottom = {world_max.x, world_max.y},\n" +
+	"  }\n" +
 	"\n" +
 	"  -- Range of tiles to render, in power of 2.\n" +
 	"  local tile_range_min = math.log(params.tilemin, 2)\n" +
@@ -473,6 +478,15 @@ var FileModControlLua =
 	"\n" +
 	"  -- Size of a tile, in pixels.\n" +
 	"  local render_size = params.resolution\n" +
+	"\n" +
+	"  -- Find train stations\n" +
+	"  local stations = {}\n" +
+	"  for _, ent in ipairs(surface.find_entities_filtered({area=area, name=\"train-stop\"})) do\n" +
+	"    table.insert(stations, {\n" +
+	"      backer_name = ent.backer_name,\n" +
+	"      bounding_box = ent.bounding_box,\n" +
+	"    })\n" +
+	"  end\n" +
 	"\n" +
 	"  -- Write metadata.\n" +
 	"  game.write_file(prefix .. \"mapshot.json\", game.table_to_json({\n" +
@@ -487,6 +501,7 @@ var FileModControlLua =
 	"    zoom_max = tile_range_max - tile_range_min,\n" +
 	"    seed = game.default_map_gen_settings.seed,\n" +
 	"    map_exchange = game.get_map_exchange_string(),\n" +
+	"    stations = stations,\n" +
 	"  }))\n" +
 	"\n" +
 	"  -- Create the serving html.\n" +
@@ -758,6 +773,13 @@ var FileModGeneratedLua =
 	"          );\n" +
 	"        };\n" +
 	"\n" +
+	"        const midPointToLatLng = function (bbox) {\n" +
+	"          return worldToLatLng(\n" +
+	"            (bbox.left_top.x + bbox.right_bottom.x) / 2,\n" +
+	"            (bbox.left_top.y + bbox.right_bottom.y) / 2,\n" +
+	"          );\n" +
+	"        }\n" +
+	"\n" +
 	"        const baseLayer = L.tileLayer(path + \"zoom_{z}/tile_{x}_{y}.jpg\", {\n" +
 	"          tileSize: info.render_size,\n" +
 	"          bounds: L.latLngBounds(\n" +
@@ -784,12 +806,26 @@ var FileModGeneratedLua =
 	"` }),\n" +
 	"        ]);\n" +
 	"\n" +
+	"        let stations = [];\n" +
+	"        if (info.stations) {\n" +
+	"          for (const station of info.stations) {\n" +
+	"            stations.push(L.marker(\n" +
+	"              midPointToLatLng(station.bounding_box),\n" +
+	"              { title: station.backer_name },\n" +
+	"            ).bindTooltip(station.backer_name, { permanent: true }))\n" +
+	"          }\n" +
+	"        }\n" +
+	"        const stationsLayer = L.layerGroup(stations);\n" +
+	"\n" +
 	"        const mymap = L.map('map', {\n" +
 	"          crs: L.CRS.Simple,\n" +
 	"          layers: [baseLayer],\n" +
 	"        });\n" +
 	"\n" +
-	"        L.control.layers({/* Only one default base layer */ }, { \"Debug\": debugLayer }).addTo(mymap);\n" +
+	"        L.control.layers({/* Only one default base layer */ }, {\n" +
+	"          \"Train stations\": stationsLayer,\n" +
+	"          \"Debug\": debugLayer,\n" +
+	"        }).addTo(mymap);\n" +
 	"\n" +
 	"        mymap.setView([0, 0], 0);\n" +
 	"      });\n" +

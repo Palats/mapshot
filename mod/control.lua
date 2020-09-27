@@ -28,15 +28,16 @@ function mapshot(player, prefix, name)
   player.print("Mapshot '" .. prefix .. "' ...")
   log("Mapshot target " .. prefix)
 
+  local surface = game.surfaces["nauvis"]
+
   -- Determine map min & max world coordinates based on existing chunks.
   local world_min = { x = 2^30, y = 2^30 }
   local world_max = { x = -2^30, y = -2^30 }
-  local s = game.surfaces["nauvis"]
   local chunk_count = 0
-  for chunk in s.get_chunks() do
-    local c = s.is_chunk_generated(chunk)
+  for chunk in surface.get_chunks() do
+    local c = surface.is_chunk_generated(chunk)
     if params.area == "entities" then
-      c = c and s.count_entities_filtered({ area = chunk.area, limit = 1, type = entities.includes}) > 0
+      c = c and surface.count_entities_filtered({ area = chunk.area, limit = 1, type = entities.includes}) > 0
     end
     if c then
       world_min.x = math.min(world_min.x, chunk.area.left_top.x)
@@ -52,6 +53,10 @@ function mapshot(player, prefix, name)
     return
   end
   player.print("Map: (" .. world_min.x .. ", " .. world_min.y .. ")-(" .. world_max.x .. ", " .. world_max.y .. ")")
+  local area = {
+    left_top = {world_min.x, world_min.y},
+    right_bottom = {world_max.x, world_max.y},
+  }
 
   -- Range of tiles to render, in power of 2.
   local tile_range_min = math.log(params.tilemin, 2)
@@ -59,6 +64,15 @@ function mapshot(player, prefix, name)
 
   -- Size of a tile, in pixels.
   local render_size = params.resolution
+
+  -- Find train stations
+  local stations = {}
+  for _, ent in ipairs(surface.find_entities_filtered({area=area, name="train-stop"})) do
+    table.insert(stations, {
+      backer_name = ent.backer_name,
+      bounding_box = ent.bounding_box,
+    })
+  end
 
   -- Write metadata.
   game.write_file(prefix .. "mapshot.json", game.table_to_json({
@@ -73,6 +87,7 @@ function mapshot(player, prefix, name)
     zoom_max = tile_range_max - tile_range_min,
     seed = game.default_map_gen_settings.seed,
     map_exchange = game.get_map_exchange_string(),
+    stations = stations,
   }))
 
   -- Create the serving html.
