@@ -1,5 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.0.5
+Date: 2020.09.27
   Features:
     - Built-in HTTP server with listing of available mapshots, refreshing as new one are created.
     - Windows build.

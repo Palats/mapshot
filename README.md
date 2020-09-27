@@ -20,7 +20,7 @@ The Factorio mod can be installed like any other mod from the Factorio UI.
 The optional CLI is used for serving generated mapshots and generating mapshots from outside the game. The standalone binaries can be downloaded from https://github.com/Palats/mapshot/releases; then:
 
  * Linux: Mark as executable if needed and run - this is a standard command line tool.
- * Windows: For convenience, if `.exe` file is launched directly from Explorer, it will automatically start the serving mode. Otherwise, you need a way to give the tool parameters - either by launching it from the `cmd` console, or by creating a shortcut (with extra parameters in the properties).
+ * Windows: For convenience, if the `.exe` file is launched directly from Explorer, it will automatically start the serving mode. Otherwise, you need a way to give the tool parameters - either by launching it from the `cmd` console, or by creating a shortcut (with extra parameters in the properties).
  * MacOS: A binary is provided ("darwin" version), but is completely untested as I have no access to a MacOS system.
 
 

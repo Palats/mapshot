@@ -2,7 +2,7 @@
 package embed
 
 // Version of the mod
-var Version = "0.0.4"
+var Version = "0.0.5"
 
 // FileLicense is file "LICENSE"
 var FileLicense =
@@ -237,9 +237,9 @@ var FileReadmeMd =
 	"naries can be downloaded from https://github.com/Palats/mapshot/releases; then:\n" +
 	"\n" +
 	" * Linux: Mark as executable if needed and run - this is a standard command line tool.\n" +
-	" * Windows: For convenience, if `.exe` file is launched directly from Explorer, it will automatically start the serving " + // cont.
-	"mode. Otherwise, you need a way to give the tool parameters - either by launching it from the `cmd` console, or by creat" + // cont.
-	"ing a shortcut (with extra parameters in the properties).\n" +
+	" * Windows: For convenience, if the `.exe` file is launched directly from Explorer, it will automatically start the serv" + // cont.
+	"ing mode. Otherwise, you need a way to give the tool parameters - either by launching it from the `cmd` console, or by c" + // cont.
+	"reating a shortcut (with extra parameters in the properties).\n" +
 	" * MacOS: A binary is provided (\"darwin\" version), but is completely untested as I have no access to a MacOS system.\n" +
 	"\n" +
 	"\n" +
@@ -359,6 +359,7 @@ var FileReadmeMd =
 var FileChangelogTxt =
 	"---------------------------------------------------------------------------------------------------\n" +
 	"Version: 0.0.5\n" +
+	"Date: 2020.09.27\n" +
 	"  Features:\n" +
 	"    - Built-in HTTP server with listing of available mapshots, refreshing as new one are created.\n" +
 	"    - Windows build.\n" +
@@ -803,7 +804,7 @@ var FileModGeneratedLua =
 var FileModInfoJSON =
 	"{\n" +
 	"  \"name\": \"mapshot\",\n" +
-	"  \"version\": \"0.0.4\",\n" +
+	"  \"version\": \"0.0.5\",\n" +
 	"  \"title\": \"Mapshot\",\n" +
 	"  \"author\": \"pierre@palatin.fr\",\n" +
 	"  \"factorio_version\": \"1.0\",\n" +
