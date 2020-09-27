@@ -83,6 +83,17 @@ data.html = [==[
         }
         const stationsLayer = L.layerGroup(stations);
 
+        let tags = [];
+        if (info.tags) {
+          for (const tag of info.tags) {
+            tags.push(L.marker(
+              worldToLatLng(tag.position.x, tag.position.y),
+              { title: `${tag.force_name}: ${tag.text}` },
+            ).bindTooltip(tag.text, { permanent: true }))
+          }
+        }
+        const tagsLayer = L.layerGroup(tags);
+
         const mymap = L.map('map', {
           crs: L.CRS.Simple,
           layers: [baseLayer],
@@ -90,6 +101,7 @@ data.html = [==[
 
         L.control.layers({/* Only one default base layer */ }, {
           "Train stations": stationsLayer,
+          "Tags": tagsLayer,
           "Debug": debugLayer,
         }).addTo(mymap);
 

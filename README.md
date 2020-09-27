@@ -9,6 +9,8 @@ They can be created in 2 ways:
 
 The generated zoomable screenshots can be explored through a web browser, using the CLI tool to serve them. As those mapshots are exported as static files (html, javascript, jpg), they can also be served through any HTTP server - see below.
 
+Some simple layers are generated - currently it is possible to show train stations and map labels (chart tags).
+
 ***Warning: Generation can take quite a while. Factorio UI will appear frozen during that time; this is normal.***
 
 See https://github.com/Palats/mapshot for more details.
@@ -109,7 +111,7 @@ By default, it will show the help, including all the available subcommands.
 * Update changelog
 * Update version in: `changelog.txt` (incl. date), `info.json`
 * Regenerate files: `go generate ./...`
+* Test build release: `./build.sh`
 * Commit and push
-* Build release: `./build.sh`
 * Create release in Github
 * Update Factorio mods portal (new zip, update doc)

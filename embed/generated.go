@@ -2,7 +2,7 @@
 package embed
 
 // Version of the mod
-var Version = "0.0.5"
+var Version = "0.0.6"
 
 // FileLicense is file "LICENSE"
 var FileLicense =
@@ -225,6 +225,8 @@ var FileReadmeMd =
 	"shots are exported as static files (html, javascript, jpg), they can also be served through any HTTP server - see below." + // cont.
 	"\n" +
 	"\n" +
+	"Some simple layers are generated - currently it is possible to show train stations and map labels (chart tags).\n" +
+	"\n" +
 	"***Warning: Generation can take quite a while. Factorio UI will appear frozen during that time; this is normal.***\n" +
 	"\n" +
 	"See https://github.com/Palats/mapshot for more details.\n" +
@@ -358,6 +360,12 @@ var FileReadmeMd =
 // FileChangelogTxt is file "changelog.txt"
 var FileChangelogTxt =
 	"---------------------------------------------------------------------------------------------------\n" +
+	"Version: 0.0.6\n" +
+	"Date: 2020.09.27\n" +
+	"  Features:\n" +
+	"    - Generate layer with train stations.\n" +
+	"    - Generate layer with chart tags (aka, map labels).\n" +
+	"---------------------------------------------------------------------------------------------------\n" +
 	"Version: 0.0.5\n" +
 	"Date: 2020.09.27\n" +
 	"  Features:\n" +
@@ -488,6 +496,21 @@ var FileModControlLua =
 	"    })\n" +
 	"  end\n" +
 	"\n" +
+	"  -- Find all chart tags - aka, map labels.\n" +
+	"  local tags = {}\n" +
+	"  for _, force in pairs(game.forces) do\n" +
+	"    for _, tag in ipairs(force.find_chart_tags(surface, area)) do\n" +
+	"      table.insert(tags, {\n" +
+	"        force_name = force.name,\n" +
+	"        force_index = force.index,\n" +
+	"        icon = tag.icon,\n" +
+	"        tag_number = tag.tag_number,\n" +
+	"        position = tag.position,\n" +
+	"        text = tag.text,\n" +
+	"      })\n" +
+	"    end\n" +
+	"  end\n" +
+	"\n" +
 	"  -- Write metadata.\n" +
 	"  game.write_file(prefix .. \"mapshot.json\", game.table_to_json({\n" +
 	"    name = name,\n" +
@@ -502,6 +525,7 @@ var FileModControlLua =
 	"    seed = game.default_map_gen_settings.seed,\n" +
 	"    map_exchange = game.get_map_exchange_string(),\n" +
 	"    stations = stations,\n" +
+	"    tags = tags,\n" +
 	"  }))\n" +
 	"\n" +
 	"  -- Create the serving html.\n" +
@@ -817,6 +841,17 @@ var FileModGeneratedLua =
 	"        }\n" +
 	"        const stationsLayer = L.layerGroup(stations);\n" +
 	"\n" +
+	"        let tags = [];\n" +
+	"        if (info.tags) {\n" +
+	"          for (const tag of info.tags) {\n" +
+	"            tags.push(L.marker(\n" +
+	"              worldToLatLng(tag.position.x, tag.position.y),\n" +
+	"              { title: `${tag.force_name}: ${tag.text}` },\n" +
+	"            ).bindTooltip(tag.text, { permanent: true }))\n" +
+	"          }\n" +
+	"        }\n" +
+	"        const tagsLayer = L.layerGroup(tags);\n" +
+	"\n" +
 	"        const mymap = L.map('map', {\n" +
 	"          crs: L.CRS.Simple,\n" +
 	"          layers: [baseLayer],\n" +
@@ -824,6 +859,7 @@ var FileModGeneratedLua =
 	"\n" +
 	"        L.control.layers({/* Only one default base layer */ }, {\n" +
 	"          \"Train stations\": stationsLayer,\n" +
+	"          \"Tags\": tagsLayer,\n" +
 	"          \"Debug\": debugLayer,\n" +
 	"        }).addTo(mymap);\n" +
 	"\n" +
@@ -840,7 +876,7 @@ var FileModGeneratedLua =
 var FileModInfoJSON =
 	"{\n" +
 	"  \"name\": \"mapshot\",\n" +
-	"  \"version\": \"0.0.5\",\n" +
+	"  \"version\": \"0.0.6\",\n" +
 	"  \"title\": \"Mapshot\",\n" +
 	"  \"author\": \"pierre@palatin.fr\",\n" +
 	"  \"factorio_version\": \"1.0\",\n" +
