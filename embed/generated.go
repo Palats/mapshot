@@ -409,7 +409,9 @@ var FileModControlLua =
 	"end\n" +
 	"\n" +
 	"-- Generate a full map screenshot.\n" +
-	"function mapshot(player, prefix)\n" +
+	"-- prefix: path where to save the shot.\n" +
+	"-- name: a name for the shot, saved in mapshot.json.\n" +
+	"function mapshot(player, prefix, name)\n" +
 	"  player.print(\"Mapshot '\" .. prefix .. \"' ...\")\n" +
 	"  log(\"Mapshot target \" .. prefix)\n" +
 	"\n" +
@@ -447,6 +449,8 @@ var FileModControlLua =
 	"\n" +
 	"  -- Write metadata.\n" +
 	"  game.write_file(prefix .. \"mapshot.json\", game.table_to_json({\n" +
+	"    name = name,\n" +
+	"    tick = game.tick,\n" +
 	"    tile_size = math.pow(2, tile_range_max),\n" +
 	"    render_size = render_size,\n" +
 	"    world_min = world_min,\n" +
@@ -454,6 +458,8 @@ var FileModControlLua =
 	"    player = player.position,\n" +
 	"    zoom_min = 0,\n" +
 	"    zoom_max = tile_range_max - tile_range_min,\n" +
+	"    seed = game.default_map_gen_settings.seed,\n" +
+	"    map_exchange = game.get_map_exchange_string(),\n" +
 	"  }))\n" +
 	"\n" +
 	"  -- Create the serving html.\n" +
@@ -517,7 +523,7 @@ var FileModControlLua =
 	"    log(\"onstartup requested id=\" .. params.onstartup)\n" +
 	"    local name = params.shotname .. \"-\" .. evt.tick\n" +
 	"    local prefix = params.prefix .. name .. \"/\"\n" +
-	"    mapshot(player, prefix)\n" +
+	"    mapshot(player, prefix, params.shotname)\n" +
 	"\n" +
 	"    -- Write the `done` marker on the next tick - that seems to be\n" +
 	"    -- enough to guarantee ordering. Otherwise, the `done` file might\n" +
@@ -545,7 +551,7 @@ var FileModControlLua =
 	"    name = evt.parameter\n" +
 	"  end\n" +
 	"  local prefix = params.prefix .. name .. \"/\"\n" +
-	"  mapshot(player, params.prefix .. name .. \"/\")\n" +
+	"  mapshot(player, params.prefix .. name .. \"/\", name)\n" +
 	"end)" +
 	""
 // FileModEntitiesLua is file "mod/entities.lua"

@@ -22,7 +22,9 @@ function update_params(player)
 end
 
 -- Generate a full map screenshot.
-function mapshot(player, prefix)
+-- prefix: path where to save the shot.
+-- name: a name for the shot, saved in mapshot.json.
+function mapshot(player, prefix, name)
   player.print("Mapshot '" .. prefix .. "' ...")
   log("Mapshot target " .. prefix)
 
@@ -60,6 +62,8 @@ function mapshot(player, prefix)
 
   -- Write metadata.
   game.write_file(prefix .. "mapshot.json", game.table_to_json({
+    name = name,
+    tick = game.tick,
     tile_size = math.pow(2, tile_range_max),
     render_size = render_size,
     world_min = world_min,
@@ -67,6 +71,8 @@ function mapshot(player, prefix)
     player = player.position,
     zoom_min = 0,
     zoom_max = tile_range_max - tile_range_min,
+    seed = game.default_map_gen_settings.seed,
+    map_exchange = game.get_map_exchange_string(),
   }))
 
   -- Create the serving html.
@@ -129,7 +135,7 @@ script.on_event(defines.events.on_tick, function(evt)
     log("onstartup requested id=" .. params.onstartup)
     local name = params.shotname .. "-" .. evt.tick
     local prefix = params.prefix .. name .. "/"
-    mapshot(player, prefix)
+    mapshot(player, prefix, params.shotname)
 
     -- Write the `done` marker on the next tick - that seems to be
     -- enough to guarantee ordering. Otherwise, the `done` file might
@@ -157,5 +163,5 @@ commands.add_command("mapshot", "screenshot the whole map", function(evt)
     name = evt.parameter
   end
   local prefix = params.prefix .. name .. "/"
-  mapshot(player, params.prefix .. name .. "/")
+  mapshot(player, params.prefix .. name .. "/", name)
 end)
