@@ -2,7 +2,7 @@
 package embed
 
 // Version of the mod
-var Version = "0.0.6"
+var Version = "0.0.7"
 
 // FileLicense is file "LICENSE"
 var FileLicense =
@@ -352,13 +352,18 @@ var FileReadmeMd =
 	"* Update changelog\n" +
 	"* Update version in: `changelog.txt` (incl. date), `info.json`\n" +
 	"* Regenerate files: `go generate ./...`\n" +
+	"* Test build release: `./build.sh`\n" +
 	"* Commit and push\n" +
-	"* Build release: `./build.sh`\n" +
 	"* Create release in Github\n" +
 	"* Update Factorio mods portal (new zip, update doc)" +
 	""
 // FileChangelogTxt is file "changelog.txt"
 var FileChangelogTxt =
+	"---------------------------------------------------------------------------------------------------\n" +
+	"Version: 0.0.7\n" +
+	"Date: 2020.09.30\n" +
+	"  Bug:\n" +
+	"    - Fix breakage when no tags / train stations are present (https://github.com/Palats/mapshot/issues/1).\n" +
 	"---------------------------------------------------------------------------------------------------\n" +
 	"Version: 0.0.6\n" +
 	"Date: 2020.09.27\n" +
@@ -789,6 +794,15 @@ var FileModGeneratedLua =
 	"      .then(info => {\n" +
 	"        console.log(\"Map info\", info);\n" +
 	"\n" +
+	"        const iterable = function (obj) {\n" +
+	"          // falsy value is javascript includes empty string, which is iterable,\n" +
+	"          // so we cannot just check if the value is truthy.\n" +
+	"          if (obj === null || obj === undefined) {\n" +
+	"            return false;\n" +
+	"          }\n" +
+	"          return typeof obj[Symbol.iterator] === \"function\";\n" +
+	"        }\n" +
+	"\n" +
 	"        const worldToLatLng = function (x, y) {\n" +
 	"          const ratio = info.render_size / info.tile_size;\n" +
 	"          return L.latLng(\n" +
@@ -831,7 +845,7 @@ var FileModGeneratedLua =
 	"        ]);\n" +
 	"\n" +
 	"        let stations = [];\n" +
-	"        if (info.stations) {\n" +
+	"        if (iterable(info.stations)) {\n" +
 	"          for (const station of info.stations) {\n" +
 	"            stations.push(L.marker(\n" +
 	"              midPointToLatLng(station.bounding_box),\n" +
@@ -842,7 +856,7 @@ var FileModGeneratedLua =
 	"        const stationsLayer = L.layerGroup(stations);\n" +
 	"\n" +
 	"        let tags = [];\n" +
-	"        if (info.tags) {\n" +
+	"        if (iterable(info.tags)) {\n" +
 	"          for (const tag of info.tags) {\n" +
 	"            tags.push(L.marker(\n" +
 	"              worldToLatLng(tag.position.x, tag.position.y),\n" +
@@ -876,7 +890,7 @@ var FileModGeneratedLua =
 var FileModInfoJSON =
 	"{\n" +
 	"  \"name\": \"mapshot\",\n" +
-	"  \"version\": \"0.0.6\",\n" +
+	"  \"version\": \"0.0.7\",\n" +
 	"  \"title\": \"Mapshot\",\n" +
 	"  \"author\": \"pierre@palatin.fr\",\n" +
 	"  \"factorio_version\": \"1.0\",\n" +

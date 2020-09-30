@@ -35,6 +35,15 @@ data.html = [==[
       .then(info => {
         console.log("Map info", info);
 
+        const iterable = function (obj) {
+          // falsy value is javascript includes empty string, which is iterable,
+          // so we cannot just check if the value is truthy.
+          if (obj === null || obj === undefined) {
+            return false;
+          }
+          return typeof obj[Symbol.iterator] === "function";
+        }
+
         const worldToLatLng = function (x, y) {
           const ratio = info.render_size / info.tile_size;
           return L.latLng(
@@ -73,7 +82,7 @@ data.html = [==[
         ]);
 
         let stations = [];
-        if (info.stations) {
+        if (iterable(info.stations)) {
           for (const station of info.stations) {
             stations.push(L.marker(
               midPointToLatLng(station.bounding_box),
@@ -84,7 +93,7 @@ data.html = [==[
         const stationsLayer = L.layerGroup(stations);
 
         let tags = [];
-        if (info.tags) {
+        if (iterable(info.tags)) {
           for (const tag of info.tags) {
             tags.push(L.marker(
               worldToLatLng(tag.position.x, tag.position.y),
