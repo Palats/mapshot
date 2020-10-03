@@ -1,5 +1,7 @@
 -- Automatically generated, do not modify
 local data = {}
+data.version = "0.0.7"
+data.version_hash = "fa1dc6656cf695c5f3e5c65730b68b6223896198a5397dd1263131028210e713"
 data.html = [==[
 <html>
 

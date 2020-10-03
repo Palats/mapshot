@@ -1,11 +1,16 @@
 // +build ignore
 
 // Regenerate the mod data for embedding in Go/Lua.
+// Coding style is very direct - this is a short regen script, errors are
+// directly fatal.
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"hash"
 	"io/ioutil"
 	"log"
 	"os"
@@ -42,12 +47,7 @@ func getVersion() string {
 	return version
 }
 
-func genLua() {
-	raw, err := ioutil.ReadFile("viewer.html")
-	if err != nil {
-		log.Fatal(err)
-	}
-	content := string(raw)
+func genLua(content, version, versionHash string) {
 	if strings.Contains(content, "]==]") {
 		log.Fatal("dumb Lua encoding cannot proceed")
 	}
@@ -66,6 +66,8 @@ func genLua() {
 
 	writeLn("-- Automatically generated, do not modify")
 	writeLn("local data = {}")
+	writeLn(fmt.Sprintf("data.version = %q", version))
+	writeLn(fmt.Sprintf("data.version_hash = %q", versionHash))
 	writeLn("data.html = [==[")
 	// This blindly copy the file content. As both the source and target files
 	// are text file, they will preserve the end-of-lines.
@@ -91,22 +93,10 @@ func filenameToVar(fname string) string {
 		}
 		s += p
 	}
-	return s
+	return "File" + s
 }
 
-type fileInfo struct {
-	isText bool
-	// The file path to read the file.
-	localPath string
-	// Path to the file using slashes on all platforms.
-	genericPath string
-	// The key in the generated array of embedded file.
-	key string
-	// The variable containing the data in the generated content.
-	varName string
-}
-
-func genGo(version string) {
+func genGo(modFiles map[string]string, version string, versionHash string) {
 	f, err := os.Create("embed/generated.go")
 	if err != nil {
 		log.Fatal(err)
@@ -125,57 +115,22 @@ func genGo(version string) {
 	writeLn("// Version of the mod")
 	writeLn(fmt.Sprintf("var Version = %q", version))
 	writeLn("")
+	writeLn("// VersionHash is a hash of the mod content")
+	writeLn(fmt.Sprintf("var VersionHash = %q", versionHash))
+	writeLn("")
 
-	// https://stackoverflow.com/a/34863211
-
-	// modFiles is a list of globs to include. Boolean value is true if file is text.
-	var modFiles = map[string]bool{
-		"mod/*.lua":     true,
-		"mod/info.json": true,
-		"changelog.txt": true,
-		"LICENSE":       true,
-		"README.md":     true,
-		"thumbnail.png": false,
+	var filenames []string
+	for filename := range modFiles {
+		filenames = append(filenames, filename)
 	}
+	sort.Strings(filenames)
 
-	var files []fileInfo
-	for glob, isText := range modFiles {
-		matches, err := filepath.Glob(glob)
-		if err != nil {
-			log.Fatal(err)
-		}
-		for _, m := range matches {
-			info := fileInfo{
-				isText:      isText,
-				localPath:   m,
-				genericPath: filepath.ToSlash(m),
-				// Remove subpaths - this is used to generate the mod files, which is
-				// flat structure.
-				key:     filepath.Base(m),
-				varName: "File" + filenameToVar(m),
-			}
-			files = append(files, info)
-		}
-	}
+	for _, filename := range filenames {
+		content := modFiles[filename]
+		varName := filenameToVar(filename)
 
-	sort.Slice(files, func(i, j int) bool {
-		return files[i].key < files[j].key
-	})
-
-	for _, info := range files {
-		data, err := ioutil.ReadFile(info.localPath)
-		if err != nil {
-			log.Fatal(err)
-		}
-		content := string(data)
-		if info.isText && textEOL != "\n" {
-			// For text files, we want to keep the embedded data always in
-			// '\n' format.
-			content = strings.ReplaceAll(content, textEOL, "\n")
-		}
-
-		writeLn(fmt.Sprintf("// %s is file %q", info.varName, info.genericPath))
-		writeLn(fmt.Sprintf("var %s =", info.varName))
+		writeLn(fmt.Sprintf("// %s is file %q", varName, filepath.ToSlash(filename)))
+		writeLn(fmt.Sprintf("var %s =", varName))
 
 		for _, line := range strings.SplitAfter(content, "\n") {
 			for len(line) > 120 {
@@ -190,10 +145,75 @@ func genGo(version string) {
 
 	writeLn("// ModFiles is the list of files for the Factorio mod.")
 	writeLn("var ModFiles = map[string]string{")
-	for _, info := range files {
-		writeLn(fmt.Sprintf("\t%q: %s,", info.key, info.varName))
+	for _, filename := range filenames {
+		// Remove subpaths - this is used to generate the mod files, which is
+		// flat structure.
+		writeLn(fmt.Sprintf("\t%q: %s,", filepath.Base(filename), filenameToVar(filename)))
 	}
 	writeLn("}")
+}
+
+type Loader struct {
+	hash    hash.Hash
+	ignores map[string]bool
+}
+
+func newLoader(ignores []string) *Loader {
+	l := &Loader{
+		ignores: make(map[string]bool),
+		hash:    sha256.New(),
+	}
+	for _, i := range ignores {
+		l.ignores[i] = true
+	}
+	return l
+}
+
+func (l *Loader) record(filename string, content []byte) {
+	if l.ignores[filepath.Base(filename)] {
+		return
+	}
+	l.hash.Write(content)
+}
+
+func (l *Loader) LoadTextFile(filename string) string {
+	data, err := ioutil.ReadFile(filename)
+	if err != nil {
+		log.Fatal(err)
+	}
+	content := string(data)
+	if textEOL != "\n" {
+		// For text files, we want to keep the embedded data always in
+		// '\n' format.
+		content = strings.ReplaceAll(content, textEOL, "\n")
+	}
+	l.record(filename, []byte(data))
+	return content
+}
+
+func (l *Loader) LoadBinaryFile(filename string) []byte {
+	data, err := ioutil.ReadFile(filename)
+	if err != nil {
+		log.Fatal(err)
+	}
+	l.record(filename, data)
+	return data
+}
+
+func (l *Loader) LoadTextGlob(glob string) map[string]string {
+	files := make(map[string]string)
+	matches, err := filepath.Glob(glob)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, m := range matches {
+		files[m] = l.LoadTextFile(m)
+	}
+	return files
+}
+
+func (l *Loader) VersionHash() string {
+	return hex.EncodeToString(l.hash.Sum(nil))
 }
 
 func main() {
@@ -202,8 +222,31 @@ func main() {
 	// containing the statement - which is mapshot.go, at the base of the
 	// repository.
 
+	// Parameter is the list of file to ignore when creating the hash. Those
+	// files are themselves generated, so reading them would create an unstable
+	// hash.
+	loader := newLoader([]string{"generated.lua"})
+	viewerHTML := loader.LoadTextFile("viewer.html")
+
+	modFiles := loader.LoadTextGlob("mod/*.lua")
+	modFiles["thumbnail.png"] = string(loader.LoadBinaryFile("thumbnail.png"))
+	textfiles := []string{
+		"mod/info.json",
+		"changelog.txt",
+		"LICENSE",
+		"README.md",
+		"thumbnail.png",
+	}
+	for _, filename := range textfiles {
+		modFiles[filename] = loader.LoadTextFile(filename)
+	}
+
 	version := getVersion()
+	versionHash := loader.VersionHash()
+	fmt.Println("Version:", version)
+	fmt.Println("Version hash:", versionHash)
+
 	// Generate Lua file first as it will be embedded also in Go module files.
-	genLua()
-	genGo(version)
+	genLua(viewerHTML, version, versionHash)
+	genGo(modFiles, version, versionHash)
 }

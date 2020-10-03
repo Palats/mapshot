@@ -4,6 +4,9 @@ package embed
 // Version of the mod
 var Version = "0.0.7"
 
+// VersionHash is a hash of the mod content
+var VersionHash = "fa1dc6656cf695c5f3e5c65730b68b6223896198a5397dd1263131028210e713"
+
 // FileLicense is file "LICENSE"
 var FileLicense =
 	"                                 Apache License\n" +
@@ -769,6 +772,8 @@ var FileModEntitiesLua =
 var FileModGeneratedLua =
 	"-- Automatically generated, do not modify\n" +
 	"local data = {}\n" +
+	"data.version = \"0.0.7\"\n" +
+	"data.version_hash = \"fa1dc6656cf695c5f3e5c65730b68b6223896198a5397dd1263131028210e713\"\n" +
 	"data.html = [==[\n" +
 	"<html>\n" +
 	"\n" +
