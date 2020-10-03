@@ -168,11 +168,16 @@ script.on_event(defines.events.on_tick, function(evt)
     local prefix = params.prefix .. name .. "/"
     mapshot(player, prefix, params.shotname)
 
-    -- Write the `done` marker on the next tick - that seems to be
-    -- enough to guarantee ordering. Otherwise, the `done` file might
-    -- be written before the screenshots, leading to killing Factorio
-    -- too early. On Linux, using signal Interrupt helps a lot, but
-    -- that does not guarantee it - and it is not available on Windows.
+    -- Ensure that screen shots are written before marking as done.
+    game.set_wait_for_screenshots_to_finish()
+
+    -- When set_wait_for_screenshots_to_finish was not used, the `done` file was
+    -- be written before the screenshots, leading to killing Factorio too early.
+    -- On Linux, using signal Interrupt helped a lot, but that did not guarantee
+    -- it - and it is not available on Windows. Writing the `done` marker on the
+    -- next tick seemed enough to guarantee ordering. Now
+    -- set_wait_for_screenshots_to_finish is used, this is likely unnecessary -
+    -- but before removing it, more testing is needed.
     script.on_event(defines.events.on_tick, function(evt)
       log("marking as done @" .. evt.tick)
       script.on_event(defines.events.on_tick, nil)

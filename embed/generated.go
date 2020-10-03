@@ -360,6 +360,10 @@ var FileReadmeMd =
 // FileChangelogTxt is file "changelog.txt"
 var FileChangelogTxt =
 	"---------------------------------------------------------------------------------------------------\n" +
+	"Version: 0.0.8\n" +
+	"  CLI:\n" +
+	"    - Add more directories where to find Factorio.\n" +
+	"---------------------------------------------------------------------------------------------------\n" +
 	"Version: 0.0.7\n" +
 	"Date: 2020.09.30\n" +
 	"  Bug:\n" +
@@ -596,11 +600,16 @@ var FileModControlLua =
 	"    local prefix = params.prefix .. name .. \"/\"\n" +
 	"    mapshot(player, prefix, params.shotname)\n" +
 	"\n" +
-	"    -- Write the `done` marker on the next tick - that seems to be\n" +
-	"    -- enough to guarantee ordering. Otherwise, the `done` file might\n" +
-	"    -- be written before the screenshots, leading to killing Factorio\n" +
-	"    -- too early. On Linux, using signal Interrupt helps a lot, but\n" +
-	"    -- that does not guarantee it - and it is not available on Windows.\n" +
+	"    -- Ensure that screen shots are written before marking as done.\n" +
+	"    game.set_wait_for_screenshots_to_finish()\n" +
+	"\n" +
+	"    -- When set_wait_for_screenshots_to_finish was not used, the `done` file was\n" +
+	"    -- be written before the screenshots, leading to killing Factorio too early.\n" +
+	"    -- On Linux, using signal Interrupt helped a lot, but that did not guarantee\n" +
+	"    -- it - and it is not available on Windows. Writing the `done` marker on the\n" +
+	"    -- next tick seemed enough to guarantee ordering. Now\n" +
+	"    -- set_wait_for_screenshots_to_finish is used, this is likely unnecessary -\n" +
+	"    -- but before removing it, more testing is needed.\n" +
 	"    script.on_event(defines.events.on_tick, function(evt)\n" +
 	"      log(\"marking as done @\" .. evt.tick)\n" +
 	"      script.on_event(defines.events.on_tick, nil)\n" +
