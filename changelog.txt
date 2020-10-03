@@ -2,6 +2,7 @@
 Version: 0.0.8
   CLI:
     - Add more directories where to find Factorio.
+    - Have `dev` command always show Factorio output.
 ---------------------------------------------------------------------------------------------------
 Version: 0.0.7
 Date: 2020.09.30

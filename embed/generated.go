@@ -363,6 +363,7 @@ var FileChangelogTxt =
 	"Version: 0.0.8\n" +
 	"  CLI:\n" +
 	"    - Add more directories where to find Factorio.\n" +
+	"    - Have `dev` command always show Factorio output.\n" +
 	"---------------------------------------------------------------------------------------------------\n" +
 	"Version: 0.0.7\n" +
 	"Date: 2020.09.30\n" +

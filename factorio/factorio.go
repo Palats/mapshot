@@ -64,6 +64,11 @@ func New(s *Settings) (*Factorio, error) {
 	}, nil
 }
 
+// ForceVerbose set verbose to true.
+func (f *Factorio) ForceVerbose() {
+	f.verbose = true
+}
+
 // DataDir returns the place where saves, mods and others are located.
 func (f *Factorio) DataDir() string {
 	return f.datadir

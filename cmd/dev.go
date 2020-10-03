@@ -16,6 +16,7 @@ func dev(ctx context.Context, factorioSettings *factorio.Settings) error {
 	if err != nil {
 		return err
 	}
+	fact.ForceVerbose()
 
 	tmpdir, cleanup := getWorkDir()
 	defer cleanup()
@@ -60,6 +61,8 @@ into account when Factorio reads them - i.e., when loading a save.
 
 No override file is created, beside the default one - all rendering
 parameters come from the game.
+
+Flag --factorio_verbose is forced to true.
 	`,
 	Args: cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
