@@ -234,6 +234,7 @@ func (s *Settings) Register(flags *pflag.FlagSet, prefix string) *Settings {
 func (s *Settings) DataDir() (string, error) {
 	// List is in reverse order of priority - last one will be preferred.
 	candidates := []string{
+		`/opt/factorio`,
 		`~/.factorio`,
 		`~/factorio`,
 		`~/Library/Application Support/factorio`,
@@ -279,6 +280,7 @@ func (s *Settings) Binary() (string, error) {
 	candidates := []string{
 		// Steam is a bit tricky to start/stop automatically, so ignore it for now.
 		// `~/Library/Application Support/Steam/steamapps/common/Factorio/factorio.app/Contents`,
+		`/opt/factorio/bin/x64/factorio`,
 		`~/factorio/bin/x64/factorio`,
 		`~/.factorio/bin/x64/factorio`,
 		`/Applications/factorio.app/Contents`,
