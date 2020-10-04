@@ -107,7 +107,9 @@ function mapshot(player, prefix, name)
   }))
 
   -- Create the serving html.
-  game.write_file(prefix .. "index.html", generated.html)
+  for fname, content in pairs(generated.files) do
+    game.write_file(prefix .. fname, content)
+  end
 
   -- Generate all the tiles.
   for tile_range = tile_range_max, tile_range_min, -1 do

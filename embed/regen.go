@@ -47,11 +47,7 @@ func getVersion() string {
 	return version
 }
 
-func genLua(content, version, versionHash string) {
-	if strings.Contains(content, "]==]") {
-		log.Fatal("dumb Lua encoding cannot proceed")
-	}
-
+func genLua(frontendFiles map[string]string, version, versionHash string) {
 	f, err := os.Create("mod/generated.lua")
 	if err != nil {
 		log.Fatal(err)
@@ -64,17 +60,35 @@ func genLua(content, version, versionHash string) {
 		}
 	}
 
+	var filenames []string
+	for filename := range frontendFiles {
+		filenames = append(filenames, filename)
+	}
+	sort.Strings(filenames)
+
 	writeLn("-- Automatically generated, do not modify")
 	writeLn("local data = {}")
 	writeLn(fmt.Sprintf("data.version = %q", version))
 	writeLn(fmt.Sprintf("data.version_hash = %q", versionHash))
-	writeLn("data.html = [==[")
-	// This blindly copy the file content. As both the source and target files
-	// are text file, they will preserve the end-of-lines.
-	if _, err := f.WriteString(content); err != nil {
-		log.Fatal(err)
+	writeLn("data.files = {}")
+	for _, filename := range filenames {
+		content := frontendFiles[filename]
+		// Hack while moving to generated frontend.
+		if filename == "viewer.html" {
+			filename = "index.html"
+		}
+		if strings.Contains(content, "]==]") {
+			log.Fatal("dumb Lua encoding cannot proceed")
+		}
+
+		writeLn(fmt.Sprintf("data.files[%q] = [==[", filename))
+		// This blindly copy the file content. As both the source and target files
+		// are text file, they will preserve the end-of-lines.
+		if _, err := f.WriteString(content); err != nil {
+			log.Fatal(err)
+		}
+		writeLn("]==]")
 	}
-	writeLn("]==]")
 	writeLn("return data")
 }
 
@@ -226,7 +240,8 @@ func main() {
 	// files are themselves generated, so reading them would create an unstable
 	// hash.
 	loader := newLoader([]string{"generated.lua"})
-	viewerHTML := loader.LoadTextFile("viewer.html")
+
+	frontendFiles := loader.LoadTextGlob("viewer.html")
 
 	modFiles := loader.LoadTextGlob("mod/*.lua")
 	modFiles["thumbnail.png"] = string(loader.LoadBinaryFile("thumbnail.png"))
@@ -247,6 +262,6 @@ func main() {
 	fmt.Println("Version hash:", versionHash)
 
 	// Generate Lua file first as it will be embedded also in Go module files.
-	genLua(viewerHTML, version, versionHash)
+	genLua(frontendFiles, version, versionHash)
 	genGo(modFiles, version, versionHash)
 }

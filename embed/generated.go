@@ -5,7 +5,7 @@ package embed
 var Version = "0.0.7"
 
 // VersionHash is a hash of the mod content
-var VersionHash = "fa1dc6656cf695c5f3e5c65730b68b6223896198a5397dd1263131028210e713"
+var VersionHash = "a93693e4774a9b25af5017a7fc787054fade17fd2788d9eea2808666576fbfa2"
 
 // FileLicense is file "LICENSE"
 var FileLicense =
@@ -353,7 +353,7 @@ var FileReadmeMd =
 	"### Releasing\n" +
 	"\n" +
 	"* Update changelog\n" +
-	"* Update version in: `changelog.txt` (incl. date), `info.json`\n" +
+	"* Update version in: `changelog.txt` (incl. date), `mod/info.json`, `frontend/package.json`\n" +
 	"* Regenerate files: `go generate ./...`\n" +
 	"* Test build release: `./build.sh`\n" +
 	"* Commit and push\n" +
@@ -542,7 +542,9 @@ var FileModControlLua =
 	"  }))\n" +
 	"\n" +
 	"  -- Create the serving html.\n" +
-	"  game.write_file(prefix .. \"index.html\", generated.html)\n" +
+	"  for fname, content in pairs(generated.files) do\n" +
+	"    game.write_file(prefix .. fname, content)\n" +
+	"  end\n" +
 	"\n" +
 	"  -- Generate all the tiles.\n" +
 	"  for tile_range = tile_range_max, tile_range_min, -1 do\n" +
@@ -773,8 +775,9 @@ var FileModGeneratedLua =
 	"-- Automatically generated, do not modify\n" +
 	"local data = {}\n" +
 	"data.version = \"0.0.7\"\n" +
-	"data.version_hash = \"fa1dc6656cf695c5f3e5c65730b68b6223896198a5397dd1263131028210e713\"\n" +
-	"data.html = [==[\n" +
+	"data.version_hash = \"e414d7597195ae2fd5cdaaf34bf3b9dc6206573cedd66c6af5013c5985c88e3b\"\n" +
+	"data.files = {}\n" +
+	"data.files[\"index.html\"] = [==[\n" +
 	"<html>\n" +
 	"\n" +
 	"<head>\n" +
