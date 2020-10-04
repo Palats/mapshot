@@ -109,7 +109,7 @@ By default, it will show the help, including all the available subcommands.
 ### Releasing
 
 * Update changelog
-* Update version in: `changelog.txt` (incl. date), `info.json`
+* Update version in: `changelog.txt` (incl. date), `mod/info.json`, `frontend/package.json`
 * Regenerate files: `go generate ./...`
 * Test build release: `./build.sh`
 * Commit and push
