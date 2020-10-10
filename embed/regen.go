@@ -73,15 +73,13 @@ func genLua(frontendFiles map[string]string, version, versionHash string) {
 	writeLn("data.files = {}")
 	for _, filename := range filenames {
 		content := frontendFiles[filename]
-		// Hack while moving to generated frontend.
-		if filename == "viewer.html" {
-			filename = "index.html"
-		}
 		if strings.Contains(content, "]==]") {
 			log.Fatal("dumb Lua encoding cannot proceed")
 		}
 
-		writeLn(fmt.Sprintf("data.files[%q] = [==[", filename))
+		key := filepath.Base(filename)
+
+		writeLn(fmt.Sprintf("data.files[%q] = [==[", key))
 		// This blindly copy the file content. As both the source and target files
 		// are text file, they will preserve the end-of-lines.
 		if _, err := f.WriteString(content); err != nil {
@@ -241,7 +239,8 @@ func main() {
 	// hash.
 	loader := newLoader([]string{"generated.lua"})
 
-	frontendFiles := loader.LoadTextGlob("viewer.html")
+	frontendFiles := loader.LoadTextGlob("frontend/dist/*.js")
+	frontendFiles["index.html"] = loader.LoadTextFile("frontend/dist/index.html")
 
 	modFiles := loader.LoadTextGlob("mod/*.lua")
 	modFiles["thumbnail.png"] = string(loader.LoadBinaryFile("thumbnail.png"))

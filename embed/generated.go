@@ -5,7 +5,7 @@ package embed
 var Version = "0.0.7"
 
 // VersionHash is a hash of the mod content
-var VersionHash = "a93693e4774a9b25af5017a7fc787054fade17fd2788d9eea2808666576fbfa2"
+var VersionHash = "12f1d2b0c0c914ee90a5c334b0e7d54acb87d5a9ada3e511d04c08b1ec29410c"
 
 // FileLicense is file "LICENSE"
 var FileLicense =
@@ -775,132 +775,98 @@ var FileModGeneratedLua =
 	"-- Automatically generated, do not modify\n" +
 	"local data = {}\n" +
 	"data.version = \"0.0.7\"\n" +
-	"data.version_hash = \"e414d7597195ae2fd5cdaaf34bf3b9dc6206573cedd66c6af5013c5985c88e3b\"\n" +
+	"data.version_hash = \"12f1d2b0c0c914ee90a5c334b0e7d54acb87d5a9ada3e511d04c08b1ec29410c\"\n" +
 	"data.files = {}\n" +
-	"data.files[\"index.html\"] = [==[\n" +
-	"<html>\n" +
-	"\n" +
-	"<head>\n" +
-	"  <title>Mapshot</title>\n" +
-	"  <style type=\"text/css\">\n" +
-	"    html,\n" +
-	"    body {\n" +
-	"      margin: 0;\n" +
-	"    }\n" +
-	"  </style>\n" +
-	"  <link rel=\"stylesheet\" href=\"https://unpkg.com/leaflet@1.6.0/dist/leaflet.css\"\n" +
-	"    integrity=\"sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==\"\n" +
-	"    crossorigin=\"\" />\n" +
-	"  <script src=\"https://unpkg.com/leaflet@1.6.0/dist/leaflet.js\"\n" +
-	"    integrity=\"sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==\"\n" +
-	"    crossorigin=\"\"></script>\n" +
-	"</head>\n" +
-	"\n" +
-	"<body>\n" +
-	"  <div id=\"map\" style=\"height: 100%;\"></div>\n" +
-	"  <script>\n" +
+	"data.files[\"main-abd96702.js\"] = [==[\n" +
+	"(function () {\n" +
 	"    'use strict';\n" +
+	"\n" +
+	"    var _a;\n" +
 	"    const params = new URLSearchParams(window.location.search);\n" +
-	"    let path = params.get(\"path\") ?? \"\";\n" +
+	"    let path = (_a = params.get(\"path\")) !== null && _a !== void 0 ? _a : \"\";\n" +
 	"    if (!!path && path[path.length - 1] != \"/\") {\n" +
-	"      path = path + \"/\";\n" +
+	"        path = path + \"/\";\n" +
 	"    }\n" +
 	"    console.log(\"Path\", path);\n" +
-	"\n" +
 	"    fetch(path + 'mapshot.json')\n" +
-	"      .then(resp => resp.json())\n" +
-	"      .then(info => {\n" +
+	"        .then(resp => resp.json())\n" +
+	"        .then(info => {\n" +
 	"        console.log(\"Map info\", info);\n" +
-	"\n" +
 	"        const iterable = function (obj) {\n" +
-	"          // falsy value is javascript includes empty string, which is iterable,\n" +
-	"          // so we cannot just check if the value is truthy.\n" +
-	"          if (obj === null || obj === undefined) {\n" +
-	"            return false;\n" +
-	"          }\n" +
-	"          return typeof obj[Symbol.iterator] === \"function\";\n" +
-	"        }\n" +
-	"\n" +
-	"        const worldToLatLng = function (x, y) {\n" +
-	"          const ratio = info.render_size / info.tile_size;\n" +
-	"          return L.latLng(\n" +
-	"            -y * ratio,\n" +
-	"            x * ratio\n" +
-	"          );\n" +
+	"            // falsy value is javascript includes empty string, which is iterable,\n" +
+	"            // so we cannot just check if the value is truthy.\n" +
+	"            if (obj === null || obj === undefined) {\n" +
+	"                return false;\n" +
+	"            }\n" +
+	"            return typeof obj[Symbol.iterator] === \"function\";\n" +
 	"        };\n" +
-	"\n" +
+	"        const worldToLatLng = function (x, y) {\n" +
+	"            const ratio = info.render_size / info.tile_size;\n" +
+	"            return L.latLng(-y * ratio, x * ratio);\n" +
+	"        };\n" +
 	"        const midPointToLatLng = function (bbox) {\n" +
-	"          return worldToLatLng(\n" +
-	"            (bbox.left_top.x + bbox.right_bottom.x) / 2,\n" +
-	"            (bbox.left_top.y + bbox.right_bottom.y) / 2,\n" +
-	"          );\n" +
-	"        }\n" +
-	"\n" +
+	"            return worldToLatLng((bbox.left_top.x + bbox.right_bottom.x) / 2, (bbox.left_top.y + bbox.right_bottom.y) / " + // cont.
+	"2);\n" +
+	"        };\n" +
 	"        const baseLayer = L.tileLayer(path + \"zoom_{z}/tile_{x}_{y}.jpg\", {\n" +
-	"          tileSize: info.render_size,\n" +
-	"          bounds: L.latLngBounds(\n" +
-	"            worldToLatLng(info.world_min.x, info.world_min.y),\n" +
-	"            worldToLatLng(info.world_max.x, info.world_max.y),\n" +
-	"          ),\n" +
-	"          noWrap: true,\n" +
-	"          maxNativeZoom: info.zoom_max,\n" +
-	"          minNativeZoom: info.zoom_min,\n" +
-	"          minZoom: info.zoom_min - 4,\n" +
-	"          maxZoom: info.zoom_max + 4,\n" +
+	"            tileSize: info.render_size,\n" +
+	"            bounds: L.latLngBounds(worldToLatLng(info.world_min.x, info.world_min.y), worldToLatLng(info.world_max.x, in" + // cont.
+	"fo.world_max.y)),\n" +
+	"            noWrap: true,\n" +
+	"            maxNativeZoom: info.zoom_max,\n" +
+	"            minNativeZoom: info.zoom_min,\n" +
+	"            minZoom: info.zoom_min - 4,\n" +
+	"            maxZoom: info.zoom_max + 4,\n" +
 	"        });\n" +
-	"\n" +
 	"        const debugLayer = L.layerGroup([\n" +
-	"          L.marker([0, 0], { title: \"Start\" }).bindPopup(\"Starting point\"),\n" +
-	"          L.marker(worldToLatLng(info.player.x, info.player.y), { title: \"Player\" }).bindPopup(\"Player\"),\n" +
-	"          L.marker(worldToLatLng(info.world_min.x, info.world_min.y), { title: `${info.world_min.x}, ${info.world_min.y}" + // cont.
-	"` }),\n" +
-	"          L.marker(worldToLatLng(info.world_min.x, info.world_max.y), { title: `${info.world_min.x}, ${info.world_max.y}" + // cont.
-	"` }),\n" +
-	"          L.marker(worldToLatLng(info.world_max.x, info.world_min.y), { title: `${info.world_max.x}, ${info.world_min.y}" + // cont.
-	"` }),\n" +
-	"          L.marker(worldToLatLng(info.world_max.x, info.world_max.y), { title: `${info.world_max.x}, ${info.world_max.y}" + // cont.
-	"` }),\n" +
+	"            L.marker([0, 0], { title: \"Start\" }).bindPopup(\"Starting point\"),\n" +
+	"            L.marker(worldToLatLng(info.player.x, info.player.y), { title: \"Player\" }).bindPopup(\"Player\"),\n" +
+	"            L.marker(worldToLatLng(info.world_min.x, info.world_min.y), { title: `${info.world_min.x}, ${info.world_min." + // cont.
+	"y}` }),\n" +
+	"            L.marker(worldToLatLng(info.world_min.x, info.world_max.y), { title: `${info.world_min.x}, ${info.world_max." + // cont.
+	"y}` }),\n" +
+	"            L.marker(worldToLatLng(info.world_max.x, info.world_min.y), { title: `${info.world_max.x}, ${info.world_min." + // cont.
+	"y}` }),\n" +
+	"            L.marker(worldToLatLng(info.world_max.x, info.world_max.y), { title: `${info.world_max.x}, ${info.world_max." + // cont.
+	"y}` }),\n" +
 	"        ]);\n" +
-	"\n" +
 	"        let stations = [];\n" +
 	"        if (iterable(info.stations)) {\n" +
-	"          for (const station of info.stations) {\n" +
-	"            stations.push(L.marker(\n" +
-	"              midPointToLatLng(station.bounding_box),\n" +
-	"              { title: station.backer_name },\n" +
-	"            ).bindTooltip(station.backer_name, { permanent: true }))\n" +
-	"          }\n" +
+	"            for (const station of info.stations) {\n" +
+	"                stations.push(L.marker(midPointToLatLng(station.bounding_box), { title: station.backer_name }).bindToolt" + // cont.
+	"ip(station.backer_name, { permanent: true }));\n" +
+	"            }\n" +
 	"        }\n" +
 	"        const stationsLayer = L.layerGroup(stations);\n" +
-	"\n" +
 	"        let tags = [];\n" +
 	"        if (iterable(info.tags)) {\n" +
-	"          for (const tag of info.tags) {\n" +
-	"            tags.push(L.marker(\n" +
-	"              worldToLatLng(tag.position.x, tag.position.y),\n" +
-	"              { title: `${tag.force_name}: ${tag.text}` },\n" +
-	"            ).bindTooltip(tag.text, { permanent: true }))\n" +
-	"          }\n" +
+	"            for (const tag of info.tags) {\n" +
+	"                tags.push(L.marker(worldToLatLng(tag.position.x, tag.position.y), { title: `${tag.force_name}: ${tag.tex" + // cont.
+	"t}` }).bindTooltip(tag.text, { permanent: true }));\n" +
+	"            }\n" +
 	"        }\n" +
 	"        const tagsLayer = L.layerGroup(tags);\n" +
-	"\n" +
 	"        const mymap = L.map('map', {\n" +
-	"          crs: L.CRS.Simple,\n" +
-	"          layers: [baseLayer],\n" +
+	"            crs: L.CRS.Simple,\n" +
+	"            layers: [baseLayer],\n" +
 	"        });\n" +
-	"\n" +
-	"        L.control.layers({/* Only one default base layer */ }, {\n" +
-	"          \"Train stations\": stationsLayer,\n" +
-	"          \"Tags\": tagsLayer,\n" +
-	"          \"Debug\": debugLayer,\n" +
+	"        L.control.layers({ /* Only one default base layer */}, {\n" +
+	"            \"Train stations\": stationsLayer,\n" +
+	"            \"Tags\": tagsLayer,\n" +
+	"            \"Debug\": debugLayer,\n" +
 	"        }).addTo(mymap);\n" +
-	"\n" +
 	"        mymap.setView([0, 0], 0);\n" +
-	"      });\n" +
-	"  </script>\n" +
-	"</body>\n" +
+	"    });\n" +
 	"\n" +
-	"</html>]==]\n" +
+	"}());\n" +
+	"//# sourceMappingURL=main-abd96702.js.map\n" +
+	"]==]\n" +
+	"data.files[\"index.html\"] = [==[\n" +
+	"<html><head><title>Mapshot</title><style>body,html{margin:0}</style><link rel=\"stylesheet\" href=\"https://unpkg.com/leafl" + // cont.
+	"et@1.6.0/dist/leaflet.css\" integrity=\"sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw" + // cont.
+	"2yuvEpDL9wQ==\" crossorigin=\"\"><script src=\"https://unpkg.com/leaflet@1.6.0/dist/leaflet.js\" integrity=\"sha512-gZwIG9x3wU" + // cont.
+	"Xg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==\" crossorigin=\"\"></script></head><body><di" + // cont.
+	"v id=\"map\" style=\"height:100%\"></div><script src=\"./main-abd96702.js\" defer=\"\"></script></body></html>]==]\n" +
 	"return data\n" +
 	"" +
 	""
