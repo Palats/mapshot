@@ -100,6 +100,7 @@ function mapshot(player, prefix, name)
     name = name,
     unique_id = unique_id,
     tick = game.tick,
+    ticks_player = game.ticks_played,
     tile_size = math.pow(2, tile_range_max),
     render_size = render_size,
     world_min = world_min,
