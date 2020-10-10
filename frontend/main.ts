@@ -1,6 +1,70 @@
 // The name of the path to use by default is injected in the HTML.
 declare var MAPSHOT_DEFAULT_PATH: string;
 
+interface FactorioPosition {
+    x: number,
+    y: number,
+}
+
+interface FactorioBoundingBox {
+    left_top: FactorioPosition,
+    right_bottom: FactorioPosition,
+}
+
+interface FactorioIcon {
+    name: string,
+    type: string,
+}
+
+interface FactorioStation {
+    backer_name: string,
+    bounding_box: FactorioBoundingBox,
+}
+
+interface FactorioTag {
+    force_name: string,
+    force_index: string,
+    icon: FactorioIcon,
+    tag_number: number,
+    position: FactorioPosition,
+    text: string,
+}
+
+interface MapshotJSON {
+    // A unique ID generated for this render.
+    unique_id: string,
+    // Name of the save.
+    name: string,
+
+    // game.tick
+    tick: number,
+    // game.ticks_played
+    ticks_played: number,
+    // Seed of the map.
+    seed: number,
+    // Factorio map exchange string
+    map_exchange?: string,
+
+    // Size of a tile in in-game units for the least detailed layer.
+    tile_size: number,
+    // Size of a tile, in pixels.
+    render_size: number,
+    // Area rendered.
+    world_min: FactorioPosition,
+    world_max: FactorioPosition,
+    // Minimal available zoom level index (least detailed)
+    zoom_min: number,
+    // Maximal available zoom level index (most detailed)
+    zoom_max: number,
+
+    // Current position of the player.
+    player?: FactorioPosition,
+    // List of train stations.
+    stations?: FactorioStation[] | {},
+    // List of map tags.
+    tags?: FactorioTag[] | {},
+}
+
 const params = new URLSearchParams(window.location.search);
 let path = params.get("path") ?? MAPSHOT_DEFAULT_PATH;
 if (!!path && path[path.length - 1] != "/") {
@@ -10,10 +74,10 @@ console.log("Path", path);
 
 fetch(path + 'mapshot.json')
     .then(resp => resp.json())
-    .then(info => {
+    .then((info: MapshotJSON) => {
         console.log("Map info", info);
 
-        const iterable = function (obj: any): Boolean {
+        const isIterable = function <T>(obj: Iterable<T> | any): obj is Iterable<T> {
             // falsy value is javascript includes empty string, which is iterable,
             // so we cannot just check if the value is truthy.
             if (obj === null || obj === undefined) {
@@ -30,7 +94,7 @@ fetch(path + 'mapshot.json')
             );
         };
 
-        const midPointToLatLng = function (bbox: any) {
+        const midPointToLatLng = function (bbox: FactorioBoundingBox) {
             return worldToLatLng(
                 (bbox.left_top.x + bbox.right_bottom.x) / 2,
                 (bbox.left_top.y + bbox.right_bottom.y) / 2,
@@ -50,46 +114,47 @@ fetch(path + 'mapshot.json')
             maxZoom: info.zoom_max + 4,
         });
 
-        const debugLayer = L.layerGroup([
+        const debugLayers = [
             L.marker([0, 0], { title: "Start" }).bindPopup("Starting point"),
-            L.marker(worldToLatLng(info.player.x, info.player.y), { title: "Player" }).bindPopup("Player"),
+        ]
+        if (info.player) {
+            debugLayers.push(L.marker(worldToLatLng(info.player.x, info.player.y), { title: "Player" }).bindPopup("Player"))
+        }
+        debugLayers.push(
             L.marker(worldToLatLng(info.world_min.x, info.world_min.y), { title: `${info.world_min.x}, ${info.world_min.y}` }),
             L.marker(worldToLatLng(info.world_min.x, info.world_max.y), { title: `${info.world_min.x}, ${info.world_max.y}` }),
             L.marker(worldToLatLng(info.world_max.x, info.world_min.y), { title: `${info.world_max.x}, ${info.world_min.y}` }),
             L.marker(worldToLatLng(info.world_max.x, info.world_max.y), { title: `${info.world_max.x}, ${info.world_max.y}` }),
-        ]);
+        );
 
-        let stations = [];
-        if (iterable(info.stations)) {
+        let stationsLayers = [];
+        if (isIterable(info.stations)) {
             for (const station of info.stations) {
-                stations.push(L.marker(
+                stationsLayers.push(L.marker(
                     midPointToLatLng(station.bounding_box),
                     { title: station.backer_name },
                 ).bindTooltip(station.backer_name, { permanent: true }))
             }
         }
-        const stationsLayer = L.layerGroup(stations);
 
-        let tags = [];
-        if (iterable(info.tags)) {
+        let tagsLayers = [];
+        if (isIterable(info.tags)) {
             for (const tag of info.tags) {
-                tags.push(L.marker(
+                tagsLayers.push(L.marker(
                     worldToLatLng(tag.position.x, tag.position.y),
                     { title: `${tag.force_name}: ${tag.text}` },
                 ).bindTooltip(tag.text, { permanent: true }))
             }
         }
-        const tagsLayer = L.layerGroup(tags);
 
         const mymap = L.map('map', {
             crs: L.CRS.Simple,
             layers: [baseLayer],
         });
-
         L.control.layers({/* Only one default base layer */ }, {
-            "Train stations": stationsLayer,
-            "Tags": tagsLayer,
-            "Debug": debugLayer,
+            "Train stations": L.layerGroup(stationsLayers),
+            "Tags": L.layerGroup(tagsLayers),
+            "Debug": L.layerGroup(debugLayers),
         }).addTo(mymap);
 
         mymap.setView([0, 0], 0);

@@ -5,7 +5,7 @@ package embed
 var Version = "0.0.7"
 
 // VersionHash is a hash of the mod content
-var VersionHash = "c1ed99e010833f54e86956fe8f8241d0f31b05fdc01df34d26c2ae54d2485802"
+var VersionHash = "0f3934cd21ea3bf154be9f1705ed172631a6b939754dcc13014031c8c6f611dc"
 
 // FileLicense is file "LICENSE"
 var FileLicense =
@@ -507,7 +507,7 @@ var FileModControlLua =
 	"    name = name,\n" +
 	"    unique_id = unique_id,\n" +
 	"    tick = game.tick,\n" +
-	"    ticks_player = game.ticks_played,\n" +
+	"    ticks_played = game.ticks_played,\n" +
 	"    tile_size = math.pow(2, tile_range_max),\n" +
 	"    render_size = render_size,\n" +
 	"    world_min = world_min,\n" +
@@ -768,7 +768,7 @@ var FileModGeneratedLua =
 	"-- Automatically generated, do not modify\n" +
 	"local data = {}\n" +
 	"data.version = \"0.0.7\"\n" +
-	"data.version_hash = \"9a13077c0070452d42bb416eb51fe7edfbad34ce7eaacb5f1ec3012e98fb00b7\"\n" +
+	"data.version_hash = \"c1ed99e010833f54e86956fe8f8241d0f31b05fdc01df34d26c2ae54d2485802\"\n" +
 	"data.files = {}\n" +
 	"data.files[\"main-cc850eb1.js\"] = [==[\n" +
 	"(function () {\n" +
