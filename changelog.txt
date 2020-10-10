@@ -3,6 +3,9 @@ Version: 0.0.8
   CLI:
     - Add more directories where to find Factorio.
     - Have `dev` command always show Factorio output.
+  Internal:
+    - Frontend is now generated, which will allow for imports & typescript.
+    - Frontend can contains more files; might allow for icons later.
 ---------------------------------------------------------------------------------------------------
 Version: 0.0.7
 Date: 2020.09.30

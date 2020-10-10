@@ -86,32 +86,4 @@ The generated content is made of static files. This means you can also serve the
 
 ## Development
 
-### Running as a live mod
-
-The files in a checkout of the repository can be used directly by Factorio. This allows to a quick edit/test cycle. For that, simply your checkout from the Factorio `mods` directory under the name `mapshot`.
-
-To avoid having to regenerate Lua files when modifying the html part of the plugin, link `viewer.html` from `script-output`. Load `viewer.html` in your browser and add `?path=mapshot/<name>` to look directly at one of the generated map.
-
-Files in `embed/` and `generated.lua` are automatically generated from other files of the repository; to regenerate them:
-```
-go generate ./...
-```
-
-### The CLI
-
-To run it from a checkout of the repository:
-```
-go generate ./... && go run mapshot.go <parameters...>
-```
-
-By default, it will show the help, including all the available subcommands.
-
-### Releasing
-
-* Update changelog
-* Update version in: `changelog.txt` (incl. date), `mod/info.json`, `frontend/package.json`
-* Regenerate files: `go generate ./...`
-* Test build release: `./build.sh`
-* Commit and push
-* Create release in Github
-* Update Factorio mods portal (new zip, update doc)
+See [DEVELOPMENT.md](#DEVELOPMENT.md) in the repository.
