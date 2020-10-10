@@ -1,5 +1,8 @@
+// The name of the path to use by default is injected in the HTML.
+declare var MAPSHOT_DEFAULT_PATH: string;
+
 const params = new URLSearchParams(window.location.search);
-let path = params.get("path") ?? "";
+let path = params.get("path") ?? MAPSHOT_DEFAULT_PATH;
 if (!!path && path[path.length - 1] != "/") {
     path = path + "/";
 }

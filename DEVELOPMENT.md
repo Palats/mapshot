@@ -77,7 +77,7 @@ The frontend can load arbitrary mapshots by adding `?path=mapshot/<name>` query 
 
 * Update `changelog.txt`
 * Update version in: `changelog.txt` (add date), `mod/info.json`, `frontend/package.json`
-* Regenerate files: `npm --prefix frontend build && go generate ./...`
+* Regenerate files: `npm --prefix frontend run build && go generate ./...`
 * Test build release: `./build.sh`
 * Commit and push
 * Create release in Github

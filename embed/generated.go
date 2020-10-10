@@ -5,7 +5,7 @@ package embed
 var Version = "0.0.7"
 
 // VersionHash is a hash of the mod content
-var VersionHash = "12f1d2b0c0c914ee90a5c334b0e7d54acb87d5a9ada3e511d04c08b1ec29410c"
+var VersionHash = "9a13077c0070452d42bb416eb51fe7edfbad34ce7eaacb5f1ec3012e98fb00b7"
 
 // FileLicense is file "LICENSE"
 var FileLicense =
@@ -327,38 +327,7 @@ var FileReadmeMd =
 	"\n" +
 	"## Development\n" +
 	"\n" +
-	"### Running as a live mod\n" +
-	"\n" +
-	"The files in a checkout of the repository can be used directly by Factorio. This allows to a quick edit/test cycle. For " + // cont.
-	"that, simply your checkout from the Factorio `mods` directory under the name `mapshot`.\n" +
-	"\n" +
-	"To avoid having to regenerate Lua files when modifying the html part of the plugin, link `viewer.html` from `script-outp" + // cont.
-	"ut`. Load `viewer.html` in your browser and add `?path=mapshot/<name>` to look directly at one of the generated map.\n" +
-	"\n" +
-	"Files in `embed/` and `generated.lua` are automatically generated from other files of the repository; to regenerate them" + // cont.
-	":\n" +
-	"```\n" +
-	"go generate ./...\n" +
-	"```\n" +
-	"\n" +
-	"### The CLI\n" +
-	"\n" +
-	"To run it from a checkout of the repository:\n" +
-	"```\n" +
-	"go generate ./... && go run mapshot.go <parameters...>\n" +
-	"```\n" +
-	"\n" +
-	"By default, it will show the help, including all the available subcommands.\n" +
-	"\n" +
-	"### Releasing\n" +
-	"\n" +
-	"* Update changelog\n" +
-	"* Update version in: `changelog.txt` (incl. date), `mod/info.json`, `frontend/package.json`\n" +
-	"* Regenerate files: `go generate ./...`\n" +
-	"* Test build release: `./build.sh`\n" +
-	"* Commit and push\n" +
-	"* Create release in Github\n" +
-	"* Update Factorio mods portal (new zip, update doc)" +
+	"See [DEVELOPMENT.md](#DEVELOPMENT.md) in the repository." +
 	""
 // FileChangelogTxt is file "changelog.txt"
 var FileChangelogTxt =
@@ -367,6 +336,9 @@ var FileChangelogTxt =
 	"  CLI:\n" +
 	"    - Add more directories where to find Factorio.\n" +
 	"    - Have `dev` command always show Factorio output.\n" +
+	"  Internal:\n" +
+	"    - Frontend is now generated, which will allow for imports & typescript.\n" +
+	"    - Frontend can contains more files; might allow for icons later.\n" +
 	"---------------------------------------------------------------------------------------------------\n" +
 	"Version: 0.0.7\n" +
 	"Date: 2020.09.30\n" +
@@ -436,6 +408,7 @@ var FileModControlLua =
 	"local generated = require(\"generated\")\n" +
 	"local overrides = require(\"overrides\")\n" +
 	"local entities = require(\"entities\")\n" +
+	"local hash = require(\"hash\")\n" +
 	"\n" +
 	"-- All settings of the mod.\n" +
 	"local params = {}\n" +
@@ -461,7 +434,12 @@ var FileModControlLua =
 	"-- name: a name for the shot, saved in mapshot.json.\n" +
 	"function mapshot(player, prefix, name)\n" +
 	"  player.print(\"Mapshot '\" .. prefix .. \"' ...\")\n" +
+	"  local unique_id = gen_unique_id()\n" +
+	"  local data_dir = \"d-\" .. unique_id\n" +
+	"  local data_prefix = prefix .. data_dir .. \"/\"\n" +
 	"  log(\"Mapshot target \" .. prefix)\n" +
+	"  log(\"Mapshot data target \" .. data_prefix)\n" +
+	"  log(\"Mapshot unique id \" .. unique_id)\n" +
 	"\n" +
 	"  local surface = game.surfaces[\"nauvis\"]\n" +
 	"\n" +
@@ -525,8 +503,9 @@ var FileModControlLua =
 	"  end\n" +
 	"\n" +
 	"  -- Write metadata.\n" +
-	"  game.write_file(prefix .. \"mapshot.json\", game.table_to_json({\n" +
+	"  game.write_file(data_prefix .. \"mapshot.json\", game.table_to_json({\n" +
 	"    name = name,\n" +
+	"    unique_id = unique_id,\n" +
 	"    tick = game.tick,\n" +
 	"    tile_size = math.pow(2, tile_range_max),\n" +
 	"    render_size = render_size,\n" +
@@ -543,6 +522,9 @@ var FileModControlLua =
 	"\n" +
 	"  -- Create the serving html.\n" +
 	"  for fname, content in pairs(generated.files) do\n" +
+	"    if (fname == \"index.html\") then\n" +
+	"      content = string.gsub(content, \"__MAPSHOT_DEFAULT_PATH__\", data_dir)\n" +
+	"    end\n" +
 	"    game.write_file(prefix .. fname, content)\n" +
 	"  end\n" +
 	"\n" +
@@ -550,14 +532,14 @@ var FileModControlLua =
 	"  for tile_range = tile_range_max, tile_range_min, -1 do\n" +
 	"    local tile_size = math.pow(2, tile_range)\n" +
 	"    local render_zoom = tile_range_max - tile_range\n" +
-	"    gen_layer(player, tile_size, render_size, world_min, world_max, prefix .. \"zoom_\" .. render_zoom .. \"/\")\n" +
+	"    gen_layer(player, tile_size, render_size, world_min, world_max, data_prefix .. \"zoom_\" .. render_zoom .. \"/\")\n" +
 	"  end\n" +
 	"\n" +
 	"  player.print(\"Mapshot done at \" .. prefix)\n" +
-	"  log(\"Mapshot done at \" .. prefix)\n" +
+	"  log(\"Mapshot done at \" .. prefix .. \"(\" .. data_prefix .. \")\")\n" +
 	"end\n" +
 	"\n" +
-	"function gen_layer(player, tile_size, render_size, world_min, world_max, prefix)\n" +
+	"function gen_layer(player, tile_size, render_size, world_min, world_max, data_prefix)\n" +
 	"  -- Zoom. We want to have render_size pixels represent tile_size world unit.\n" +
 	"  -- A zoom of 1.0 means that 32 pixels represent 1 world unit. A zoom of 2.0 means 64 pixels per world unit.\n" +
 	"  local zoom = render_size / 32 / tile_size\n" +
@@ -580,7 +562,7 @@ var FileModControlLua =
 	"        },\n" +
 	"        resolution = {render_size, render_size},\n" +
 	"        zoom = zoom,\n" +
-	"        path = prefix .. \"tile_\" .. tile_x .. \"_\" .. tile_y .. \".jpg\",\n" +
+	"        path = data_prefix .. \"tile_\" .. tile_x .. \"_\" .. tile_y .. \".jpg\",\n" +
 	"        show_gui = false,\n" +
 	"        show_entity_info = true,\n" +
 	"        quality = params.jpgquality,\n" +
@@ -589,6 +571,18 @@ var FileModControlLua =
 	"      }\n" +
 	"    end\n" +
 	"  end\n" +
+	"end\n" +
+	"\n" +
+	"-- Create a unique ID of the generated mapshot.\n" +
+	"function gen_unique_id()\n" +
+	"  local data = generated.version_hash .. \" \" .. tostring(game.tick) .. \" \" .. game.get_map_exchange_string()\n" +
+	"  -- sha256 produces 64 digits. We're not looking for crypto secure hashing, and instead\n" +
+	"  -- just a short unique string - so pick up a subset.\n" +
+	"  local idx = 8\n" +
+	"  local len = 10\n" +
+	"  local h = string.sub(hash.hash256(data), idx, idx + len - 1)\n" +
+	"  log(\"Unique ID: \" .. h)\n" +
+	"  return h\n" +
 	"end\n" +
 	"\n" +
 	"-- Detects if an on-startup screenshot is requested.\n" +
@@ -602,8 +596,7 @@ var FileModControlLua =
 	"  update_params(player)\n" +
 	"  if params.onstartup ~= \"\" then\n" +
 	"    log(\"onstartup requested id=\" .. params.onstartup)\n" +
-	"    local name = params.shotname .. \"-\" .. evt.tick\n" +
-	"    local prefix = params.prefix .. name .. \"/\"\n" +
+	"    local prefix = params.prefix .. params.shotname .. \"/\"\n" +
 	"    mapshot(player, prefix, params.shotname)\n" +
 	"\n" +
 	"    -- Ensure that screen shots are written before marking as done.\n" +
@@ -632,11 +625,10 @@ var FileModControlLua =
 	"  update_params(player)\n" +
 	"\n" +
 	"  -- Where to store the output.\n" +
-	"  local name = \"seed\" .. game.default_map_gen_settings.seed .. \"-\" .. evt.tick\n" +
+	"  local name = \"seed\" .. game.default_map_gen_settings.seed\n" +
 	"  if evt.parameter ~= nil and #evt.parameter > 0 then\n" +
 	"    name = evt.parameter\n" +
 	"  end\n" +
-	"  local prefix = params.prefix .. name .. \"/\"\n" +
 	"  mapshot(player, params.prefix .. name .. \"/\", name)\n" +
 	"end)" +
 	""
@@ -775,15 +767,15 @@ var FileModGeneratedLua =
 	"-- Automatically generated, do not modify\n" +
 	"local data = {}\n" +
 	"data.version = \"0.0.7\"\n" +
-	"data.version_hash = \"12f1d2b0c0c914ee90a5c334b0e7d54acb87d5a9ada3e511d04c08b1ec29410c\"\n" +
+	"data.version_hash = \"9a13077c0070452d42bb416eb51fe7edfbad34ce7eaacb5f1ec3012e98fb00b7\"\n" +
 	"data.files = {}\n" +
-	"data.files[\"main-abd96702.js\"] = [==[\n" +
+	"data.files[\"main-cc850eb1.js\"] = [==[\n" +
 	"(function () {\n" +
 	"    'use strict';\n" +
 	"\n" +
 	"    var _a;\n" +
 	"    const params = new URLSearchParams(window.location.search);\n" +
-	"    let path = (_a = params.get(\"path\")) !== null && _a !== void 0 ? _a : \"\";\n" +
+	"    let path = (_a = params.get(\"path\")) !== null && _a !== void 0 ? _a : MAPSHOT_DEFAULT_PATH;\n" +
 	"    if (!!path && path[path.length - 1] != \"/\") {\n" +
 	"        path = path + \"/\";\n" +
 	"    }\n" +
@@ -859,16 +851,263 @@ var FileModGeneratedLua =
 	"    });\n" +
 	"\n" +
 	"}());\n" +
-	"//# sourceMappingURL=main-abd96702.js.map\n" +
+	"//# sourceMappingURL=main-cc850eb1.js.map\n" +
 	"]==]\n" +
 	"data.files[\"index.html\"] = [==[\n" +
 	"<html><head><title>Mapshot</title><style>body,html{margin:0}</style><link rel=\"stylesheet\" href=\"https://unpkg.com/leafl" + // cont.
 	"et@1.6.0/dist/leaflet.css\" integrity=\"sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw" + // cont.
 	"2yuvEpDL9wQ==\" crossorigin=\"\"><script src=\"https://unpkg.com/leaflet@1.6.0/dist/leaflet.js\" integrity=\"sha512-gZwIG9x3wU" + // cont.
-	"Xg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==\" crossorigin=\"\"></script></head><body><di" + // cont.
-	"v id=\"map\" style=\"height:100%\"></div><script src=\"./main-abd96702.js\" defer=\"\"></script></body></html>]==]\n" +
+	"Xg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==\" crossorigin=\"\"></script><script>const MA" + // cont.
+	"PSHOT_DEFAULT_PATH=\"__MAPSHOT_DEFAULT_PATH__\"</script></head><body><div id=\"map\" style=\"height:100%\"></div><script src=\"" + // cont.
+	"./main-cc850eb1.js\" defer=\"\"></script></body></html>]==]\n" +
 	"return data\n" +
 	"" +
+	""
+// FileModHashLua is file "mod/hash.lua"
+var FileModHashLua =
+	"-- From http://lua-users.org/wiki/SecureHashAlgorithm\n" +
+	"-- Originally written by Roberto Ierusalimschy\n" +
+	"-- Licensed under MIT (http://lua-users.org/lists/lua-l/2014-08/msg00628.html)\n" +
+	"-- SHA-256 code in Lua 5.2; based on the pseudo-code from Wikipedia\n" +
+	"-- (http://en.wikipedia.org/wiki/SHA-2)\n" +
+	"\n" +
+	"local band, rrotate, bxor, rshift, bnot =\n" +
+	"  bit32.band, bit32.rrotate, bit32.bxor, bit32.rshift, bit32.bnot\n" +
+	"\n" +
+	"local string, setmetatable, assert = string, setmetatable, assert\n" +
+	"\n" +
+	"_ENV = nil\n" +
+	"\n" +
+	"-- Initialize table of round constants\n" +
+	"-- (first 32 bits of the fractional parts of the cube roots of the first\n" +
+	"-- 64 primes 2..311):\n" +
+	"local k = {\n" +
+	"   0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5,\n" +
+	"   0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,\n" +
+	"   0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3,\n" +
+	"   0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,\n" +
+	"   0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc,\n" +
+	"   0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,\n" +
+	"   0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7,\n" +
+	"   0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,\n" +
+	"   0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13,\n" +
+	"   0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,\n" +
+	"   0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3,\n" +
+	"   0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,\n" +
+	"   0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5,\n" +
+	"   0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,\n" +
+	"   0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208,\n" +
+	"   0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,\n" +
+	"}\n" +
+	"\n" +
+	"\n" +
+	"-- transform a string of bytes in a string of hexadecimal digits\n" +
+	"local function str2hexa (s)\n" +
+	"  local h = string.gsub(s, \".\", function(c)\n" +
+	"              return string.format(\"%02x\", string.byte(c))\n" +
+	"            end)\n" +
+	"  return h\n" +
+	"end\n" +
+	"\n" +
+	"\n" +
+	"-- transform number 'l' in a big-endian sequence of 'n' bytes\n" +
+	"-- (coded as a string)\n" +
+	"local function num2s (l, n)\n" +
+	"  local s = \"\"\n" +
+	"  for i = 1, n do\n" +
+	"    local rem = l % 256\n" +
+	"    s = string.char(rem) .. s\n" +
+	"    l = (l - rem) / 256\n" +
+	"  end\n" +
+	"  return s\n" +
+	"end\n" +
+	"\n" +
+	"-- transform the big-endian sequence of four bytes starting at\n" +
+	"-- index 'i' in 's' into a number\n" +
+	"local function s232num (s, i)\n" +
+	"  local n = 0\n" +
+	"  for i = i, i + 3 do\n" +
+	"    n = n*256 + string.byte(s, i)\n" +
+	"  end\n" +
+	"  return n\n" +
+	"end\n" +
+	"\n" +
+	"\n" +
+	"-- append the bit '1' to the message\n" +
+	"-- append k bits '0', where k is the minimum number >= 0 such that the\n" +
+	"-- resulting message length (in bits) is congruent to 448 (mod 512)\n" +
+	"-- append length of message (before pre-processing), in bits, as 64-bit\n" +
+	"-- big-endian integer\n" +
+	"local function preproc (msg, len)\n" +
+	"  local extra = -(len + 1 + 8) % 64\n" +
+	"  len = num2s(8 * len, 8)    -- original len in bits, coded\n" +
+	"  msg = msg .. \"\\128\" .. string.rep(\"\\0\", extra) .. len\n" +
+	"  assert(#msg % 64 == 0)\n" +
+	"  return msg\n" +
+	"end\n" +
+	"\n" +
+	"\n" +
+	"local function initH224 (H)\n" +
+	"  -- (second 32 bits of the fractional parts of the square roots of the\n" +
+	"  -- 9th through 16th primes 23..53)\n" +
+	"  H[1] = 0xc1059ed8\n" +
+	"  H[2] = 0x367cd507\n" +
+	"  H[3] = 0x3070dd17\n" +
+	"  H[4] = 0xf70e5939\n" +
+	"  H[5] = 0xffc00b31\n" +
+	"  H[6] = 0x68581511\n" +
+	"  H[7] = 0x64f98fa7\n" +
+	"  H[8] = 0xbefa4fa4\n" +
+	"  return H\n" +
+	"end\n" +
+	"\n" +
+	"\n" +
+	"local function initH256 (H)\n" +
+	"  -- (first 32 bits of the fractional parts of the square roots of the\n" +
+	"  -- first 8 primes 2..19):\n" +
+	"  H[1] = 0x6a09e667\n" +
+	"  H[2] = 0xbb67ae85\n" +
+	"  H[3] = 0x3c6ef372\n" +
+	"  H[4] = 0xa54ff53a\n" +
+	"  H[5] = 0x510e527f\n" +
+	"  H[6] = 0x9b05688c\n" +
+	"  H[7] = 0x1f83d9ab\n" +
+	"  H[8] = 0x5be0cd19\n" +
+	"  return H\n" +
+	"end\n" +
+	"\n" +
+	"\n" +
+	"local function digestblock (msg, i, H)\n" +
+	"\n" +
+	"    -- break chunk into sixteen 32-bit big-endian words w[1..16]\n" +
+	"    local w = {}\n" +
+	"    for j = 1, 16 do\n" +
+	"      w[j] = s232num(msg, i + (j - 1)*4)\n" +
+	"    end\n" +
+	"\n" +
+	"    -- Extend the sixteen 32-bit words into sixty-four 32-bit words:\n" +
+	"    for j = 17, 64 do\n" +
+	"      local v = w[j - 15]\n" +
+	"      local s0 = bxor(rrotate(v, 7), rrotate(v, 18), rshift(v, 3))\n" +
+	"      v = w[j - 2]\n" +
+	"      local s1 = bxor(rrotate(v, 17), rrotate(v, 19), rshift(v, 10))\n" +
+	"      w[j] = w[j - 16] + s0 + w[j - 7] + s1\n" +
+	"    end\n" +
+	"\n" +
+	"    -- Initialize hash value for this chunk:\n" +
+	"    local a, b, c, d, e, f, g, h =\n" +
+	"        H[1], H[2], H[3], H[4], H[5], H[6], H[7], H[8]\n" +
+	"\n" +
+	"    -- Main loop:\n" +
+	"    for i = 1, 64 do\n" +
+	"      local s0 = bxor(rrotate(a, 2), rrotate(a, 13), rrotate(a, 22))\n" +
+	"      local maj = bxor(band(a, b), band(a, c), band(b, c))\n" +
+	"      local t2 = s0 + maj\n" +
+	"      local s1 = bxor(rrotate(e, 6), rrotate(e, 11), rrotate(e, 25))\n" +
+	"      local ch = bxor (band(e, f), band(bnot(e), g))\n" +
+	"      local t1 = h + s1 + ch + k[i] + w[i]\n" +
+	"\n" +
+	"      h = g\n" +
+	"      g = f\n" +
+	"      f = e\n" +
+	"      e = d + t1\n" +
+	"      d = c\n" +
+	"      c = b\n" +
+	"      b = a\n" +
+	"      a = t1 + t2\n" +
+	"    end\n" +
+	"\n" +
+	"    -- Add (mod 2^32) this chunk's hash to result so far:\n" +
+	"    H[1] = band(H[1] + a)\n" +
+	"    H[2] = band(H[2] + b)\n" +
+	"    H[3] = band(H[3] + c)\n" +
+	"    H[4] = band(H[4] + d)\n" +
+	"    H[5] = band(H[5] + e)\n" +
+	"    H[6] = band(H[6] + f)\n" +
+	"    H[7] = band(H[7] + g)\n" +
+	"    H[8] = band(H[8] + h)\n" +
+	"\n" +
+	"end\n" +
+	"\n" +
+	"\n" +
+	"local function finalresult224 (H)\n" +
+	"  -- Produce the final hash value (big-endian):\n" +
+	"  return\n" +
+	"    str2hexa(num2s(H[1], 4)..num2s(H[2], 4)..num2s(H[3], 4)..num2s(H[4], 4)..\n" +
+	"             num2s(H[5], 4)..num2s(H[6], 4)..num2s(H[7], 4))\n" +
+	"end\n" +
+	"\n" +
+	"\n" +
+	"local function finalresult256 (H)\n" +
+	"  -- Produce the final hash value (big-endian):\n" +
+	"  return\n" +
+	"    str2hexa(num2s(H[1], 4)..num2s(H[2], 4)..num2s(H[3], 4)..num2s(H[4], 4)..\n" +
+	"             num2s(H[5], 4)..num2s(H[6], 4)..num2s(H[7], 4)..num2s(H[8], 4))\n" +
+	"end\n" +
+	"\n" +
+	"\n" +
+	"----------------------------------------------------------------------\n" +
+	"local HH = {}    -- to reuse\n" +
+	"\n" +
+	"local function hash224 (msg)\n" +
+	"  msg = preproc(msg, #msg)\n" +
+	"  local H = initH224(HH)\n" +
+	"\n" +
+	"  -- Process the message in successive 512-bit (64 bytes) chunks:\n" +
+	"  for i = 1, #msg, 64 do\n" +
+	"    digestblock(msg, i, H)\n" +
+	"  end\n" +
+	"\n" +
+	"  return finalresult224(H)\n" +
+	"end\n" +
+	"\n" +
+	"\n" +
+	"local function hash256 (msg)\n" +
+	"  msg = preproc(msg, #msg)\n" +
+	"  local H = initH256(HH)\n" +
+	"\n" +
+	"  -- Process the message in successive 512-bit (64 bytes) chunks:\n" +
+	"  for i = 1, #msg, 64 do\n" +
+	"    digestblock(msg, i, H)\n" +
+	"  end\n" +
+	"\n" +
+	"  return finalresult256(H)\n" +
+	"end\n" +
+	"----------------------------------------------------------------------\n" +
+	"local mt = {}\n" +
+	"\n" +
+	"local function new256 ()\n" +
+	"  local o = {H = initH256({}), msg = \"\", len = 0}\n" +
+	"  setmetatable(o, mt)\n" +
+	"  return o\n" +
+	"end\n" +
+	"\n" +
+	"mt.__index = mt\n" +
+	"\n" +
+	"function mt:add (m)\n" +
+	"  self.msg = self.msg .. m\n" +
+	"  self.len = self.len + #m\n" +
+	"  local t = 0\n" +
+	"  while #self.msg - t >= 64 do\n" +
+	"    digestblock(self.msg, t + 1, self.H)\n" +
+	"    t = t + 64\n" +
+	"  end\n" +
+	"  self.msg = self.msg:sub(t + 1, -1)\n" +
+	"end\n" +
+	"\n" +
+	"\n" +
+	"function mt:close ()\n" +
+	"  self.msg = preproc(self.msg, self.len)\n" +
+	"  self:add(\"\")\n" +
+	"  return finalresult256(self.H)\n" +
+	"end\n" +
+	"----------------------------------------------------------------------\n" +
+	"\n" +
+	"return {\n" +
+	"  hash224 = hash224,\n" +
+	"  hash256 = hash256,\n" +
+	"  new256 = new256,\n" +
+	"}" +
 	""
 // FileModInfoJSON is file "mod/info.json"
 var FileModInfoJSON =
@@ -1450,6 +1689,7 @@ var ModFiles = map[string]string{
 	"control.lua": FileModControlLua,
 	"entities.lua": FileModEntitiesLua,
 	"generated.lua": FileModGeneratedLua,
+	"hash.lua": FileModHashLua,
 	"info.json": FileModInfoJSON,
 	"overrides.lua": FileModOverridesLua,
 	"settings.lua": FileModSettingsLua,

@@ -1,6 +1,7 @@
 local generated = require("generated")
 local overrides = require("overrides")
 local entities = require("entities")
+local hash = require("hash")
 
 -- All settings of the mod.
 local params = {}
@@ -26,7 +27,12 @@ end
 -- name: a name for the shot, saved in mapshot.json.
 function mapshot(player, prefix, name)
   player.print("Mapshot '" .. prefix .. "' ...")
+  local unique_id = gen_unique_id()
+  local data_dir = "d-" .. unique_id
+  local data_prefix = prefix .. data_dir .. "/"
   log("Mapshot target " .. prefix)
+  log("Mapshot data target " .. data_prefix)
+  log("Mapshot unique id " .. unique_id)
 
   local surface = game.surfaces["nauvis"]
 
@@ -90,8 +96,9 @@ function mapshot(player, prefix, name)
   end
 
   -- Write metadata.
-  game.write_file(prefix .. "mapshot.json", game.table_to_json({
+  game.write_file(data_prefix .. "mapshot.json", game.table_to_json({
     name = name,
+    unique_id = unique_id,
     tick = game.tick,
     tile_size = math.pow(2, tile_range_max),
     render_size = render_size,
@@ -108,6 +115,9 @@ function mapshot(player, prefix, name)
 
   -- Create the serving html.
   for fname, content in pairs(generated.files) do
+    if (fname == "index.html") then
+      content = string.gsub(content, "__MAPSHOT_DEFAULT_PATH__", data_dir)
+    end
     game.write_file(prefix .. fname, content)
   end
 
@@ -115,14 +125,14 @@ function mapshot(player, prefix, name)
   for tile_range = tile_range_max, tile_range_min, -1 do
     local tile_size = math.pow(2, tile_range)
     local render_zoom = tile_range_max - tile_range
-    gen_layer(player, tile_size, render_size, world_min, world_max, prefix .. "zoom_" .. render_zoom .. "/")
+    gen_layer(player, tile_size, render_size, world_min, world_max, data_prefix .. "zoom_" .. render_zoom .. "/")
   end
 
   player.print("Mapshot done at " .. prefix)
-  log("Mapshot done at " .. prefix)
+  log("Mapshot done at " .. prefix .. "(" .. data_prefix .. ")")
 end
 
-function gen_layer(player, tile_size, render_size, world_min, world_max, prefix)
+function gen_layer(player, tile_size, render_size, world_min, world_max, data_prefix)
   -- Zoom. We want to have render_size pixels represent tile_size world unit.
   -- A zoom of 1.0 means that 32 pixels represent 1 world unit. A zoom of 2.0 means 64 pixels per world unit.
   local zoom = render_size / 32 / tile_size
@@ -144,7 +154,7 @@ function gen_layer(player, tile_size, render_size, world_min, world_max, prefix)
         },
         resolution = {render_size, render_size},
         zoom = zoom,
-        path = prefix .. "tile_" .. tile_x .. "_" .. tile_y .. ".jpg",
+        path = data_prefix .. "tile_" .. tile_x .. "_" .. tile_y .. ".jpg",
         show_gui = false,
         show_entity_info = true,
         quality = params.jpgquality,
@@ -153,6 +163,18 @@ function gen_layer(player, tile_size, render_size, world_min, world_max, prefix)
       }
     end
   end
+end
+
+-- Create a unique ID of the generated mapshot.
+function gen_unique_id()
+  local data = generated.version_hash .. " " .. tostring(game.tick) .. " " .. game.get_map_exchange_string()
+  -- sha256 produces 64 digits. We're not looking for crypto secure hashing, and instead
+  -- just a short unique string - so pick up a subset.
+  local idx = 8
+  local len = 10
+  local h = string.sub(hash.hash256(data), idx, idx + len - 1)
+  log("Unique ID: " .. h)
+  return h
 end
 
 -- Detects if an on-startup screenshot is requested.
@@ -166,8 +188,7 @@ script.on_event(defines.events.on_tick, function(evt)
   update_params(player)
   if params.onstartup ~= "" then
     log("onstartup requested id=" .. params.onstartup)
-    local name = params.shotname .. "-" .. evt.tick
-    local prefix = params.prefix .. name .. "/"
+    local prefix = params.prefix .. params.shotname .. "/"
     mapshot(player, prefix, params.shotname)
 
     -- Ensure that screen shots are written before marking as done.
@@ -196,10 +217,9 @@ commands.add_command("mapshot", "screenshot the whole map", function(evt)
   update_params(player)
 
   -- Where to store the output.
-  local name = "seed" .. game.default_map_gen_settings.seed .. "-" .. evt.tick
+  local name = "seed" .. game.default_map_gen_settings.seed
   if evt.parameter ~= nil and #evt.parameter > 0 then
     name = evt.parameter
   end
-  local prefix = params.prefix .. name .. "/"
   mapshot(player, params.prefix .. name .. "/", name)
 end)
