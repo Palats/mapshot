@@ -5,7 +5,7 @@ package embed
 var Version = "0.0.7"
 
 // VersionHash is a hash of the mod content
-var VersionHash = "0f3934cd21ea3bf154be9f1705ed172631a6b939754dcc13014031c8c6f611dc"
+var VersionHash = "52d426da1bdbec5ea6b7be825ac601e75c89448673949dd2d4ca89c1684abd84"
 
 // FileLicense is file "LICENSE"
 var FileLicense =
@@ -410,11 +410,9 @@ var FileModControlLua =
 	"local entities = require(\"entities\")\n" +
 	"local hash = require(\"hash\")\n" +
 	"\n" +
-	"-- All settings of the mod.\n" +
-	"local params = {}\n" +
-	"\n" +
 	"-- Read all settings and update the params var, incl. overrides.\n" +
-	"function update_params(player)\n" +
+	"function build_params(player)\n" +
+	"  local params = {}\n" +
 	"  -- settings.player[xxx] does contain the value at the beginning of the game,\n" +
 	"  -- while get_player_settings contains the current value.\n" +
 	"  local s = settings.get_player_settings(player)\n" +
@@ -426,17 +424,23 @@ var FileModControlLua =
 	"    params[k] = v\n" +
 	"  end\n" +
 	"\n" +
-	"  log(\"mapshot update_params:\\n\" .. serpent.block(params))\n" +
+	"  return params\n" +
 	"end\n" +
 	"\n" +
 	"-- Generate a full map screenshot.\n" +
-	"-- prefix: path where to save the shot.\n" +
-	"-- name: a name for the shot, saved in mapshot.json.\n" +
-	"function mapshot(player, prefix, name)\n" +
-	"  player.print(\"Mapshot '\" .. prefix .. \"' ...\")\n" +
+	"function mapshot(player, params)\n" +
+	"  log(\"mapshot params:\\n\" .. serpent.block(params))\n" +
+	"\n" +
 	"  local unique_id = gen_unique_id()\n" +
+	"  local map_id = gen_map_id()\n" +
+	"  local savename = params.savename\n" +
+	"  if (savename == nil or #savename == 0) then\n" +
+	"    savename = \"map-\" .. map_id\n" +
+	"  end\n" +
+	"  local prefix = params.prefix .. savename .. \"/\"\n" +
 	"  local data_dir = \"d-\" .. unique_id\n" +
 	"  local data_prefix = prefix .. data_dir .. \"/\"\n" +
+	"  player.print(\"Mapshot '\" .. prefix .. \"' ...\")\n" +
 	"  log(\"Mapshot target \" .. prefix)\n" +
 	"  log(\"Mapshot data target \" .. data_prefix)\n" +
 	"  log(\"Mapshot unique id \" .. unique_id)\n" +
@@ -504,8 +508,9 @@ var FileModControlLua =
 	"\n" +
 	"  -- Write metadata.\n" +
 	"  game.write_file(data_prefix .. \"mapshot.json\", game.table_to_json({\n" +
-	"    name = name,\n" +
+	"    savename = params.savename,\n" +
 	"    unique_id = unique_id,\n" +
+	"    map_id = map_id,\n" +
 	"    tick = game.tick,\n" +
 	"    ticks_played = game.ticks_played,\n" +
 	"    tile_size = math.pow(2, tile_range_max),\n" +
@@ -533,14 +538,15 @@ var FileModControlLua =
 	"  for tile_range = tile_range_max, tile_range_min, -1 do\n" +
 	"    local tile_size = math.pow(2, tile_range)\n" +
 	"    local render_zoom = tile_range_max - tile_range\n" +
-	"    gen_layer(player, tile_size, render_size, world_min, world_max, data_prefix .. \"zoom_\" .. render_zoom .. \"/\")\n" +
+	"    gen_layer(player, params, tile_size, render_size, world_min, world_max, data_prefix .. \"zoom_\" .. render_zoom .. \"/\"" + // cont.
+	")\n" +
 	"  end\n" +
 	"\n" +
-	"  player.print(\"Mapshot done at \" .. prefix)\n" +
-	"  log(\"Mapshot done at \" .. prefix .. \"(\" .. data_prefix .. \")\")\n" +
+	"  player.print(\"Mapshot done at \" .. data_prefix)\n" +
+	"  log(\"Mapshot done at \" .. data_prefix)\n" +
 	"end\n" +
 	"\n" +
-	"function gen_layer(player, tile_size, render_size, world_min, world_max, data_prefix)\n" +
+	"function gen_layer(player, params, tile_size, render_size, world_min, world_max, data_prefix)\n" +
 	"  -- Zoom. We want to have render_size pixels represent tile_size world unit.\n" +
 	"  -- A zoom of 1.0 means that 32 pixels represent 1 world unit. A zoom of 2.0 means 64 pixels per world unit.\n" +
 	"  local zoom = render_size / 32 / tile_size\n" +
@@ -579,10 +585,21 @@ var FileModControlLua =
 	"  local data = generated.version_hash .. \" \" .. tostring(game.tick) .. \" \" .. game.get_map_exchange_string()\n" +
 	"  -- sha256 produces 64 digits. We're not looking for crypto secure hashing, and instead\n" +
 	"  -- just a short unique string - so pick up a subset.\n" +
-	"  local idx = 8\n" +
-	"  local len = 10\n" +
+	"  local idx = 10\n" +
+	"  local len = 8\n" +
 	"  local h = string.sub(hash.hash256(data), idx, idx + len - 1)\n" +
 	"  log(\"Unique ID: \" .. h)\n" +
+	"  return h\n" +
+	"end\n" +
+	"\n" +
+	"-- Create a unique ID for the game being played.\n" +
+	"function gen_map_id()\n" +
+	"  -- sha256 produces 64 digits. We're not looking for crypto secure hashing, and instead\n" +
+	"  -- just a short unique string - so pick up a subset.\n" +
+	"  local idx = 10\n" +
+	"  local len = 8\n" +
+	"  local h = string.sub(hash.hash256(game.get_map_exchange_string()), idx, idx + len - 1)\n" +
+	"  log(\"Map ID: \" .. h)\n" +
 	"  return h\n" +
 	"end\n" +
 	"\n" +
@@ -594,11 +611,11 @@ var FileModControlLua =
 	"\n" +
 	"  -- Assume player index 1 during startup.\n" +
 	"  local player = game.get_player(1)\n" +
-	"  update_params(player)\n" +
+	"  local params = build_params(player)\n" +
+	"\n" +
 	"  if params.onstartup ~= \"\" then\n" +
 	"    log(\"onstartup requested id=\" .. params.onstartup)\n" +
-	"    local prefix = params.prefix .. params.shotname .. \"/\"\n" +
-	"    mapshot(player, prefix, params.shotname)\n" +
+	"    mapshot(player, params)\n" +
 	"\n" +
 	"    -- Ensure that screen shots are written before marking as done.\n" +
 	"    game.set_wait_for_screenshots_to_finish()\n" +
@@ -623,14 +640,11 @@ var FileModControlLua =
 	"-- doing weird things with --mod-directory and list of active mods.\n" +
 	"commands.add_command(\"mapshot\", \"screenshot the whole map\", function(evt)\n" +
 	"  local player = game.get_player(evt.player_index)\n" +
-	"  update_params(player)\n" +
-	"\n" +
-	"  -- Where to store the output.\n" +
-	"  local name = \"seed\" .. game.default_map_gen_settings.seed\n" +
+	"  local params = build_params(player)\n" +
 	"  if evt.parameter ~= nil and #evt.parameter > 0 then\n" +
-	"    name = evt.parameter\n" +
+	"    params.savename = evt.parameter\n" +
 	"  end\n" +
-	"  mapshot(player, params.prefix .. name .. \"/\", name)\n" +
+	"  mapshot(player, params)\n" +
 	"end)" +
 	""
 // FileModEntitiesLua is file "mod/entities.lua"
@@ -768,9 +782,9 @@ var FileModGeneratedLua =
 	"-- Automatically generated, do not modify\n" +
 	"local data = {}\n" +
 	"data.version = \"0.0.7\"\n" +
-	"data.version_hash = \"c1ed99e010833f54e86956fe8f8241d0f31b05fdc01df34d26c2ae54d2485802\"\n" +
+	"data.version_hash = \"2cf886b22ec3083412e9f10a78016b80a8960c00f8ca2b29afb69cb73e4ec7c0\"\n" +
 	"data.files = {}\n" +
-	"data.files[\"main-cc850eb1.js\"] = [==[\n" +
+	"data.files[\"main-9c2be034.js\"] = [==[\n" +
 	"(function () {\n" +
 	"    'use strict';\n" +
 	"\n" +
@@ -783,9 +797,9 @@ var FileModGeneratedLua =
 	"    console.log(\"Path\", path);\n" +
 	"    fetch(path + 'mapshot.json')\n" +
 	"        .then(resp => resp.json())\n" +
-	"        .then(info => {\n" +
+	"        .then((info) => {\n" +
 	"        console.log(\"Map info\", info);\n" +
-	"        const iterable = function (obj) {\n" +
+	"        const isIterable = function (obj) {\n" +
 	"            // falsy value is javascript includes empty string, which is iterable,\n" +
 	"            // so we cannot just check if the value is truthy.\n" +
 	"            if (obj === null || obj === undefined) {\n" +
@@ -811,48 +825,46 @@ var FileModGeneratedLua =
 	"            minZoom: info.zoom_min - 4,\n" +
 	"            maxZoom: info.zoom_max + 4,\n" +
 	"        });\n" +
-	"        const debugLayer = L.layerGroup([\n" +
+	"        const debugLayers = [\n" +
 	"            L.marker([0, 0], { title: \"Start\" }).bindPopup(\"Starting point\"),\n" +
-	"            L.marker(worldToLatLng(info.player.x, info.player.y), { title: \"Player\" }).bindPopup(\"Player\"),\n" +
-	"            L.marker(worldToLatLng(info.world_min.x, info.world_min.y), { title: `${info.world_min.x}, ${info.world_min." + // cont.
-	"y}` }),\n" +
-	"            L.marker(worldToLatLng(info.world_min.x, info.world_max.y), { title: `${info.world_min.x}, ${info.world_max." + // cont.
-	"y}` }),\n" +
-	"            L.marker(worldToLatLng(info.world_max.x, info.world_min.y), { title: `${info.world_max.x}, ${info.world_min." + // cont.
-	"y}` }),\n" +
-	"            L.marker(worldToLatLng(info.world_max.x, info.world_max.y), { title: `${info.world_max.x}, ${info.world_max." + // cont.
-	"y}` }),\n" +
-	"        ]);\n" +
-	"        let stations = [];\n" +
-	"        if (iterable(info.stations)) {\n" +
+	"        ];\n" +
+	"        if (info.player) {\n" +
+	"            debugLayers.push(L.marker(worldToLatLng(info.player.x, info.player.y), { title: \"Player\" }).bindPopup(\"Playe" + // cont.
+	"r\"));\n" +
+	"        }\n" +
+	"        debugLayers.push(L.marker(worldToLatLng(info.world_min.x, info.world_min.y), { title: `${info.world_min.x}, ${in" + // cont.
+	"fo.world_min.y}` }), L.marker(worldToLatLng(info.world_min.x, info.world_max.y), { title: `${info.world_min.x}, ${info.w" + // cont.
+	"orld_max.y}` }), L.marker(worldToLatLng(info.world_max.x, info.world_min.y), { title: `${info.world_max.x}, ${info.world" + // cont.
+	"_min.y}` }), L.marker(worldToLatLng(info.world_max.x, info.world_max.y), { title: `${info.world_max.x}, ${info.world_max" + // cont.
+	".y}` }));\n" +
+	"        let stationsLayers = [];\n" +
+	"        if (isIterable(info.stations)) {\n" +
 	"            for (const station of info.stations) {\n" +
-	"                stations.push(L.marker(midPointToLatLng(station.bounding_box), { title: station.backer_name }).bindToolt" + // cont.
-	"ip(station.backer_name, { permanent: true }));\n" +
+	"                stationsLayers.push(L.marker(midPointToLatLng(station.bounding_box), { title: station.backer_name }).bin" + // cont.
+	"dTooltip(station.backer_name, { permanent: true }));\n" +
 	"            }\n" +
 	"        }\n" +
-	"        const stationsLayer = L.layerGroup(stations);\n" +
-	"        let tags = [];\n" +
-	"        if (iterable(info.tags)) {\n" +
+	"        let tagsLayers = [];\n" +
+	"        if (isIterable(info.tags)) {\n" +
 	"            for (const tag of info.tags) {\n" +
-	"                tags.push(L.marker(worldToLatLng(tag.position.x, tag.position.y), { title: `${tag.force_name}: ${tag.tex" + // cont.
-	"t}` }).bindTooltip(tag.text, { permanent: true }));\n" +
+	"                tagsLayers.push(L.marker(worldToLatLng(tag.position.x, tag.position.y), { title: `${tag.force_name}: ${t" + // cont.
+	"ag.text}` }).bindTooltip(tag.text, { permanent: true }));\n" +
 	"            }\n" +
 	"        }\n" +
-	"        const tagsLayer = L.layerGroup(tags);\n" +
 	"        const mymap = L.map('map', {\n" +
 	"            crs: L.CRS.Simple,\n" +
 	"            layers: [baseLayer],\n" +
 	"        });\n" +
 	"        L.control.layers({ /* Only one default base layer */}, {\n" +
-	"            \"Train stations\": stationsLayer,\n" +
-	"            \"Tags\": tagsLayer,\n" +
-	"            \"Debug\": debugLayer,\n" +
+	"            \"Train stations\": L.layerGroup(stationsLayers),\n" +
+	"            \"Tags\": L.layerGroup(tagsLayers),\n" +
+	"            \"Debug\": L.layerGroup(debugLayers),\n" +
 	"        }).addTo(mymap);\n" +
 	"        mymap.setView([0, 0], 0);\n" +
 	"    });\n" +
 	"\n" +
 	"}());\n" +
-	"//# sourceMappingURL=main-cc850eb1.js.map\n" +
+	"//# sourceMappingURL=main-9c2be034.js.map\n" +
 	"]==]\n" +
 	"data.files[\"index.html\"] = [==[\n" +
 	"<html><head><title>Mapshot</title><style>body,html{margin:0}</style><link rel=\"stylesheet\" href=\"https://unpkg.com/leafl" + // cont.
@@ -860,7 +872,7 @@ var FileModGeneratedLua =
 	"2yuvEpDL9wQ==\" crossorigin=\"\"><script src=\"https://unpkg.com/leaflet@1.6.0/dist/leaflet.js\" integrity=\"sha512-gZwIG9x3wU" + // cont.
 	"Xg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==\" crossorigin=\"\"></script><script>const MA" + // cont.
 	"PSHOT_DEFAULT_PATH=\"__MAPSHOT_DEFAULT_PATH__\"</script></head><body><div id=\"map\" style=\"height:100%\"></div><script src=\"" + // cont.
-	"./main-cc850eb1.js\" defer=\"\"></script></body></html>]==]\n" +
+	"./main-9c2be034.js\" defer=\"\"></script></body></html>]==]\n" +
 	"return data\n" +
 	"" +
 	""
@@ -1211,12 +1223,12 @@ var FileModSettingsLua =
 	"    },\n" +
 	"    {\n" +
 	"        type = \"string-setting\",\n" +
-	"        name = \"shotname\",\n" +
+	"        name = \"savename\",\n" +
 	"        setting_type = \"runtime-per-user\",\n" +
 	"        default_value = \"\",\n" +
 	"        allow_blank = true,\n" +
-	"        localised_name = \"Shot name\",\n" +
-	"        localised_description = \"Name of the mapshot to create.\",\n" +
+	"        localised_name = \"Save name\",\n" +
+	"        localised_description = \"Name of the save - used to store related mapshot together.\",\n" +
 	"        hidden = true,\n" +
 	"        order = \"302\",\n" +
 	"    },\n" +

@@ -138,7 +138,7 @@ func render(ctx context.Context, factorioSettings *factorio.Settings, rf *Render
 	// file, as mods don't have any way of loading data.
 	overridesData := rf.genOverrides()
 	overridesData["onstartup"] = runID
-	overridesData["shotname"] = name
+	overridesData["savename"] = name
 	if err := writeOverrides(overridesData, dstMapshot); err != nil {
 		return err
 	}

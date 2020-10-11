@@ -3,11 +3,9 @@ local overrides = require("overrides")
 local entities = require("entities")
 local hash = require("hash")
 
--- All settings of the mod.
-local params = {}
-
 -- Read all settings and update the params var, incl. overrides.
-function update_params(player)
+function build_params(player)
+  local params = {}
   -- settings.player[xxx] does contain the value at the beginning of the game,
   -- while get_player_settings contains the current value.
   local s = settings.get_player_settings(player)
@@ -19,17 +17,23 @@ function update_params(player)
     params[k] = v
   end
 
-  log("mapshot update_params:\n" .. serpent.block(params))
+  return params
 end
 
 -- Generate a full map screenshot.
--- prefix: path where to save the shot.
--- name: a name for the shot, saved in mapshot.json.
-function mapshot(player, prefix, name)
-  player.print("Mapshot '" .. prefix .. "' ...")
+function mapshot(player, params)
+  log("mapshot params:\n" .. serpent.block(params))
+
   local unique_id = gen_unique_id()
+  local map_id = gen_map_id()
+  local savename = params.savename
+  if (savename == nil or #savename == 0) then
+    savename = "map-" .. map_id
+  end
+  local prefix = params.prefix .. savename .. "/"
   local data_dir = "d-" .. unique_id
   local data_prefix = prefix .. data_dir .. "/"
+  player.print("Mapshot '" .. prefix .. "' ...")
   log("Mapshot target " .. prefix)
   log("Mapshot data target " .. data_prefix)
   log("Mapshot unique id " .. unique_id)
@@ -97,8 +101,9 @@ function mapshot(player, prefix, name)
 
   -- Write metadata.
   game.write_file(data_prefix .. "mapshot.json", game.table_to_json({
-    name = name,
+    savename = params.savename,
     unique_id = unique_id,
+    map_id = map_id,
     tick = game.tick,
     ticks_played = game.ticks_played,
     tile_size = math.pow(2, tile_range_max),
@@ -126,14 +131,14 @@ function mapshot(player, prefix, name)
   for tile_range = tile_range_max, tile_range_min, -1 do
     local tile_size = math.pow(2, tile_range)
     local render_zoom = tile_range_max - tile_range
-    gen_layer(player, tile_size, render_size, world_min, world_max, data_prefix .. "zoom_" .. render_zoom .. "/")
+    gen_layer(player, params, tile_size, render_size, world_min, world_max, data_prefix .. "zoom_" .. render_zoom .. "/")
   end
 
-  player.print("Mapshot done at " .. prefix)
-  log("Mapshot done at " .. prefix .. "(" .. data_prefix .. ")")
+  player.print("Mapshot done at " .. data_prefix)
+  log("Mapshot done at " .. data_prefix)
 end
 
-function gen_layer(player, tile_size, render_size, world_min, world_max, data_prefix)
+function gen_layer(player, params, tile_size, render_size, world_min, world_max, data_prefix)
   -- Zoom. We want to have render_size pixels represent tile_size world unit.
   -- A zoom of 1.0 means that 32 pixels represent 1 world unit. A zoom of 2.0 means 64 pixels per world unit.
   local zoom = render_size / 32 / tile_size
@@ -171,10 +176,21 @@ function gen_unique_id()
   local data = generated.version_hash .. " " .. tostring(game.tick) .. " " .. game.get_map_exchange_string()
   -- sha256 produces 64 digits. We're not looking for crypto secure hashing, and instead
   -- just a short unique string - so pick up a subset.
-  local idx = 8
-  local len = 10
+  local idx = 10
+  local len = 8
   local h = string.sub(hash.hash256(data), idx, idx + len - 1)
   log("Unique ID: " .. h)
+  return h
+end
+
+-- Create a unique ID for the game being played.
+function gen_map_id()
+  -- sha256 produces 64 digits. We're not looking for crypto secure hashing, and instead
+  -- just a short unique string - so pick up a subset.
+  local idx = 10
+  local len = 8
+  local h = string.sub(hash.hash256(game.get_map_exchange_string()), idx, idx + len - 1)
+  log("Map ID: " .. h)
   return h
 end
 
@@ -186,11 +202,11 @@ script.on_event(defines.events.on_tick, function(evt)
 
   -- Assume player index 1 during startup.
   local player = game.get_player(1)
-  update_params(player)
+  local params = build_params(player)
+
   if params.onstartup ~= "" then
     log("onstartup requested id=" .. params.onstartup)
-    local prefix = params.prefix .. params.shotname .. "/"
-    mapshot(player, prefix, params.shotname)
+    mapshot(player, params)
 
     -- Ensure that screen shots are written before marking as done.
     game.set_wait_for_screenshots_to_finish()
@@ -215,12 +231,9 @@ end)
 -- doing weird things with --mod-directory and list of active mods.
 commands.add_command("mapshot", "screenshot the whole map", function(evt)
   local player = game.get_player(evt.player_index)
-  update_params(player)
-
-  -- Where to store the output.
-  local name = "seed" .. game.default_map_gen_settings.seed
+  local params = build_params(player)
   if evt.parameter ~= nil and #evt.parameter > 0 then
-    name = evt.parameter
+    params.savename = evt.parameter
   end
-  mapshot(player, params.prefix .. name .. "/", name)
+  mapshot(player, params)
 end)

@@ -33,8 +33,9 @@ interface FactorioTag {
 interface MapshotJSON {
     // A unique ID generated for this render.
     unique_id: string,
-    // Name of the save.
-    name: string,
+    // The name of the save - not reliable, as it can be customized.
+    // This is mostly the subdir that was used.
+    savename: string,
 
     // game.tick
     tick: number,
@@ -44,6 +45,8 @@ interface MapshotJSON {
     seed: number,
     // Factorio map exchange string
     map_exchange?: string,
+    // A short ID of the map, derived from map_exchange.
+    map_id: string,
 
     // Size of a tile in in-game units for the least detailed layer.
     tile_size: number,
