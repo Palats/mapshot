@@ -1,5 +1,11 @@
 // The name of the path to use by default is injected in the HTML.
-declare var MAPSHOT_DEFAULT_PATH: string;
+declare var MAPSHOT_CONFIG: MapshotConfig;
+
+// Config for mapshot UI.
+interface MapshotConfig {
+    // Where to find the mapshot to load (not including `mapshot.json`).
+    path?: string;
+}
 
 interface FactorioPosition {
     x: number,
@@ -69,7 +75,7 @@ interface MapshotJSON {
 }
 
 const params = new URLSearchParams(window.location.search);
-let path = params.get("path") ?? MAPSHOT_DEFAULT_PATH;
+let path = params.get("path") ?? MAPSHOT_CONFIG.path ?? "";
 if (!!path && path[path.length - 1] != "/") {
     path = path + "/";
 }

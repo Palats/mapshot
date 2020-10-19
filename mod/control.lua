@@ -122,7 +122,10 @@ function mapshot(player, params)
   -- Create the serving html.
   for fname, content in pairs(generated.files) do
     if (fname == "index.html") then
-      content = string.gsub(content, "__MAPSHOT_DEFAULT_PATH__", data_dir)
+      local config = {
+        path = data_dir,
+      }
+      content = string.gsub(content, "__MAPSHOT_CONFIG_TOKEN__", game.table_to_json(config))
     end
     game.write_file(prefix .. fname, content)
   end

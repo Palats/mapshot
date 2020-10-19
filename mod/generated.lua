@@ -1,15 +1,15 @@
 -- Automatically generated, do not modify
 local data = {}
 data.version = "0.0.7"
-data.version_hash = "52d426da1bdbec5ea6b7be825ac601e75c89448673949dd2d4ca89c1684abd84"
+data.version_hash = "c78e44e5464a789d05b5e85079469869f691168628eda8375e5b54fd63dae22d"
 data.files = {}
-data.files["main-9c2be034.js"] = [==[
+data.files["main-1c3f7217.js"] = [==[
 (function () {
     'use strict';
 
-    var _a;
+    var _a, _b;
     const params = new URLSearchParams(window.location.search);
-    let path = (_a = params.get("path")) !== null && _a !== void 0 ? _a : MAPSHOT_DEFAULT_PATH;
+    let path = (_b = (_a = params.get("path")) !== null && _a !== void 0 ? _a : MAPSHOT_CONFIG.path) !== null && _b !== void 0 ? _b : "";
     if (!!path && path[path.length - 1] != "/") {
         path = path + "/";
     }
@@ -74,8 +74,8 @@ data.files["main-9c2be034.js"] = [==[
     });
 
 }());
-//# sourceMappingURL=main-9c2be034.js.map
+//# sourceMappingURL=main-1c3f7217.js.map
 ]==]
 data.files["index.html"] = [==[
-<html><head><title>Mapshot</title><style>body,html{margin:0}</style><link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin=""><script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js" integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==" crossorigin=""></script><script>const MAPSHOT_DEFAULT_PATH="__MAPSHOT_DEFAULT_PATH__"</script></head><body><div id="map" style="height:100%"></div><script src="./main-9c2be034.js" defer=""></script></body></html>]==]
+<html><head><title>Mapshot</title><style>body,html{margin:0}</style><link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin=""><script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js" integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==" crossorigin=""></script><script>const MAPSHOT_CONFIG=__MAPSHOT_CONFIG_TOKEN__</script></head><body><div id="map" style="height:100%"></div><script src="./main-1c3f7217.js" defer=""></script></body></html>]==]
 return data
