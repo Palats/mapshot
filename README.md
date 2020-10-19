@@ -1,6 +1,6 @@
 # Mapshot for Factorio
 
-*Mapshot* generates zoomable screenshots of Factorio maps - **[example](https://palats.github.io/mapshot-example/)**.
+*Mapshot* generates zoomable screenshots of Factorio maps - **[example](https://mapshot.palats.xyz/)**.
 
 They can be created in 2 ways:
 

@@ -1,7 +1,7 @@
 -- Automatically generated, do not modify
 local data = {}
 data.version = "0.0.7"
-data.version_hash = "fa140058e414f50ac901e4b4b78e4cc0ee6e9f834a2d8f945a8fc95e2f993454"
+data.version_hash = "e21730009780ad5e4297049fd3ef48efb85646ea1d2d67e1ee9f13e6b47bb004"
 data.files = {}
 data.files["main-1c3f7217.js"] = [==[
 (function () {
