@@ -5,7 +5,7 @@ package embed
 var Version = "0.0.7"
 
 // VersionHash is a hash of the mod content
-var VersionHash = "c78e44e5464a789d05b5e85079469869f691168628eda8375e5b54fd63dae22d"
+var VersionHash = "fa140058e414f50ac901e4b4b78e4cc0ee6e9f834a2d8f945a8fc95e2f993454"
 
 // FileLicense is file "LICENSE"
 var FileLicense =
@@ -319,10 +319,12 @@ var FileReadmeMd =
 	"\n" +
 	"By default, it serves on port 8080 - thus accessible at http://localhost:8080 if it is running on your local machine. It" + // cont.
 	" serves all the mapshots available in the `script-output` directory of Factorio. It provides a very basic list of availa" + // cont.
-	"ble mapshots and refreshes this list every few seconds.\n" +
+	"ble mapshots and refreshes this list every few seconds. (Note: it uses frontend code built into the binary. It ignores t" + // cont.
+	"he frontend files such as `index.html` and Javascript files present next to the mapshots.)\n" +
 	"\n" +
-	"The generated content is made of static files. This means you can also serve the content through any HTTP server (e.g., " + // cont.
-	"`python3 -m http.server 8080` from the `script-output` directory) or your favorite web file hosting.\n" +
+	"The generated content has static frontend code generated next to the images. This means you can also serve the content t" + // cont.
+	"hrough any HTTP server (e.g., `python3 -m http.server 8080` from the `script-output` directory) or your favorite web fil" + // cont.
+	"e hosting.\n" +
 	"\n" +
 	"\n" +
 	"## Development\n" +
@@ -785,7 +787,7 @@ var FileModGeneratedLua =
 	"-- Automatically generated, do not modify\n" +
 	"local data = {}\n" +
 	"data.version = \"0.0.7\"\n" +
-	"data.version_hash = \"7c940e721ad45ef8e984f0abf09e638db529a1723fc78a4164c4b00d5e258b98\"\n" +
+	"data.version_hash = \"66f68eca86b779ff19870f94a062e0597ef29519f032dc141e5f5a2bf2413677\"\n" +
 	"data.files = {}\n" +
 	"data.files[\"main-1c3f7217.js\"] = [==[\n" +
 	"(function () {\n" +
@@ -883,7 +885,7 @@ var FileModGeneratedLua =
 	"F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==\" crossorigin=\"\">\n" +
 	"    <script src=\"https://unpkg.com/leaflet@1.6.0/dist/leaflet.js\" integrity=\"sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg" + // cont.
 	"4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==\" crossorigin=\"\"></script>\n" +
-	"    <script>const MAPSHOT_CONFIG = __MAPSHOT_CONFIG_TOKEN__</script>\n" +
+	"    <script>let MAPSHOT_CONFIG = {}; try { MAPSHOT_CONFIG = __MAPSHOT_CONFIG_TOKEN__ } catch (e) { }</script>\n" +
 	"</head>\n" +
 	"\n" +
 	"<body>\n" +
@@ -1726,4 +1728,105 @@ var ModFiles = map[string]string{
 	"overrides.lua": FileModOverridesLua,
 	"settings.lua": FileModSettingsLua,
 	"thumbnail.png": FileThumbnailPng,
+}
+
+// FileFrontendDistMainCFJs is file "frontend/dist/main-1c3f7217.js"
+var FileFrontendDistMainCFJs =
+	"(function () {\n" +
+	"    'use strict';\n" +
+	"\n" +
+	"    var _a, _b;\n" +
+	"    const params = new URLSearchParams(window.location.search);\n" +
+	"    let path = (_b = (_a = params.get(\"path\")) !== null && _a !== void 0 ? _a : MAPSHOT_CONFIG.path) !== null && _b !== " + // cont.
+	"void 0 ? _b : \"\";\n" +
+	"    if (!!path && path[path.length - 1] != \"/\") {\n" +
+	"        path = path + \"/\";\n" +
+	"    }\n" +
+	"    console.log(\"Path\", path);\n" +
+	"    fetch(path + 'mapshot.json')\n" +
+	"        .then(resp => resp.json())\n" +
+	"        .then((info) => {\n" +
+	"        console.log(\"Map info\", info);\n" +
+	"        const isIterable = function (obj) {\n" +
+	"            // falsy value is javascript includes empty string, which is iterable,\n" +
+	"            // so we cannot just check if the value is truthy.\n" +
+	"            if (obj === null || obj === undefined) {\n" +
+	"                return false;\n" +
+	"            }\n" +
+	"            return typeof obj[Symbol.iterator] === \"function\";\n" +
+	"        };\n" +
+	"        const worldToLatLng = function (x, y) {\n" +
+	"            const ratio = info.render_size / info.tile_size;\n" +
+	"            return L.latLng(-y * ratio, x * ratio);\n" +
+	"        };\n" +
+	"        const midPointToLatLng = function (bbox) {\n" +
+	"            return worldToLatLng((bbox.left_top.x + bbox.right_bottom.x) / 2, (bbox.left_top.y + bbox.right_bottom.y) / " + // cont.
+	"2);\n" +
+	"        };\n" +
+	"        const baseLayer = L.tileLayer(path + \"zoom_{z}/tile_{x}_{y}.jpg\", {\n" +
+	"            tileSize: info.render_size,\n" +
+	"            bounds: L.latLngBounds(worldToLatLng(info.world_min.x, info.world_min.y), worldToLatLng(info.world_max.x, in" + // cont.
+	"fo.world_max.y)),\n" +
+	"            noWrap: true,\n" +
+	"            maxNativeZoom: info.zoom_max,\n" +
+	"            minNativeZoom: info.zoom_min,\n" +
+	"            minZoom: info.zoom_min - 4,\n" +
+	"            maxZoom: info.zoom_max + 4,\n" +
+	"        });\n" +
+	"        const debugLayers = [\n" +
+	"            L.marker([0, 0], { title: \"Start\" }).bindPopup(\"Starting point\"),\n" +
+	"        ];\n" +
+	"        if (info.player) {\n" +
+	"            debugLayers.push(L.marker(worldToLatLng(info.player.x, info.player.y), { title: \"Player\" }).bindPopup(\"Playe" + // cont.
+	"r\"));\n" +
+	"        }\n" +
+	"        debugLayers.push(L.marker(worldToLatLng(info.world_min.x, info.world_min.y), { title: `${info.world_min.x}, ${in" + // cont.
+	"fo.world_min.y}` }), L.marker(worldToLatLng(info.world_min.x, info.world_max.y), { title: `${info.world_min.x}, ${info.w" + // cont.
+	"orld_max.y}` }), L.marker(worldToLatLng(info.world_max.x, info.world_min.y), { title: `${info.world_max.x}, ${info.world" + // cont.
+	"_min.y}` }), L.marker(worldToLatLng(info.world_max.x, info.world_max.y), { title: `${info.world_max.x}, ${info.world_max" + // cont.
+	".y}` }));\n" +
+	"        let stationsLayers = [];\n" +
+	"        if (isIterable(info.stations)) {\n" +
+	"            for (const station of info.stations) {\n" +
+	"                stationsLayers.push(L.marker(midPointToLatLng(station.bounding_box), { title: station.backer_name }).bin" + // cont.
+	"dTooltip(station.backer_name, { permanent: true }));\n" +
+	"            }\n" +
+	"        }\n" +
+	"        let tagsLayers = [];\n" +
+	"        if (isIterable(info.tags)) {\n" +
+	"            for (const tag of info.tags) {\n" +
+	"                tagsLayers.push(L.marker(worldToLatLng(tag.position.x, tag.position.y), { title: `${tag.force_name}: ${t" + // cont.
+	"ag.text}` }).bindTooltip(tag.text, { permanent: true }));\n" +
+	"            }\n" +
+	"        }\n" +
+	"        const mymap = L.map('map', {\n" +
+	"            crs: L.CRS.Simple,\n" +
+	"            layers: [baseLayer],\n" +
+	"        });\n" +
+	"        L.control.layers({ /* Only one default base layer */}, {\n" +
+	"            \"Train stations\": L.layerGroup(stationsLayers),\n" +
+	"            \"Tags\": L.layerGroup(tagsLayers),\n" +
+	"            \"Debug\": L.layerGroup(debugLayers),\n" +
+	"        }).addTo(mymap);\n" +
+	"        mymap.setView([0, 0], 0);\n" +
+	"    });\n" +
+	"\n" +
+	"}());\n" +
+	"//# sourceMappingURL=main-1c3f7217.js.map\n" +
+	"" +
+	""
+// FileIndexHtml is file "index.html"
+var FileIndexHtml =
+	"<html><head><title>Mapshot</title><style>body,html{margin:0}</style><link rel=\"stylesheet\" href=\"https://unpkg.com/leafl" + // cont.
+	"et@1.6.0/dist/leaflet.css\" integrity=\"sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw" + // cont.
+	"2yuvEpDL9wQ==\" crossorigin=\"\"><script src=\"https://unpkg.com/leaflet@1.6.0/dist/leaflet.js\" integrity=\"sha512-gZwIG9x3wU" + // cont.
+	"Xg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==\" crossorigin=\"\"></script><script>let MAPS" + // cont.
+	"HOT_CONFIG={};try{MAPSHOT_CONFIG=__MAPSHOT_CONFIG_TOKEN__}catch(_){}</script></head><body><div id=\"map\" style=\"height:10" + // cont.
+	"0%\"></div><script src=\"./main-1c3f7217.js\" defer=\"\"></script></body></html>" +
+	""
+
+// FrontendFiles is the list of files for the Factorio mod.
+var FrontendFiles = map[string]string{
+	"main-1c3f7217.js": FileFrontendDistMainCFJs,
+	"index.html": FileIndexHtml,
 }

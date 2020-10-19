@@ -3,7 +3,9 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
+	"path"
 	"path/filepath"
 
 	"github.com/Palats/mapshot/factorio"
@@ -18,6 +20,22 @@ func dev(ctx context.Context, factorioSettings *factorio.Settings) error {
 	}
 	fact.ForceVerbose()
 
+	cwd, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("unable to find current directory: %w", err)
+	}
+
+	go func() {
+		baseDir := fact.ScriptOutput()
+		fmt.Printf("Serving data from %s\n", baseDir)
+		s := newServer(baseDir, http.FileServer(http.Dir(path.Join(cwd, "frontend", "dist"))))
+		go s.watch(ctx)
+
+		addr := fmt.Sprintf(":%d", port)
+		fmt.Printf("Listening on %s ...\n", addr)
+		http.ListenAndServe(addr, s)
+	}()
+
 	tmpdir, cleanup := getWorkDir()
 	defer cleanup()
 
@@ -29,10 +47,6 @@ func dev(ctx context.Context, factorioSettings *factorio.Settings) error {
 
 	// Add the mod itself.
 	dstMapshot := filepath.Join(dstMods, "mapshot")
-	cwd, err := os.Getwd()
-	if err != nil {
-		return fmt.Errorf("unable to find current directory: %w", err)
-	}
 	modDir := filepath.Join(cwd, "mod")
 	if err := os.Symlink(modDir, dstMapshot); err != nil {
 		return fmt.Errorf("unable to symlink %q: %w", modDir, err)

@@ -108,7 +108,7 @@ func filenameToVar(fname string) string {
 	return "File" + s
 }
 
-func genGo(modFiles map[string]string, version string, versionHash string) {
+func genGo(modFiles map[string]string, frontendFiles map[string]string, version string, versionHash string) {
 	f, err := os.Create("embed/generated.go")
 	if err != nil {
 		log.Fatal(err)
@@ -131,14 +131,20 @@ func genGo(modFiles map[string]string, version string, versionHash string) {
 	writeLn(fmt.Sprintf("var VersionHash = %q", versionHash))
 	writeLn("")
 
+	genGoFileSet(modFiles, "ModFiles", "is the list of files for the Factorio mod.", writeLn)
+	writeLn("")
+	genGoFileSet(frontendFiles, "FrontendFiles", "is the files for the UI to navigate the mapshots.", writeLn)
+}
+
+func genGoFileSet(files map[string]string, varName string, comment string, writeLn func(string)) {
 	var filenames []string
-	for filename := range modFiles {
+	for filename := range files {
 		filenames = append(filenames, filename)
 	}
 	sort.Strings(filenames)
 
 	for _, filename := range filenames {
-		content := modFiles[filename]
+		content := files[filename]
 		varName := filenameToVar(filename)
 
 		writeLn(fmt.Sprintf("// %s is file %q", varName, filepath.ToSlash(filename)))
@@ -155,8 +161,8 @@ func genGo(modFiles map[string]string, version string, versionHash string) {
 	}
 	writeLn("")
 
-	writeLn("// ModFiles is the list of files for the Factorio mod.")
-	writeLn("var ModFiles = map[string]string{")
+	writeLn(fmt.Sprintf("// %s is the list of files for the Factorio mod.", varName))
+	writeLn(fmt.Sprintf("var %s = map[string]string{", varName))
 	for _, filename := range filenames {
 		// Remove subpaths - this is used to generate the mod files, which is
 		// flat structure.
@@ -262,5 +268,5 @@ func main() {
 
 	// Generate Lua file first as it will be embedded also in Go module files.
 	genLua(frontendFiles, version, versionHash)
-	genGo(modFiles, version, versionHash)
+	genGo(modFiles, frontendFiles, version, versionHash)
 }

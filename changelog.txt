@@ -3,6 +3,8 @@ Version: 0.0.8
   CLI:
     - Add more directories where to find Factorio.
     - Have `dev` command always show Factorio output.
+    - `dev` command serves content from npm build output for simpler dev cycle.
+    - `serve` command uses built-in html/javascript instead of the one generated from Factorio.
   Internal:
     - Frontend is now generated, which will allow for imports & typescript.
     - Frontend can contains more files; might allow for icons later.

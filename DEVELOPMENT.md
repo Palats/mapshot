@@ -1,6 +1,7 @@
 # Development
 
-Most instructions here assume a Linux host.
+Most instructions here assume a Linux host. The working directory is the root of
+the checkout.
 
 ## Initial setup
 
@@ -12,9 +13,41 @@ cd mapshot
 npm --prefix frontend install
 ```
 
+## Development cycle
+
+Keep an automatic rebuild of the frontend in background:
+```
+npm --prefix frontend run watch
+```
+This will automatically rebuild `frontend/dist/*` files on change.
+
+Then, run the CLI in `dev` mode:
+```
+go run mapshot.go dev
+```
+
+This will:
+ - Start Factorio with a customized list of mod, including the mapshot mod.
+ - The mapshot mod will link directly the files in the checkout - so
+   modifications of the lua files will be reflected when loading a savegame in
+   Factorio.
+ - A HTTP server will run in backgrdound to access generated content.
+ - The UI frontend will use the file watched by the `npm` command - so any
+   changes to the frontend code will be reflected on a page reload.
+
+The main limitation of the `dev` mode is that files is that the fiels embedded in the CLI binary will not be automatically updated. In practice, the only consequence is that generated `index.html` and companions files will not be up to date. However, the HTTP server in the CLI do not use them anyway.
+
+The frontend can load arbitrary mapshots by adding `?path=mapshot/<name>` query parameters.
+
+The files in the `mod` directory of the repository can be used directly by
+Factorio. This allows to a quick edit/test cycle. That directory can be linked
+from your Factorio `mods/` directory under the name `mapshot`.
+
+This will run Factorio with customized list of mods, including the mapshot mod - using links directly to the repository, so changes will be visible in Factorio after reload a save. Don't forget that generated content will not be automatically updated.
+
 ## Regenerating files
 
-Multiple files are automatically generated and thus need to be updated.
+To have a clean build, multiple files need to be generated.
 
 If source in `frontend/` is changed:
 ```
@@ -39,39 +72,6 @@ It generates:
 
 Those files _are_ committed to the repository, as per `go generate` common
 practices.
-
-## Working on the mod
-
-The files in the `mod` directory of the repository can be used directly by
-Factorio. This allows to a quick edit/test cycle. That directory can be linked
-from your Factorio `mods/` directory under the name `mapshot`.
-
-The CLI also contains a more convenient alternative:
-```
-go run mapshot.go dev
-```
-
-This will run Factorio with customized list of mods, including the mapshot mod - using links directly to the repository, so changes will be visible in Factorio after reload a save. Don't forget that generated content will not be automatically updated.
-
-## Working on the CLI
-
-To run it from a checkout of the repository:
-```
-go run mapshot.go <parameters...>
-```
-
-By default, it will show the help, including all the available subcommands. Note
-that it will run with the currently generated content, which might not be up to
-date - see "Regenerating" section.
-
-## Working on the UI
-
-To automatically rebuild `frontend/dist/*` files on change:
-```
-npm --prefix frontend run watch
-```
-
-The frontend can load arbitrary mapshots by adding `?path=mapshot/<name>` query parameters.
 
 ## Releasing
 

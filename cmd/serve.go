@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Palats/mapshot/embed"
 	"github.com/Palats/mapshot/factorio"
 	"github.com/golang/glog"
 	"github.com/spf13/cobra"
@@ -46,7 +47,7 @@ func findShots(baseDir string) ([]shotInfo, error) {
 		shots = append(shots, shotInfo{
 			fsPath:   shotPath,
 			name:     name,
-			httpPath: "/" + filepath.ToSlash(name) + "/",
+			httpPath: "/data/" + filepath.ToSlash(name) + "/",
 		})
 		return nil
 	})
@@ -59,15 +60,17 @@ func findShots(baseDir string) ([]shotInfo, error) {
 // Server implements a server presenting available mapshots and serving their
 // content.
 type Server struct {
-	baseDir string
+	baseDir     string
+	frontendMux http.Handler
 
 	m   sync.Mutex
 	mux *http.ServeMux
 }
 
-func newServer(baseDir string) *Server {
+func newServer(baseDir string, frontendMux http.Handler) *Server {
 	s := &Server{
-		baseDir: baseDir,
+		baseDir:     baseDir,
+		frontendMux: frontendMux,
 	}
 	s.updateMux()
 	return s
@@ -109,14 +112,15 @@ func (s *Server) buildMux(shots []shotInfo) *http.ServeMux {
 	mux := http.NewServeMux()
 
 	data := []map[string]string{}
-	for _, s := range shots {
+	for _, shot := range shots {
 		data = append(data, map[string]string{
-			"name": s.name,
-			"path": s.httpPath,
+			"name": shot.name,
+			"path": shot.httpPath,
 		})
-		mux.Handle(s.httpPath, http.StripPrefix(s.httpPath, http.FileServer(http.Dir(s.fsPath))))
+		mux.Handle(shot.httpPath, http.StripPrefix(shot.httpPath, http.FileServer(http.Dir(shot.fsPath))))
 	}
 
+	mux.Handle("/fe/", http.StripPrefix("/fe", s.frontendMux))
 	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
 		if err := indexHTML.Execute(w, data); err != nil {
 			http.Error(w, fmt.Sprintf("unable to generate file: %v", err), http.StatusInternalServerError)
@@ -145,7 +149,7 @@ var indexHTML = template.Must(template.New("name").Parse(`
 	{{end}}
 	<ul>
 	{{range .}}
-	<li><a href="{{.path}}">{{.name}}</a></li>
+	<li><a href="fe?path={{.path}}">{{.name}}</a></li>
 	{{end}}
 	</ul>
 </body>
@@ -167,7 +171,7 @@ It serves data from Factorio script-output directory.
 
 		baseDir := fact.ScriptOutput()
 		fmt.Printf("Serving data from %s\n", baseDir)
-		s := newServer(baseDir)
+		s := newServer(baseDir, builtinFrontendMux)
 		go s.watch(cmd.Context())
 
 		addr := fmt.Sprintf(":%d", port)
@@ -177,8 +181,24 @@ It serves data from Factorio script-output directory.
 }
 
 var port int
+var builtinFrontendMux *http.ServeMux
 
 func init() {
 	cmdServe.PersistentFlags().IntVar(&port, "port", 8080, "Port to listen on.")
 	cmdRoot.AddCommand(cmdServe)
+
+	// Build a mux to serve frontend files from embed/ module.
+	builtinFrontendMux = http.NewServeMux()
+	for fname, content := range embed.FrontendFiles {
+		fname := fname
+		content := content
+		builtinFrontendMux.HandleFunc("/"+fname, func(w http.ResponseWriter, req *http.Request) {
+			w.Write([]byte(content))
+		})
+		if fname == "index.html" {
+			builtinFrontendMux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
+				w.Write([]byte(content))
+			})
+		}
+	}
 }
