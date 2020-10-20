@@ -47,7 +47,7 @@ func getVersion() string {
 	return version
 }
 
-func genLua(frontendFiles map[string]string, version, versionHash string) {
+func genLua(frontendFiles []*FileInfo, version, versionHash string) {
 	f, err := os.Create("mod/generated.lua")
 	if err != nil {
 		log.Fatal(err)
@@ -60,29 +60,23 @@ func genLua(frontendFiles map[string]string, version, versionHash string) {
 		}
 	}
 
-	var filenames []string
-	for filename := range frontendFiles {
-		filenames = append(filenames, filename)
-	}
-	sort.Strings(filenames)
-
 	writeLn("-- Automatically generated, do not modify")
 	writeLn("local data = {}")
 	writeLn(fmt.Sprintf("data.version = %q", version))
 	writeLn(fmt.Sprintf("data.version_hash = %q", versionHash))
 	writeLn("data.files = {}")
-	for _, filename := range filenames {
-		content := frontendFiles[filename]
-		if strings.Contains(content, "]==]") {
+
+	for _, fi := range frontendFiles {
+		if strings.Contains(string(fi.Content), "]==]") {
 			log.Fatal("dumb Lua encoding cannot proceed")
 		}
 
-		key := filepath.Base(filename)
+		key := filepath.Base(fi.Filename)
 
 		writeLn(fmt.Sprintf("data.files[%q] = [==[", key))
 		// This blindly copy the file content. As both the source and target files
 		// are text file, they will preserve the end-of-lines.
-		if _, err := f.WriteString(content); err != nil {
+		if _, err := f.Write(fi.Content); err != nil {
 			log.Fatal(err)
 		}
 		writeLn("]==]")
@@ -100,6 +94,8 @@ func filenameToVar(fname string) string {
 		}
 		if p == "json" {
 			p = "JSON"
+		} else if p == "html" {
+			p = "HTML"
 		} else {
 			p = strings.ToUpper(p[0:1]) + strings.ToLower(p[1:])
 		}
@@ -108,7 +104,7 @@ func filenameToVar(fname string) string {
 	return "File" + s
 }
 
-func genGo(modFiles map[string]string, frontendFiles map[string]string, version string, versionHash string) {
+func genGo(modFiles []*FileInfo, frontendFiles []*FileInfo, version string, versionHash string) {
 	f, err := os.Create("embed/generated.go")
 	if err != nil {
 		log.Fatal(err)
@@ -131,26 +127,33 @@ func genGo(modFiles map[string]string, frontendFiles map[string]string, version 
 	writeLn(fmt.Sprintf("var VersionHash = %q", versionHash))
 	writeLn("")
 
-	genGoFileSet(modFiles, "ModFiles", "is the list of files for the Factorio mod.", writeLn)
-	writeLn("")
-	genGoFileSet(frontendFiles, "FrontendFiles", "is the files for the UI to navigate the mapshots.", writeLn)
-}
+	var files []*FileInfo
 
-func genGoFileSet(files map[string]string, varName string, comment string, writeLn func(string)) {
-	var filenames []string
-	for filename := range files {
-		filenames = append(filenames, filename)
+	writeLn("// ModFiles is the list of files for the Factorio mod.")
+	writeLn("var ModFiles = map[string]string{")
+	for _, fi := range modFiles {
+		files = append(files, fi)
+		writeLn(fmt.Sprintf("\t%q: %s,", filepath.Base(fi.Filename), filenameToVar(fi.Filename)))
 	}
-	sort.Strings(filenames)
+	writeLn("}")
+	writeLn("")
 
-	for _, filename := range filenames {
-		content := files[filename]
-		varName := filenameToVar(filename)
+	writeLn("// FrontendFiles is the files for the UI to navigate the mapshots.")
+	writeLn("var FrontendFiles = map[string]string{")
+	for _, fi := range frontendFiles {
+		files = append(files, fi)
+		writeLn(fmt.Sprintf("\t%q: %s,", filepath.Base(fi.Filename), filenameToVar(fi.Filename)))
+	}
+	writeLn("}")
+	writeLn("")
 
-		writeLn(fmt.Sprintf("// %s is file %q", varName, filepath.ToSlash(filename)))
+	for _, fi := range sortFiles(files) {
+		varName := filenameToVar(fi.Filename)
+
+		writeLn(fmt.Sprintf("// %s is file %q", varName, filepath.ToSlash(fi.Filename)))
 		writeLn(fmt.Sprintf("var %s =", varName))
 
-		for _, line := range strings.SplitAfter(content, "\n") {
+		for _, line := range strings.SplitAfter(string(fi.Content), "\n") {
 			for len(line) > 120 {
 				writeLn(fmt.Sprintf("\t%q + // cont.", line[:120]))
 				line = line[120:]
@@ -158,28 +161,22 @@ func genGoFileSet(files map[string]string, varName string, comment string, write
 			writeLn(fmt.Sprintf("\t%q +", line))
 		}
 		writeLn("\t\"\"")
+		writeLn("")
 	}
-	writeLn("")
-
-	writeLn(fmt.Sprintf("// %s is the list of files for the Factorio mod.", varName))
-	writeLn(fmt.Sprintf("var %s = map[string]string{", varName))
-	for _, filename := range filenames {
-		// Remove subpaths - this is used to generate the mod files, which is
-		// flat structure.
-		writeLn(fmt.Sprintf("\t%q: %s,", filepath.Base(filename), filenameToVar(filename)))
-	}
-	writeLn("}")
 }
 
 type Loader struct {
 	hash    hash.Hash
 	ignores map[string]bool
+	// Map filename to content
+	files map[string]*FileInfo
 }
 
 func newLoader(ignores []string) *Loader {
 	l := &Loader{
 		ignores: make(map[string]bool),
 		hash:    sha256.New(),
+		files:   make(map[string]*FileInfo),
 	}
 	for _, i := range ignores {
 		l.ignores[i] = true
@@ -187,15 +184,19 @@ func newLoader(ignores []string) *Loader {
 	return l
 }
 
-func (l *Loader) record(filename string, content []byte) {
-	if l.ignores[filepath.Base(filename)] {
-		return
+func (l *Loader) record(f *FileInfo) *FileInfo {
+	l.files[f.Filename] = f
+	if !l.ignores[f.Filename] {
+		l.hash.Write(f.Content)
 	}
-	l.hash.Write(content)
+	return f
 }
 
-func (l *Loader) LoadTextFile(filename string) string {
-	data, err := ioutil.ReadFile(filename)
+func (l *Loader) LoadTextFile(filename string) *FileInfo {
+	if fi := l.files[filename]; fi != nil {
+		return fi
+	}
+	data, err := ioutil.ReadFile(filepath.FromSlash(filename))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -205,33 +206,54 @@ func (l *Loader) LoadTextFile(filename string) string {
 		// '\n' format.
 		content = strings.ReplaceAll(content, textEOL, "\n")
 	}
-	l.record(filename, []byte(data))
-	return content
+	return l.record(&FileInfo{
+		Filename: filename,
+		Content:  []byte(data),
+	})
 }
 
-func (l *Loader) LoadBinaryFile(filename string) []byte {
-	data, err := ioutil.ReadFile(filename)
+func (l *Loader) LoadBinaryFile(filename string) *FileInfo {
+	if fi := l.files[filename]; fi != nil {
+		return fi
+	}
+	data, err := ioutil.ReadFile(filepath.FromSlash(filename))
 	if err != nil {
 		log.Fatal(err)
 	}
-	l.record(filename, data)
-	return data
+	return l.record(&FileInfo{
+		Filename: filename,
+		Content:  data,
+	})
 }
 
-func (l *Loader) LoadTextGlob(glob string) map[string]string {
-	files := make(map[string]string)
-	matches, err := filepath.Glob(glob)
+func (l *Loader) LoadTextGlob(glob string) []*FileInfo {
+	var files []*FileInfo
+	matches, err := filepath.Glob(filepath.FromSlash(glob))
 	if err != nil {
 		log.Fatal(err)
 	}
 	for _, m := range matches {
-		files[m] = l.LoadTextFile(m)
+		files = append(files, l.LoadTextFile(filepath.ToSlash(m)))
 	}
 	return files
 }
 
 func (l *Loader) VersionHash() string {
 	return hex.EncodeToString(l.hash.Sum(nil))
+}
+
+type FileInfo struct {
+	// Filename, using slashes no matter the platform.
+	Filename string
+	// Content, with \n for EOL.
+	Content []byte
+}
+
+func sortFiles(files []*FileInfo) []*FileInfo {
+	sort.Slice(files, func(i, j int) bool {
+		return files[i].Filename < files[j].Filename
+	})
+	return files
 }
 
 func main() {
@@ -243,23 +265,21 @@ func main() {
 	// Parameter is the list of file to ignore when creating the hash. Those
 	// files are themselves generated, so reading them would create an unstable
 	// hash.
-	loader := newLoader([]string{"generated.lua"})
+	loader := newLoader([]string{"mod/generated.lua"})
 
-	frontendFiles := loader.LoadTextGlob("frontend/dist/*.js")
-	frontendFiles["index.html"] = loader.LoadTextFile("frontend/dist/index.html")
+	frontendFiles := sortFiles(append(
+		loader.LoadTextGlob("frontend/dist/*.js"),
+		loader.LoadTextFile("frontend/dist/index.html"),
+	))
 
-	modFiles := loader.LoadTextGlob("mod/*.lua")
-	modFiles["thumbnail.png"] = string(loader.LoadBinaryFile("thumbnail.png"))
-	textfiles := []string{
-		"mod/info.json",
-		"changelog.txt",
-		"LICENSE",
-		"README.md",
-		"thumbnail.png",
-	}
-	for _, filename := range textfiles {
-		modFiles[filename] = loader.LoadTextFile(filename)
-	}
+	modFiles := sortFiles(append(
+		loader.LoadTextGlob("mod/*.lua"),
+		loader.LoadBinaryFile("thumbnail.png"),
+		loader.LoadTextFile("mod/info.json"),
+		loader.LoadTextFile("changelog.txt"),
+		loader.LoadTextFile("LICENSE"),
+		loader.LoadTextFile("README.md"),
+	))
 
 	version := getVersion()
 	versionHash := loader.VersionHash()
