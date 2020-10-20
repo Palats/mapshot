@@ -5,7 +5,7 @@ package embed
 var Version = "0.0.7"
 
 // VersionHash is a hash of the mod content
-var VersionHash = "e21730009780ad5e4297049fd3ef48efb85646ea1d2d67e1ee9f13e6b47bb004"
+var VersionHash = "74ab36393872e7c2050685f48f3bada8084ff0d8e51af1017aa375ca2624061e"
 
 // FileLicense is file "LICENSE"
 var FileLicense =
@@ -789,7 +789,7 @@ var FileModGeneratedLua =
 	"-- Automatically generated, do not modify\n" +
 	"local data = {}\n" +
 	"data.version = \"0.0.7\"\n" +
-	"data.version_hash = \"fa140058e414f50ac901e4b4b78e4cc0ee6e9f834a2d8f945a8fc95e2f993454\"\n" +
+	"data.version_hash = \"e21730009780ad5e4297049fd3ef48efb85646ea1d2d67e1ee9f13e6b47bb004\"\n" +
 	"data.files = {}\n" +
 	"data.files[\"main-1c3f7217.js\"] = [==[\n" +
 	"(function () {\n" +
@@ -1805,9 +1805,9 @@ var FileFrontendDistMainCFJs =
 // FileIndexHtml is file "index.html"
 var FileIndexHtml =
 	"<html><head><title>Mapshot</title><style>body,html{margin:0}</style><link rel=\"stylesheet\" href=\"https://unpkg.com/leafl" + // cont.
-	"et@1.6.0/dist/leaflet.css\" integrity=\"sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw" + // cont.
-	"2yuvEpDL9wQ==\" crossorigin=\"\"><script src=\"https://unpkg.com/leaflet@1.6.0/dist/leaflet.js\" integrity=\"sha512-gZwIG9x3wU" + // cont.
-	"Xg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==\" crossorigin=\"\"></script><script>let MAPS" + // cont.
+	"et@1.7.1/dist/leaflet.css\" integrity=\"sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19sc" + // cont.
+	"R4PsZChSR7A==\" crossorigin=\"\"><script src=\"https://unpkg.com/leaflet@1.7.1/dist/leaflet.js\" integrity=\"sha512-XQoYMqMTK8" + // cont.
+	"LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==\" crossorigin=\"\"></script><script>let MAPS" + // cont.
 	"HOT_CONFIG={};try{MAPSHOT_CONFIG=__MAPSHOT_CONFIG_TOKEN__}catch(_){}</script></head><body><div id=\"map\" style=\"height:10" + // cont.
 	"0%\"></div><script src=\"./main-1c3f7217.js\" defer=\"\"></script></body></html>" +
 	""

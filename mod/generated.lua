@@ -1,7 +1,7 @@
 -- Automatically generated, do not modify
 local data = {}
 data.version = "0.0.7"
-data.version_hash = "e21730009780ad5e4297049fd3ef48efb85646ea1d2d67e1ee9f13e6b47bb004"
+data.version_hash = "74ab36393872e7c2050685f48f3bada8084ff0d8e51af1017aa375ca2624061e"
 data.files = {}
 data.files["main-1c3f7217.js"] = [==[
 (function () {
@@ -77,5 +77,5 @@ data.files["main-1c3f7217.js"] = [==[
 //# sourceMappingURL=main-1c3f7217.js.map
 ]==]
 data.files["index.html"] = [==[
-<html><head><title>Mapshot</title><style>body,html{margin:0}</style><link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin=""><script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js" integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==" crossorigin=""></script><script>let MAPSHOT_CONFIG={};try{MAPSHOT_CONFIG=__MAPSHOT_CONFIG_TOKEN__}catch(_){}</script></head><body><div id="map" style="height:100%"></div><script src="./main-1c3f7217.js" defer=""></script></body></html>]==]
+<html><head><title>Mapshot</title><style>body,html{margin:0}</style><link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""><script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script><script>let MAPSHOT_CONFIG={};try{MAPSHOT_CONFIG=__MAPSHOT_CONFIG_TOKEN__}catch(_){}</script></head><body><div id="map" style="height:100%"></div><script src="./main-1c3f7217.js" defer=""></script></body></html>]==]
 return data
