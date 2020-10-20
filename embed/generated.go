@@ -5,7 +5,7 @@ package embed
 var Version = "0.0.7"
 
 // VersionHash is a hash of the mod content
-var VersionHash = "1e13b216de87a102375457109aae9cfc6b053daf840457d7329bf2fcc85fe17e"
+var VersionHash = "942832a35c1bc40fc7df7174704f2a7b02f2058c4f9b4778efa6a54b675e4389"
 
 // ModFiles is the list of files for the Factorio mod.
 var ModFiles = map[string]string{
@@ -14,12 +14,12 @@ var ModFiles = map[string]string{
 	"changelog.txt": FileChangelogTxt,
 	"control.lua": FileModControlLua,
 	"entities.lua": FileModEntitiesLua,
-	"generated.lua": FileModGeneratedLua,
 	"hash.lua": FileModHashLua,
 	"info.json": FileModInfoJSON,
 	"overrides.lua": FileModOverridesLua,
 	"settings.lua": FileModSettingsLua,
 	"thumbnail.png": FileThumbnailPng,
+	"generated.lua": FileModGeneratedLua,
 }
 
 // FrontendFiles is the files for the UI to navigate the mapshots.
@@ -651,14 +651,15 @@ var FileModControlLua =
 	"  }))\n" +
 	"\n" +
 	"  -- Create the serving html.\n" +
-	"  for fname, content in pairs(generated.files) do\n" +
+	"  for fname, contentfunc in pairs(generated.files) do\n" +
+	"    local content = contentfunc()\n" +
 	"    if (fname == \"index.html\") then\n" +
 	"      local config = {\n" +
 	"        path = data_dir,\n" +
 	"      }\n" +
 	"      content = string.gsub(content, \"__MAPSHOT_CONFIG_TOKEN__\", game.table_to_json(config))\n" +
 	"    end\n" +
-	"    game.write_file(prefix .. fname, content)\n" +
+	"    local r = game.write_file(prefix .. fname, content)\n" +
 	"  end\n" +
 	"\n" +
 	"  -- Generate all the tiles.\n" +
@@ -911,16 +912,17 @@ var FileModGeneratedLua =
 	"-- Automatically generated, do not modify\n" +
 	"local data = {}\n" +
 	"data.version = \"0.0.7\"\n" +
-	"data.version_hash = \"1e13b216de87a102375457109aae9cfc6b053daf840457d7329bf2fcc85fe17e\"\n" +
+	"data.version_hash = \"942832a35c1bc40fc7df7174704f2a7b02f2058c4f9b4778efa6a54b675e4389\"\n" +
 	"data.files = {}\n" +
-	"data.files[\"index.html\"] = [==[\n" +
+	"data.files[\"index.html\"] = function() return [==[\n" +
 	"<html><head><title>Mapshot</title><style>body,html{margin:0}</style><link rel=\"stylesheet\" href=\"https://unpkg.com/leafl" + // cont.
 	"et@1.7.1/dist/leaflet.css\" integrity=\"sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19sc" + // cont.
 	"R4PsZChSR7A==\" crossorigin=\"\"><script src=\"https://unpkg.com/leaflet@1.7.1/dist/leaflet.js\" integrity=\"sha512-XQoYMqMTK8" + // cont.
 	"LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==\" crossorigin=\"\"></script><script>let MAPS" + // cont.
 	"HOT_CONFIG={};try{MAPSHOT_CONFIG=__MAPSHOT_CONFIG_TOKEN__}catch(_){}</script></head><body><div id=\"map\" style=\"height:10" + // cont.
-	"0%\"></div><script src=\"./main-1c3f7217.js\" defer=\"\"></script></body></html>]==]\n" +
-	"data.files[\"main-1c3f7217.js\"] = [==[\n" +
+	"0%\"></div><script src=\"./main-1c3f7217.js\" defer=\"\"></script></body></html>]==] end\n" +
+	"\n" +
+	"data.files[\"main-1c3f7217.js\"] = function() return [==[\n" +
 	"(function () {\n" +
 	"    'use strict';\n" +
 	"\n" +
@@ -1002,7 +1004,8 @@ var FileModGeneratedLua =
 	"\n" +
 	"}());\n" +
 	"//# sourceMappingURL=main-1c3f7217.js.map\n" +
-	"]==]\n" +
+	"]==] end\n" +
+	"\n" +
 	"return data\n" +
 	"" +
 	""

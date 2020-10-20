@@ -19,6 +19,8 @@ import (
 	"runtime"
 	"sort"
 	"strings"
+
+	"github.com/Palats/mapshot/factorio"
 )
 
 // textEOL contains the end-of-line chars to use. That allows to generate \r\n
@@ -67,19 +69,36 @@ func genLua(frontendFiles []*FileInfo, version, versionHash string) {
 	writeLn("data.files = {}")
 
 	for _, fi := range frontendFiles {
-		if strings.Contains(string(fi.Content), "]==]") {
-			log.Fatal("dumb Lua encoding cannot proceed")
-		}
-
 		key := filepath.Base(fi.Filename)
 
-		writeLn(fmt.Sprintf("data.files[%q] = [==[", key))
-		// This blindly copy the file content. As both the source and target files
-		// are text file, they will preserve the end-of-lines.
-		if _, err := f.Write(fi.Content); err != nil {
-			log.Fatal(err)
+		if fi.Binary {
+			content := factorio.Encode(fi.Content)
+			writeLn(fmt.Sprintf(`data.files[%q] = function() return game.decode_string(table.concat({`, key))
+			begin := 0
+			end := 78
+			for begin < len(content) {
+				if end > len(content) {
+					end = len(content)
+				}
+				writeLn(fmt.Sprintf(`  "%s",`, content[begin:end]))
+				begin = end
+				end = end + 78
+			}
+			writeLn("})) end")
+		} else {
+			if strings.Contains(string(fi.Content), "]==]") {
+				log.Fatal("dumb Lua encoding cannot proceed")
+			}
+
+			writeLn(fmt.Sprintf("data.files[%q] = function() return [==[", key))
+			// This blindly copy the file content. As both the source and target files
+			// are text file, they will preserve the end-of-lines.
+			if _, err := f.Write(fi.Content); err != nil {
+				log.Fatal(err)
+			}
+			writeLn("]==] end")
 		}
-		writeLn("]==]")
+		writeLn("")
 	}
 	writeLn("return data")
 }
@@ -147,7 +166,12 @@ func genGo(modFiles []*FileInfo, frontendFiles []*FileInfo, version string, vers
 	writeLn("}")
 	writeLn("")
 
+	seen := map[*FileInfo]bool{}
 	for _, fi := range sortFiles(files) {
+		if seen[fi] {
+			continue
+		}
+		seen[fi] = true
 		varName := filenameToVar(fi.Filename)
 
 		writeLn(fmt.Sprintf("// %s is file %q", varName, filepath.ToSlash(fi.Filename)))
@@ -166,29 +190,24 @@ func genGo(modFiles []*FileInfo, frontendFiles []*FileInfo, version string, vers
 }
 
 type Loader struct {
-	hash    hash.Hash
-	ignores map[string]bool
+	hash        hash.Hash
+	hashingDone bool
 	// Map filename to content
 	files map[string]*FileInfo
 }
 
-func newLoader(ignores []string) *Loader {
-	l := &Loader{
-		ignores: make(map[string]bool),
-		hash:    sha256.New(),
-		files:   make(map[string]*FileInfo),
+func newLoader() *Loader {
+	return &Loader{
+		hash:  sha256.New(),
+		files: make(map[string]*FileInfo),
 	}
-	for _, i := range ignores {
-		l.ignores[i] = true
-	}
-	return l
 }
 
 func (l *Loader) record(f *FileInfo) *FileInfo {
-	l.files[f.Filename] = f
-	if !l.ignores[f.Filename] {
+	if !l.hashingDone {
 		l.hash.Write(f.Content)
 	}
+	l.files[f.Filename] = f
 	return f
 }
 
@@ -223,22 +242,39 @@ func (l *Loader) LoadBinaryFile(filename string) *FileInfo {
 	return l.record(&FileInfo{
 		Filename: filename,
 		Content:  data,
+		Binary:   true,
 	})
 }
 
-func (l *Loader) LoadTextGlob(glob string) []*FileInfo {
+func (l *Loader) LoadTextGlob(glob string, excludes []string) []*FileInfo {
 	var files []*FileInfo
 	matches, err := filepath.Glob(filepath.FromSlash(glob))
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	ex := map[string]bool{}
+	for _, e := range excludes {
+		ex[e] = true
+	}
+
 	for _, m := range matches {
+		if ex[m] {
+			continue
+		}
 		files = append(files, l.LoadTextFile(filepath.ToSlash(m)))
 	}
 	return files
 }
 
+func (l *Loader) MarkHashingDone() {
+	l.hashingDone = true
+}
+
 func (l *Loader) VersionHash() string {
+	if !l.hashingDone {
+		panic("hashing still on going")
+	}
 	return hex.EncodeToString(l.hash.Sum(nil))
 }
 
@@ -247,6 +283,7 @@ type FileInfo struct {
 	Filename string
 	// Content, with \n for EOL.
 	Content []byte
+	Binary  bool
 }
 
 func sortFiles(files []*FileInfo) []*FileInfo {
@@ -262,24 +299,23 @@ func main() {
 	// containing the statement - which is mapshot.go, at the base of the
 	// repository.
 
-	// Parameter is the list of file to ignore when creating the hash. Those
-	// files are themselves generated, so reading them would create an unstable
-	// hash.
-	loader := newLoader([]string{"mod/generated.lua"})
+	loader := newLoader()
 
 	frontendFiles := sortFiles(append(
-		loader.LoadTextGlob("frontend/dist/*.js"),
+		loader.LoadTextGlob("frontend/dist/*.js", nil),
 		loader.LoadTextFile("frontend/dist/index.html"),
 	))
 
 	modFiles := sortFiles(append(
-		loader.LoadTextGlob("mod/*.lua"),
+		loader.LoadTextGlob("mod/*.lua", []string{"mod/generated.lua"}),
 		loader.LoadBinaryFile("thumbnail.png"),
 		loader.LoadTextFile("mod/info.json"),
 		loader.LoadTextFile("changelog.txt"),
 		loader.LoadTextFile("LICENSE"),
 		loader.LoadTextFile("README.md"),
 	))
+
+	loader.MarkHashingDone()
 
 	version := getVersion()
 	versionHash := loader.VersionHash()
@@ -288,5 +324,6 @@ func main() {
 
 	// Generate Lua file first as it will be embedded also in Go module files.
 	genLua(frontendFiles, version, versionHash)
+	modFiles = append(modFiles, loader.LoadTextFile("mod/generated.lua"))
 	genGo(modFiles, frontendFiles, version, versionHash)
 }

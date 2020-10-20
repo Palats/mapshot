@@ -120,14 +120,15 @@ function mapshot(player, params)
   }))
 
   -- Create the serving html.
-  for fname, content in pairs(generated.files) do
+  for fname, contentfunc in pairs(generated.files) do
+    local content = contentfunc()
     if (fname == "index.html") then
       local config = {
         path = data_dir,
       }
       content = string.gsub(content, "__MAPSHOT_CONFIG_TOKEN__", game.table_to_json(config))
     end
-    game.write_file(prefix .. fname, content)
+    local r = game.write_file(prefix .. fname, content)
   end
 
   -- Generate all the tiles.

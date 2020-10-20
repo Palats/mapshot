@@ -2,7 +2,10 @@
 package factorio
 
 import (
+	"bytes"
+	"compress/zlib"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -389,4 +392,16 @@ func EnableMod(modsPath string, modName string) error {
 	}
 	mlist.Enable(modName)
 	return mlist.Write(modListFile)
+}
+
+// Encode data in a format suitable for Factorio `game.decode_string`.
+func Encode(data []byte) string {
+	// Factorio
+	var b bytes.Buffer
+	encoder := base64.NewEncoder(base64.StdEncoding, &b)
+	compress := zlib.NewWriter(encoder)
+	compress.Write(data)
+	compress.Close()
+	encoder.Close()
+	return b.String()
 }
