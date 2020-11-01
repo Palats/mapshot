@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -181,7 +182,10 @@ func render(ctx context.Context, factorioSettings *factorio.Settings, rf *Render
 		select {
 		case <-time.After(time.Second):
 		case err := <-errCh:
-			return fmt.Errorf("factorio exited early; err=%w", err)
+			if err == nil {
+				return errors.New("factorio exited early")
+			}
+			return fmt.Errorf("factorio exited early: %w", err)
 		}
 	}
 	glog.Infof("done file %q now exists", doneFile)
