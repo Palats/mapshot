@@ -5,7 +5,7 @@ package embed
 var Version = "0.0.7"
 
 // VersionHash is a hash of the mod content
-var VersionHash = "070b88660933e7d4ad4d043e7b511b60b67178b1101db7998e07aa18711d0448"
+var VersionHash = "dd26755e981669d6ab51bd70a4d569b958459c0bf572a49320b93c3c9fafb146"
 
 // ModFiles is the list of files for the Factorio mod.
 var ModFiles = map[string]string{
@@ -332,7 +332,7 @@ var FileReadmeMd =
 	"te and use up several gigabytes of space.*\n" +
 	"\n" +
 	"\n" +
-	"## Serving the generated content\n" +
+	"## Serving the maps\n" +
 	"\n" +
 	"The CLI can be used to serve the mapshots:\n" +
 	"\n" +
@@ -349,6 +349,63 @@ var FileReadmeMd =
 	"hrough any HTTP server (e.g., `python3 -m http.server 8080` from the `script-output` directory) or your favorite web fil" + // cont.
 	"e hosting.\n" +
 	"\n" +
+	"## Generated content\n" +
+	"\n" +
+	"### Directory hierarchy\n" +
+	"\n" +
+	"All content is generated in the Mapshot output directory. This directory is `script-output/<prefix>`, where:\n" +
+	"* `script-output` is the default Factorio directory where mods can write.\n" +
+	"* `<prefix>` is a subdirectory where Mapshot can write. By default this is `mapshot/`.\n" +
+	"\n" +
+	"Within that directory, a directory will be created per save:\n" +
+	"* When using Factorio command `/mapshot <savename>`, the name will be `<savename>/`.\n" +
+	"* When using Factorio command `/mapshot`, a savename will be generated, stable across invocation on the same game. This " + // cont.
+	"is based on map generation parameters, in the form `map-<hash>`.\n" +
+	"* When using CLI `mapshot render <savename>`, the name will be `<savename>/`.\n" +
+	"\n" +
+	"Within a given `<savename>` directory, one subdirectory will be created everytime a mapshot is made. It is of the form `" + // cont.
+	"d-<hash>`, where the hash is computed based on many input to try to be as unique as possible. Those directories contain " + // cont.
+	"some more internal directories to organize the raw data.\n" +
+	"\n" +
+	"### Files\n" +
+	"\n" +
+	"Currently no files are created in the Mapshot output directory itself.\n" +
+	"\n" +
+	"In a `<savename>` directory, html and javascript files are created. It points to latest mapshot generated in that `<save" + // cont.
+	"name>` directory. Currently, accessing older mapshots require fiddling with `?path=xxx` URL query parameter.\n" +
+	"\n" +
+	"In a given mapshot directory (of the form `d-<hash>`), a `mapshot.json` file describes that specific render.\n" +
+	"\n" +
+	"### Caching\n" +
+	"\n" +
+	"Generated `html` files are not meant to be cached, as they are potentially updated on each render. Javascript files can " + // cont.
+	"be cached as their name will change as needed. The `thumbnail.png` is used only as a favicon - while it might change in " + // cont.
+	"the future, it is not critical. Anything under a specific mapshot directory (`d-<hash>`) is immutable and can be cached " + // cont.
+	"indefinitely.\n" +
+	"\n" +
+	"### Example\n" +
+	"\n" +
+	"Visually, that gives something like that:\n" +
+	"```\n" +
+	"script-output/mapshot/  <--- output directory\n" +
+	"  savename1/\n" +
+	"    index.html\n" +
+	"    main-1c3f7217.js\n" +
+	"    thumbnail.png\n" +
+	"    d-5bd8e540/\n" +
+	"      mapshot.json\n" +
+	"      zoom_0/ ...\n" +
+	"      zoom_1/ ...\n" +
+	"      ...\n" +
+	"    d-a309ff22/\n" +
+	"      ...\n" +
+	"    ...\n" +
+	"  savename2/\n" +
+	"    ...\n" +
+	"  map-ad765988/\n" +
+	"    ...\n" +
+	"  ...\n" +
+	"```\n" +
 	"\n" +
 	"## Development\n" +
 	"\n" +
@@ -916,7 +973,7 @@ var FileModGeneratedLua =
 	"-- Automatically generated, do not modify\n" +
 	"local data = {}\n" +
 	"data.version = \"0.0.7\"\n" +
-	"data.version_hash = \"070b88660933e7d4ad4d043e7b511b60b67178b1101db7998e07aa18711d0448\"\n" +
+	"data.version_hash = \"dd26755e981669d6ab51bd70a4d569b958459c0bf572a49320b93c3c9fafb146\"\n" +
 	"data.files = {}\n" +
 	"data.files[\"index.html\"] = function() return [==[\n" +
 	"<html><head><title>Mapshot</title><style>body,html{margin:0}</style><link rel=\"icon\" href=\"thumbnail.png\" sizes=\"144x144" + // cont.

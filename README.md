@@ -71,7 +71,7 @@ Parameters:
 *Warning: the generation time & disk usage increases very quickly. At maximum resolution, it will take forever to generate and use up several gigabytes of space.*
 
 
-## Serving the generated content
+## Serving the maps
 
 The CLI can be used to serve the mapshots:
 
@@ -83,6 +83,56 @@ By default, it serves on port 8080 - thus accessible at http://localhost:8080 if
 
 The generated content has static frontend code generated next to the images. This means you can also serve the content through any HTTP server (e.g., `python3 -m http.server 8080` from the `script-output` directory) or your favorite web file hosting.
 
+## Generated content
+
+### Directory hierarchy
+
+All content is generated in the Mapshot output directory. This directory is `script-output/<prefix>`, where:
+* `script-output` is the default Factorio directory where mods can write.
+* `<prefix>` is a subdirectory where Mapshot can write. By default this is `mapshot/`.
+
+Within that directory, a directory will be created per save:
+* When using Factorio command `/mapshot <savename>`, the name will be `<savename>/`.
+* When using Factorio command `/mapshot`, a savename will be generated, stable across invocation on the same game. This is based on map generation parameters, in the form `map-<hash>`.
+* When using CLI `mapshot render <savename>`, the name will be `<savename>/`.
+
+Within a given `<savename>` directory, one subdirectory will be created everytime a mapshot is made. It is of the form `d-<hash>`, where the hash is computed based on many input to try to be as unique as possible. Those directories contain some more internal directories to organize the raw data.
+
+### Files
+
+Currently no files are created in the Mapshot output directory itself.
+
+In a `<savename>` directory, html and javascript files are created. It points to latest mapshot generated in that `<savename>` directory. Currently, accessing older mapshots require fiddling with `?path=xxx` URL query parameter.
+
+In a given mapshot directory (of the form `d-<hash>`), a `mapshot.json` file describes that specific render.
+
+### Caching
+
+Generated `html` files are not meant to be cached, as they are potentially updated on each render. Javascript files can be cached as their name will change as needed. The `thumbnail.png` is used only as a favicon - while it might change in the future, it is not critical. Anything under a specific mapshot directory (`d-<hash>`) is immutable and can be cached indefinitely.
+
+### Example
+
+Visually, that gives something like that:
+```
+script-output/mapshot/  <--- output directory
+  savename1/
+    index.html
+    main-1c3f7217.js
+    thumbnail.png
+    d-5bd8e540/
+      mapshot.json
+      zoom_0/ ...
+      zoom_1/ ...
+      ...
+    d-a309ff22/
+      ...
+    ...
+  savename2/
+    ...
+  map-ad765988/
+    ...
+  ...
+```
 
 ## Development
 
