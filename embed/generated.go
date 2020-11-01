@@ -5,7 +5,7 @@ package embed
 var Version = "0.0.7"
 
 // VersionHash is a hash of the mod content
-var VersionHash = "003d990628a00e8a5488c496a482badc37dca31a60c3b1a87e1c568ce75aefd5"
+var VersionHash = "22d9d2d52659850c02f728577ae62017fff359e09cdb8605114390a06f84873f"
 
 // ModFiles is the list of files for the Factorio mod.
 var ModFiles = map[string]string{
@@ -425,6 +425,11 @@ var FileReadmeMd =
 var FileChangelogTxt =
 	"---------------------------------------------------------------------------------------------------\n" +
 	"Version: 0.0.8\n" +
+	"  Generated content:\n" +
+	"    - Re-organized to be caching friendly.\n" +
+	"    - Cleaner subdirectories to more easily update the latest shot of a given save.\n" +
+	"    - Favicon added.\n" +
+	"    - Documentation of generated content.\n" +
 	"  CLI:\n" +
 	"    - Add more directories where to find Factorio.\n" +
 	"    - Have `dev` command always show Factorio output.\n" +
@@ -982,7 +987,7 @@ var FileModGeneratedLua =
 	"-- Automatically generated, do not modify\n" +
 	"local data = {}\n" +
 	"data.version = \"0.0.7\"\n" +
-	"data.version_hash = \"003d990628a00e8a5488c496a482badc37dca31a60c3b1a87e1c568ce75aefd5\"\n" +
+	"data.version_hash = \"22d9d2d52659850c02f728577ae62017fff359e09cdb8605114390a06f84873f\"\n" +
 	"data.files = {}\n" +
 	"data.files[\"index.html\"] = function() return [==[\n" +
 	"<html><head><title>Mapshot</title><style>body,html{margin:0}</style><link rel=\"icon\" href=\"thumbnail.png\" sizes=\"144x144" + // cont.

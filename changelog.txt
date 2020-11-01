@@ -1,5 +1,10 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.0.8
+  Generated content:
+    - Re-organized to be caching friendly.
+    - Cleaner subdirectories to more easily update the latest shot of a given save.
+    - Favicon added.
+    - Documentation of generated content.
   CLI:
     - Add more directories where to find Factorio.
     - Have `dev` command always show Factorio output.
