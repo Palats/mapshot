@@ -3,6 +3,8 @@ local overrides = require("overrides")
 local entities = require("entities")
 local hash = require("hash")
 
+local factorio_min_zoom = 0.031250
+
 -- Read all settings and update the params var, incl. overrides.
 function build_params(player)
   local params = {}
@@ -17,7 +19,28 @@ function build_params(player)
     params[k] = v
   end
 
+  params.tilemin = factorio_fit_zoom(params.resolution, params.tilemin, "tilemin", player)
+  params.tilemax = factorio_fit_zoom(params.resolution, params.tilemax, "tilemax", player)
+
   return params
+end
+
+-- Calculate the zoom value for Factorio take_screenshot function
+function factorio_zoom(render_size, tile_size)
+  -- We want to have render_size pixels represent tile_size world unit.
+  -- A zoom of 1.0 means that 32 pixels represent 1 world unit. A zoom of 2.0 means 64 pixels per world unit.
+  return render_size / 32 / tile_size
+end
+
+function factorio_fit_zoom(render_size, tile_size, name, player)
+  if (factorio_zoom(render_size, tile_size) < factorio_min_zoom) then
+    local old = tile_size
+    tile_size = render_size / 32 / factorio_min_zoom
+    local msg = "Parameter " .. name .. " changed from " .. old .. " to " .. tile_size .. " to fit within Factorio minimal zoom of " .. factorio_min_zoom
+    player.print(msg)
+    log(msg)
+  end
+  return tile_size
 end
 
 -- Generate a full map screenshot.
@@ -145,10 +168,6 @@ function mapshot(player, params)
 end
 
 function gen_layer(player, params, tile_size, render_size, world_min, world_max, data_prefix)
-  -- Zoom. We want to have render_size pixels represent tile_size world unit.
-  -- A zoom of 1.0 means that 32 pixels represent 1 world unit. A zoom of 2.0 means 64 pixels per world unit.
-  local zoom = render_size / 32 / tile_size
-
   local tile_min = { x = math.floor(world_min.x / tile_size), y = math.floor(world_min.y / tile_size) }
   local tile_max = { x = math.floor(world_max.x / tile_size), y = math.floor(world_max.y / tile_size) }
 
@@ -165,7 +184,7 @@ function gen_layer(player, params, tile_size, render_size, world_min, world_max,
           y = top_left.y + tile_size / 2,
         },
         resolution = {render_size, render_size},
-        zoom = zoom,
+        zoom = factorio_zoom(render_size, tile_size),
         path = data_prefix .. "tile_" .. tile_x .. "_" .. tile_y .. ".jpg",
         show_gui = false,
         show_entity_info = true,

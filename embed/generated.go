@@ -5,7 +5,7 @@ package embed
 var Version = "0.0.7"
 
 // VersionHash is a hash of the mod content
-var VersionHash = "22d9d2d52659850c02f728577ae62017fff359e09cdb8605114390a06f84873f"
+var VersionHash = "1f8891d34598b8836d806a4e95786075332adb0879329699be7b7c2ad8451f5d"
 
 // ModFiles is the list of files for the Factorio mod.
 var ModFiles = map[string]string{
@@ -435,6 +435,8 @@ var FileChangelogTxt =
 	"    - Have `dev` command always show Factorio output.\n" +
 	"    - `dev` command serves content from npm build output for simpler dev cycle.\n" +
 	"    - `serve` command uses built-in html/javascript instead of the one generated from Factorio.\n" +
+	"  Bugs:\n" +
+	"    - Fix tilemax/tilemin when they would generate out-of-bound zoom values.\n" +
 	"  Internal:\n" +
 	"    - Frontend is now generated, which will allow for imports & typescript.\n" +
 	"    - Frontend can contains more files; might allow for icons later.\n" +
@@ -607,6 +609,8 @@ var FileModControlLua =
 	"local entities = require(\"entities\")\n" +
 	"local hash = require(\"hash\")\n" +
 	"\n" +
+	"local factorio_min_zoom = 0.031250\n" +
+	"\n" +
 	"-- Read all settings and update the params var, incl. overrides.\n" +
 	"function build_params(player)\n" +
 	"  local params = {}\n" +
@@ -621,7 +625,29 @@ var FileModControlLua =
 	"    params[k] = v\n" +
 	"  end\n" +
 	"\n" +
+	"  params.tilemin = factorio_fit_zoom(params.resolution, params.tilemin, \"tilemin\", player)\n" +
+	"  params.tilemax = factorio_fit_zoom(params.resolution, params.tilemax, \"tilemax\", player)\n" +
+	"\n" +
 	"  return params\n" +
+	"end\n" +
+	"\n" +
+	"-- Calculate the zoom value for Factorio take_screenshot function\n" +
+	"function factorio_zoom(render_size, tile_size)\n" +
+	"  -- We want to have render_size pixels represent tile_size world unit.\n" +
+	"  -- A zoom of 1.0 means that 32 pixels represent 1 world unit. A zoom of 2.0 means 64 pixels per world unit.\n" +
+	"  return render_size / 32 / tile_size\n" +
+	"end\n" +
+	"\n" +
+	"function factorio_fit_zoom(render_size, tile_size, name, player)\n" +
+	"  if (factorio_zoom(render_size, tile_size) < factorio_min_zoom) then\n" +
+	"    local old = tile_size\n" +
+	"    tile_size = render_size / 32 / factorio_min_zoom\n" +
+	"    local msg = \"Parameter \" .. name .. \" changed from \" .. old .. \" to \" .. tile_size .. \" to fit within Factorio minim" + // cont.
+	"al zoom of \" .. factorio_min_zoom\n" +
+	"    player.print(msg)\n" +
+	"    log(msg)\n" +
+	"  end\n" +
+	"  return tile_size\n" +
 	"end\n" +
 	"\n" +
 	"-- Generate a full map screenshot.\n" +
@@ -750,10 +776,6 @@ var FileModControlLua =
 	"end\n" +
 	"\n" +
 	"function gen_layer(player, params, tile_size, render_size, world_min, world_max, data_prefix)\n" +
-	"  -- Zoom. We want to have render_size pixels represent tile_size world unit.\n" +
-	"  -- A zoom of 1.0 means that 32 pixels represent 1 world unit. A zoom of 2.0 means 64 pixels per world unit.\n" +
-	"  local zoom = render_size / 32 / tile_size\n" +
-	"\n" +
 	"  local tile_min = { x = math.floor(world_min.x / tile_size), y = math.floor(world_min.y / tile_size) }\n" +
 	"  local tile_max = { x = math.floor(world_max.x / tile_size), y = math.floor(world_max.y / tile_size) }\n" +
 	"\n" +
@@ -771,7 +793,7 @@ var FileModControlLua =
 	"          y = top_left.y + tile_size / 2,\n" +
 	"        },\n" +
 	"        resolution = {render_size, render_size},\n" +
-	"        zoom = zoom,\n" +
+	"        zoom = factorio_zoom(render_size, tile_size),\n" +
 	"        path = data_prefix .. \"tile_\" .. tile_x .. \"_\" .. tile_y .. \".jpg\",\n" +
 	"        show_gui = false,\n" +
 	"        show_entity_info = true,\n" +
@@ -987,7 +1009,7 @@ var FileModGeneratedLua =
 	"-- Automatically generated, do not modify\n" +
 	"local data = {}\n" +
 	"data.version = \"0.0.7\"\n" +
-	"data.version_hash = \"22d9d2d52659850c02f728577ae62017fff359e09cdb8605114390a06f84873f\"\n" +
+	"data.version_hash = \"1f8891d34598b8836d806a4e95786075332adb0879329699be7b7c2ad8451f5d\"\n" +
 	"data.files = {}\n" +
 	"data.files[\"index.html\"] = function() return [==[\n" +
 	"<html><head><title>Mapshot</title><style>body,html{margin:0}</style><link rel=\"icon\" href=\"thumbnail.png\" sizes=\"144x144" + // cont.
@@ -2095,7 +2117,7 @@ var FileModSettingsLua =
 	"        name = \"tilemin\",\n" +
 	"        setting_type = \"runtime-per-user\",\n" +
 	"        default_value = 64,\n" +
-	"        allowed_values = {16, 32, 64, 128, 256, 512, 1024, 2048, 4096},\n" +
+	"        allowed_values = {16, 32, 64, 128, 256, 512, 1024},\n" +
 	"        localised_name = \"Smallest tile size\",\n" +
 	"        localised_description = \"Size in in-game units of a tile for the most zoomed layer.\",\n" +
 	"        order = \"100\",\n" +
@@ -2105,7 +2127,7 @@ var FileModSettingsLua =
 	"        name = \"tilemax\",\n" +
 	"        setting_type = \"runtime-per-user\",\n" +
 	"        default_value = 1024,\n" +
-	"        allowed_values = {16, 32, 64, 128, 256, 512, 1024, 2048, 4096},\n" +
+	"        allowed_values = {16, 32, 64, 128, 256, 512, 1024},\n" +
 	"        localised_name = \"Largest tile size\",\n" +
 	"        localised_description = \"Size in in-game units of a tile for the least zoomed layer.\",\n" +
 	"        order = \"101\",\n" +

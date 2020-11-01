@@ -1,7 +1,7 @@
 -- Automatically generated, do not modify
 local data = {}
 data.version = "0.0.7"
-data.version_hash = "22d9d2d52659850c02f728577ae62017fff359e09cdb8605114390a06f84873f"
+data.version_hash = "1f8891d34598b8836d806a4e95786075332adb0879329699be7b7c2ad8451f5d"
 data.files = {}
 data.files["index.html"] = function() return [==[
 <html><head><title>Mapshot</title><style>body,html{margin:0}</style><link rel="icon" href="thumbnail.png" sizes="144x144"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""><script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script><script>let MAPSHOT_CONFIG={};try{MAPSHOT_CONFIG=__MAPSHOT_CONFIG_TOKEN__}catch(_){}</script></head><body><div id="map" style="height:100%"></div><script src="./main-1c3f7217.js" defer=""></script></body></html>]==] end
