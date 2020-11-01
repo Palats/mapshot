@@ -1,7 +1,7 @@
 #!/bin/sh
 # This script is to prepare the release. To just run a modified version,
 # you can just run `go run mapshot.go` (see README.md).
-go generate ./...
+./generate.sh
 go test ./... || exit 1
 
 TARGET="$(pwd)/build"

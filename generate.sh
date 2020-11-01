@@ -1,0 +1,3 @@
+#!/bin/sh
+npm --prefix frontend run build
+go generate ./...
