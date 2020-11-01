@@ -82,10 +82,9 @@ practices.
 
 * Update `changelog.txt`
 * Update version in: `changelog.txt` (add date), `mod/info.json`, `frontend/package.json`
-* Regenerate files: `npm --prefix frontend run build && go generate ./...`
 * Test build release: `./build.sh`
 * Commit and push
-* Create release in Github
+* Create release in Github (tag: `0.0.8`, title: `Version 0.0.8`)
 * Update Factorio mods portal (new zip, update doc)
 
 ## Updating example
