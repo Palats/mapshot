@@ -1,5 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.0.8
+Date: 2020.11.01
   Generated content:
     - Re-organized to be caching friendly.
     - Cleaner subdirectories to more easily update the latest shot of a given save.

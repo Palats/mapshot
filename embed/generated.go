@@ -2,10 +2,10 @@
 package embed
 
 // Version of the mod
-var Version = "0.0.7"
+var Version = "0.0.8"
 
 // VersionHash is a hash of the mod content
-var VersionHash = "1f8891d34598b8836d806a4e95786075332adb0879329699be7b7c2ad8451f5d"
+var VersionHash = "233d78a81b29b5e893d1fda564b839a85fa98f95fd1637439e2dc68d4ad16f35"
 
 // ModFiles is the list of files for the Factorio mod.
 var ModFiles = map[string]string{
@@ -425,6 +425,7 @@ var FileReadmeMd =
 var FileChangelogTxt =
 	"---------------------------------------------------------------------------------------------------\n" +
 	"Version: 0.0.8\n" +
+	"Date: 2020.11.01\n" +
 	"  Generated content:\n" +
 	"    - Re-organized to be caching friendly.\n" +
 	"    - Cleaner subdirectories to more easily update the latest shot of a given save.\n" +
@@ -1008,8 +1009,8 @@ var FileModEntitiesLua =
 var FileModGeneratedLua =
 	"-- Automatically generated, do not modify\n" +
 	"local data = {}\n" +
-	"data.version = \"0.0.7\"\n" +
-	"data.version_hash = \"1f8891d34598b8836d806a4e95786075332adb0879329699be7b7c2ad8451f5d\"\n" +
+	"data.version = \"0.0.8\"\n" +
+	"data.version_hash = \"233d78a81b29b5e893d1fda564b839a85fa98f95fd1637439e2dc68d4ad16f35\"\n" +
 	"data.files = {}\n" +
 	"data.files[\"index.html\"] = function() return [==[\n" +
 	"<html><head><title>Mapshot</title><style>body,html{margin:0}</style><link rel=\"icon\" href=\"thumbnail.png\" sizes=\"144x144" + // cont.
@@ -2071,7 +2072,7 @@ var FileModHashLua =
 var FileModInfoJSON =
 	"{\n" +
 	"  \"name\": \"mapshot\",\n" +
-	"  \"version\": \"0.0.7\",\n" +
+	"  \"version\": \"0.0.8\",\n" +
 	"  \"title\": \"Mapshot\",\n" +
 	"  \"author\": \"pierre@palatin.fr\",\n" +
 	"  \"factorio_version\": \"1.0\",\n" +
