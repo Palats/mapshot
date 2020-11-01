@@ -5,7 +5,7 @@ package embed
 var Version = "0.0.7"
 
 // VersionHash is a hash of the mod content
-var VersionHash = "dd26755e981669d6ab51bd70a4d569b958459c0bf572a49320b93c3c9fafb146"
+var VersionHash = "003d990628a00e8a5488c496a482badc37dca31a60c3b1a87e1c568ce75aefd5"
 
 // ModFiles is the list of files for the Factorio mod.
 var ModFiles = map[string]string{
@@ -382,6 +382,15 @@ var FileReadmeMd =
 	"be cached as their name will change as needed. The `thumbnail.png` is used only as a favicon - while it might change in " + // cont.
 	"the future, it is not critical. Anything under a specific mapshot directory (`d-<hash>`) is immutable and can be cached " + // cont.
 	"indefinitely.\n" +
+	"\n" +
+	"In practice, if adding a caching layer in front of `./mapshot serve`, everything can be cached as most of the content UR" + // cont.
+	"Ls contain hashes. Exceptions:\n" +
+	"* `/` (not subpaths) is HTML listing available mapshots. It changes content in place everytime a new one mapshot is crea" + // cont.
+	"ted. Caching should probably be short term to allow to see new content.\n" +
+	"* `/map/` (not subpaths) is the mapshot viewer HTML. It changes rarely - on every new release of the mod. Caching is lik" + // cont.
+	"ely fine for hours. Note: this is content from the `serve` command, not the html/js files generated in `script-output`.\n" +
+	"* `/map/thumbnail.png` is used as a favicon. It might change in place in the future, but can be cached heavily as it is " + // cont.
+	"non-critical.\n" +
 	"\n" +
 	"### Example\n" +
 	"\n" +
@@ -973,7 +982,7 @@ var FileModGeneratedLua =
 	"-- Automatically generated, do not modify\n" +
 	"local data = {}\n" +
 	"data.version = \"0.0.7\"\n" +
-	"data.version_hash = \"dd26755e981669d6ab51bd70a4d569b958459c0bf572a49320b93c3c9fafb146\"\n" +
+	"data.version_hash = \"003d990628a00e8a5488c496a482badc37dca31a60c3b1a87e1c568ce75aefd5\"\n" +
 	"data.files = {}\n" +
 	"data.files[\"index.html\"] = function() return [==[\n" +
 	"<html><head><title>Mapshot</title><style>body,html{margin:0}</style><link rel=\"icon\" href=\"thumbnail.png\" sizes=\"144x144" + // cont.

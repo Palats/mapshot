@@ -110,6 +110,11 @@ In a given mapshot directory (of the form `d-<hash>`), a `mapshot.json` file des
 
 Generated `html` files are not meant to be cached, as they are potentially updated on each render. Javascript files can be cached as their name will change as needed. The `thumbnail.png` is used only as a favicon - while it might change in the future, it is not critical. Anything under a specific mapshot directory (`d-<hash>`) is immutable and can be cached indefinitely.
 
+In practice, if adding a caching layer in front of `./mapshot serve`, everything can be cached as most of the content URLs contain hashes. Exceptions:
+* `/` (not subpaths) is HTML listing available mapshots. It changes content in place everytime a new one mapshot is created. Caching should probably be short term to allow to see new content.
+* `/map/` (not subpaths) is the mapshot viewer HTML. It changes rarely - on every new release of the mod. Caching is likely fine for hours. Note: this is content from the `serve` command, not the html/js files generated in `script-output`.
+* `/map/thumbnail.png` is used as a favicon. It might change in place in the future, but can be cached heavily as it is non-critical.
+
 ### Example
 
 Visually, that gives something like that:

@@ -120,7 +120,7 @@ func (s *Server) buildMux(shots []shotInfo) *http.ServeMux {
 		mux.Handle(shot.httpPath, http.StripPrefix(shot.httpPath, http.FileServer(http.Dir(shot.fsPath))))
 	}
 
-	mux.Handle("/fe/", http.StripPrefix("/fe", s.frontendMux))
+	mux.Handle("/map/", http.StripPrefix("/map", s.frontendMux))
 	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
 		if err := indexHTML.Execute(w, data); err != nil {
 			http.Error(w, fmt.Sprintf("unable to generate file: %v", err), http.StatusInternalServerError)
@@ -142,7 +142,7 @@ var indexHTML = template.Must(template.New("name").Parse(`
 <html>
 <head>
 	<title>Mapshot for Factorio</title>
-	<link rel="icon" href="fe/thumbnail.png" sizes="144x144">
+	<link rel="icon" href="map/thumbnail.png" sizes="144x144">
 </head>
 <body>
 	{{if not .}}
@@ -150,7 +150,7 @@ var indexHTML = template.Must(template.New("name").Parse(`
 	{{end}}
 	<ul>
 	{{range .}}
-	<li><a href="fe?path={{.path}}">{{.name}}</a></li>
+	<li><a href="map?path={{.path}}">{{.name}}</a></li>
 	{{end}}
 	</ul>
 </body>
