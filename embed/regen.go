@@ -304,6 +304,7 @@ func main() {
 	frontendFiles := sortFiles(append(
 		loader.LoadTextGlob("frontend/dist/*.js", nil),
 		loader.LoadTextFile("frontend/dist/index.html"),
+		loader.LoadBinaryFile("thumbnail.png"),
 	))
 
 	modFiles := sortFiles(append(

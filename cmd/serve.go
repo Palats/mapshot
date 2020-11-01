@@ -142,6 +142,7 @@ var indexHTML = template.Must(template.New("name").Parse(`
 <html>
 <head>
 	<title>Mapshot for Factorio</title>
+	<link rel="icon" href="fe/thumbnail.png" sizes="144x144">
 </head>
 <body>
 	{{if not .}}
