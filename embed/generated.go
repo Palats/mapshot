@@ -5,7 +5,7 @@ package embed
 var Version = "0.0.7"
 
 // VersionHash is a hash of the mod content
-var VersionHash = "eb70c8a1c03b3b9225ad7557045eeefbcf41cfccf47e11b85d5b2424aa1133d8"
+var VersionHash = "070b88660933e7d4ad4d043e7b511b60b67178b1101db7998e07aa18711d0448"
 
 // ModFiles is the list of files for the Factorio mod.
 var ModFiles = map[string]string{
@@ -674,6 +674,8 @@ var FileModControlLua =
 	"\n" +
 	"  player.print(\"Mapshot done at \" .. data_prefix)\n" +
 	"  log(\"Mapshot done at \" .. data_prefix)\n" +
+	"\n" +
+	"  return data_prefix\n" +
 	"end\n" +
 	"\n" +
 	"function gen_layer(player, params, tile_size, render_size, world_min, world_max, data_prefix)\n" +
@@ -745,7 +747,7 @@ var FileModControlLua =
 	"\n" +
 	"  if params.onstartup ~= \"\" then\n" +
 	"    log(\"onstartup requested id=\" .. params.onstartup)\n" +
-	"    mapshot(player, params)\n" +
+	"    local data_prefix = mapshot(player, params)\n" +
 	"\n" +
 	"    -- Ensure that screen shots are written before marking as done.\n" +
 	"    game.set_wait_for_screenshots_to_finish()\n" +
@@ -760,7 +762,7 @@ var FileModControlLua =
 	"    script.on_event(defines.events.on_tick, function(evt)\n" +
 	"      log(\"marking as done @\" .. evt.tick)\n" +
 	"      script.on_event(defines.events.on_tick, nil)\n" +
-	"      game.write_file(\"mapshot-done-\" .. params.onstartup, prefix)\n" +
+	"      game.write_file(\"mapshot-done-\" .. params.onstartup, data_prefix)\n" +
 	"    end)\n" +
 	"  end\n" +
 	"end)\n" +
@@ -914,7 +916,7 @@ var FileModGeneratedLua =
 	"-- Automatically generated, do not modify\n" +
 	"local data = {}\n" +
 	"data.version = \"0.0.7\"\n" +
-	"data.version_hash = \"eb70c8a1c03b3b9225ad7557045eeefbcf41cfccf47e11b85d5b2424aa1133d8\"\n" +
+	"data.version_hash = \"070b88660933e7d4ad4d043e7b511b60b67178b1101db7998e07aa18711d0448\"\n" +
 	"data.files = {}\n" +
 	"data.files[\"index.html\"] = function() return [==[\n" +
 	"<html><head><title>Mapshot</title><style>body,html{margin:0}</style><link rel=\"icon\" href=\"thumbnail.png\" sizes=\"144x144" + // cont.

@@ -140,6 +140,8 @@ function mapshot(player, params)
 
   player.print("Mapshot done at " .. data_prefix)
   log("Mapshot done at " .. data_prefix)
+
+  return data_prefix
 end
 
 function gen_layer(player, params, tile_size, render_size, world_min, world_max, data_prefix)
@@ -210,7 +212,7 @@ script.on_event(defines.events.on_tick, function(evt)
 
   if params.onstartup ~= "" then
     log("onstartup requested id=" .. params.onstartup)
-    mapshot(player, params)
+    local data_prefix = mapshot(player, params)
 
     -- Ensure that screen shots are written before marking as done.
     game.set_wait_for_screenshots_to_finish()
@@ -225,7 +227,7 @@ script.on_event(defines.events.on_tick, function(evt)
     script.on_event(defines.events.on_tick, function(evt)
       log("marking as done @" .. evt.tick)
       script.on_event(defines.events.on_tick, nil)
-      game.write_file("mapshot-done-" .. params.onstartup, prefix)
+      game.write_file("mapshot-done-" .. params.onstartup, data_prefix)
     end)
   end
 end)
