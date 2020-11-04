@@ -70,6 +70,16 @@ Parameters:
 
 *Warning: the generation time & disk usage increases very quickly. At maximum resolution, it will take forever to generate and use up several gigabytes of space.*
 
+### Headless server
+
+Mapshot requires a running Factorio with UI to do the rendering - this is a constraint of Factorio itself. On Linux, this means a X server must be available. On a Linux headless server, it is still possible to do renders using [Xvfb](https://en.wikipedia.org/wiki/Xvfb).
+
+On Ubuntu, Xvfb can be installed through `apt-get install xvfb`. Once you have it installed, you can create a mapshot by running the command through `xvfb-run`; for example:
+```
+xvfb-run ./mapshot render <savename>
+```
+
+Note: it seems that a recent Xvfb version is needed. For example, on Ubuntu 18.04 there are issues with OpenGL, while it works fine on Ubuntu 20.04.
 
 ## Serving the maps
 
