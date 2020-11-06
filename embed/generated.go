@@ -5,7 +5,7 @@ package embed
 var Version = "0.0.8"
 
 // VersionHash is a hash of the mod content
-var VersionHash = "233d78a81b29b5e893d1fda564b839a85fa98f95fd1637439e2dc68d4ad16f35"
+var VersionHash = "d34d5fcfdea65b6ea0b625d7d7c54b528f47ce1751d6c3a95900cbb37d544596"
 
 // ModFiles is the list of files for the Factorio mod.
 var ModFiles = map[string]string{
@@ -25,7 +25,8 @@ var ModFiles = map[string]string{
 // FrontendFiles is the files for the UI to navigate the mapshots.
 var FrontendFiles = map[string]string{
 	"index.html": FileFrontendDistIndexHTML,
-	"main-1c3f7217.js": FileFrontendDistMainCFJs,
+	"leaflet-control-boxzoom-4be5d249281d260e.svg": FileFrontendDistLeafletControlBoxzoomBeDDESvg,
+	"main-c7f52b47.js": FileFrontendDistMainCFBJs,
 	"thumbnail.png": FileThumbnailPng,
 }
 
@@ -331,6 +332,20 @@ var FileReadmeMd =
 	"*Warning: the generation time & disk usage increases very quickly. At maximum resolution, it will take forever to genera" + // cont.
 	"te and use up several gigabytes of space.*\n" +
 	"\n" +
+	"### Headless server\n" +
+	"\n" +
+	"Mapshot requires a running Factorio with UI to do the rendering - this is a constraint of Factorio itself. On Linux, thi" + // cont.
+	"s means a X server must be available. On a Linux headless server, it is still possible to do renders using [Xvfb](https:" + // cont.
+	"//en.wikipedia.org/wiki/Xvfb).\n" +
+	"\n" +
+	"On Ubuntu, Xvfb can be installed through `apt-get install xvfb`. Once you have it installed, you can create a mapshot by" + // cont.
+	" running the command through `xvfb-run`; for example:\n" +
+	"```\n" +
+	"xvfb-run ./mapshot render <savename>\n" +
+	"```\n" +
+	"\n" +
+	"Note: it seems that a recent Xvfb version is needed. For example, on Ubuntu 18.04 there are issues with OpenGL, while it" + // cont.
+	" works fine on Ubuntu 20.04.\n" +
 	"\n" +
 	"## Serving the maps\n" +
 	"\n" +
@@ -424,6 +439,10 @@ var FileReadmeMd =
 // FileChangelogTxt is file "changelog.txt"
 var FileChangelogTxt =
 	"---------------------------------------------------------------------------------------------------\n" +
+	"Version: 0.0.9\n" +
+	"  UI:\n" +
+	"    - A button to zoom to a selected region (boxzoom).\n" +
+	"---------------------------------------------------------------------------------------------------\n" +
 	"Version: 0.0.8\n" +
 	"Date: 2020.11.01\n" +
 	"  Generated content:\n" +
@@ -508,21 +527,563 @@ var FileChangelogTxt =
 
 // FileFrontendDistIndexHTML is file "frontend/dist/index.html"
 var FileFrontendDistIndexHTML =
-	"<html><head><title>Mapshot</title><style>body,html{margin:0}</style><link rel=\"icon\" href=\"thumbnail.png\" sizes=\"144x144" + // cont.
-	"\"><link rel=\"stylesheet\" href=\"https://unpkg.com/leaflet@1.7.1/dist/leaflet.css\" integrity=\"sha512-xodZBNTC5n17Xt2atTPuE" + // cont.
-	"1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==\" crossorigin=\"\"><script src=\"https://unpkg.com/leafl" + // cont.
-	"et@1.7.1/dist/leaflet.js\" integrity=\"sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhi" + // cont.
-	"XZ5V3ynxwA==\" crossorigin=\"\"></script><script>let MAPSHOT_CONFIG={};try{MAPSHOT_CONFIG=__MAPSHOT_CONFIG_TOKEN__}catch(_)" + // cont.
-	"{}</script></head><body><div id=\"map\" style=\"height:100%\"></div><script src=\"./main-1c3f7217.js\" defer=\"\"></script></bod" + // cont.
-	"y></html>" +
+	"<html><head><title>Mapshot</title><link rel=\"icon\" href=\"thumbnail.png\" sizes=\"144x144\"><link rel=\"stylesheet\" href=\"htt" + // cont.
+	"ps://unpkg.com/leaflet@1.7.1/dist/leaflet.css\" integrity=\"sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAsh" + // cont.
+	"OMAS6/keqq/sMZMZ19scR4PsZChSR7A==\" crossorigin=\"\"><script src=\"https://unpkg.com/leaflet@1.7.1/dist/leaflet.js\" integrit" + // cont.
+	"y=\"sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==\" crossorigin=\"\"></scr" + // cont.
+	"ipt><script>let MAPSHOT_CONFIG={};try{MAPSHOT_CONFIG=__MAPSHOT_CONFIG_TOKEN__}catch(_){}</script></head><body><div id=\"m" + // cont.
+	"ap\" style=\"height:100%\"></div><script src=\"./main-c7f52b47.js\" defer=\"\"></script></body></html>" +
 	""
 
-// FileFrontendDistMainCFJs is file "frontend/dist/main-1c3f7217.js"
-var FileFrontendDistMainCFJs =
-	"(function () {\n" +
+// FileFrontendDistLeafletControlBoxzoomBeDDESvg is file "frontend/dist/leaflet-control-boxzoom-4be5d249281d260e.svg"
+var FileFrontendDistLeafletControlBoxzoomBeDDESvg =
+	"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
+	"<!-- Created with Inkscape (http://www.inkscape.org/) -->\n" +
+	"<svg\n" +
+	"   xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n" +
+	"   xmlns:cc=\"http://web.resource.org/cc/\"\n" +
+	"   xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n" +
+	"   xmlns:svg=\"http://www.w3.org/2000/svg\"\n" +
+	"   xmlns=\"http://www.w3.org/2000/svg\"\n" +
+	"   xmlns:xlink=\"http://www.w3.org/1999/xlink\"\n" +
+	"   xmlns:sodipodi=\"http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd\"\n" +
+	"   xmlns:inkscape=\"http://www.inkscape.org/namespaces/inkscape\"\n" +
+	"   sodipodi:docname=\"magnifying_icon.svg\"\n" +
+	"   sodipodi:docbase=\"C:\\Documents and Settings\\Aqua\\Desktop\"\n" +
+	"   inkscape:version=\"0.45.1\"\n" +
+	"   sodipodi:version=\"0.32\"\n" +
+	"   id=\"svg2325\"\n" +
+	"   height=\"32\"\n" +
+	"   width=\"32\"\n" +
+	"   version=\"1.0\"\n" +
+	"   inkscape:export-filename=\"/home/adrien/Bureau/En cours/Wikipedia.fr/Final/communauté48.png\"\n" +
+	"   inkscape:export-xdpi=\"135\"\n" +
+	"   inkscape:export-ydpi=\"135\"\n" +
+	"   inkscape:output_extension=\"org.inkscape.output.svg.inkscape\">\n" +
+	"  <defs\n" +
+	"     id=\"defs3\">\n" +
+	"    <linearGradient\n" +
+	"       inkscape:collect=\"always\"\n" +
+	"       id=\"linearGradient3216\">\n" +
+	"      <stop\n" +
+	"         style=\"stop-color:#ffffff;stop-opacity:1;\"\n" +
+	"         offset=\"0\"\n" +
+	"         id=\"stop3218\" />\n" +
+	"      <stop\n" +
+	"         style=\"stop-color:#ffffff;stop-opacity:0;\"\n" +
+	"         offset=\"1\"\n" +
+	"         id=\"stop3220\" />\n" +
+	"    </linearGradient>\n" +
+	"    <linearGradient\n" +
+	"       id=\"linearGradient2455\">\n" +
+	"      <stop\n" +
+	"         id=\"stop2457\"\n" +
+	"         offset=\"0.0000000\"\n" +
+	"         style=\"stop-color:#5cd7fa;stop-opacity:1.0000000;\" />\n" +
+	"      <stop\n" +
+	"         id=\"stop2465\"\n" +
+	"         offset=\"0.25000000\"\n" +
+	"         style=\"stop-color:#5cd7fa;stop-opacity:1.0000000;\" />\n" +
+	"      <stop\n" +
+	"         id=\"stop2463\"\n" +
+	"         offset=\"0.68000001\"\n" +
+	"         style=\"stop-color:#3098e2;stop-opacity:1.0000000;\" />\n" +
+	"      <stop\n" +
+	"         id=\"stop2467\"\n" +
+	"         offset=\"0.76999998\"\n" +
+	"         style=\"stop-color:#2686d9;stop-opacity:0.49803922;\" />\n" +
+	"      <stop\n" +
+	"         id=\"stop2459\"\n" +
+	"         offset=\"1\"\n" +
+	"         style=\"stop-color:#1d75d1;stop-opacity:0;\" />\n" +
+	"    </linearGradient>\n" +
+	"    <radialGradient\n" +
+	"       gradientUnits=\"userSpaceOnUse\"\n" +
+	"       r=\"235.21336\"\n" +
+	"       fy=\"24.824932\"\n" +
+	"       fx=\"303.3027\"\n" +
+	"       cy=\"24.824932\"\n" +
+	"       cx=\"303.3027\"\n" +
+	"       gradientTransform=\"matrix(0.131896,0,0,0.122656,-24.18581,-5.466475e-2)\"\n" +
+	"       id=\"radialGradient2461\"\n" +
+	"       xlink:href=\"#linearGradient2455\"\n" +
+	"       inkscape:collect=\"always\" />\n" +
+	"    <linearGradient\n" +
+	"       y2=\"224.01366\"\n" +
+	"       x2=\"126.40201\"\n" +
+	"       y1=\"20.281345\"\n" +
+	"       x1=\"126.40201\"\n" +
+	"       gradientTransform=\"matrix(8.079689e-3,0,0,8.057006e-3,-20.54882,-0.506927)\"\n" +
+	"       gradientUnits=\"userSpaceOnUse\"\n" +
+	"       id=\"linearGradient5439\"\n" +
+	"       xlink:href=\"#linearGradient9123\"\n" +
+	"       inkscape:collect=\"always\" />\n" +
+	"    <radialGradient\n" +
+	"       r=\"203.7394\"\n" +
+	"       fy=\"22.007891\"\n" +
+	"       fx=\"131.50195\"\n" +
+	"       cy=\"22.007891\"\n" +
+	"       cx=\"131.50195\"\n" +
+	"       gradientTransform=\"matrix(8.079993e-3,0,0,8.057006e-3,-20.54889,-0.506927)\"\n" +
+	"       gradientUnits=\"userSpaceOnUse\"\n" +
+	"       id=\"radialGradient5437\"\n" +
+	"       xlink:href=\"#linearGradient3014\"\n" +
+	"       inkscape:collect=\"always\" />\n" +
+	"    <linearGradient\n" +
+	"       y2=\"224.01366\"\n" +
+	"       x2=\"126.40201\"\n" +
+	"       y1=\"20.281345\"\n" +
+	"       x1=\"126.40201\"\n" +
+	"       gradientTransform=\"matrix(8.791556e-2,0,0,8.766874e-2,-0.23325,-0.285795)\"\n" +
+	"       gradientUnits=\"userSpaceOnUse\"\n" +
+	"       id=\"linearGradient2765\"\n" +
+	"       xlink:href=\"#linearGradient9123\"\n" +
+	"       inkscape:collect=\"always\" />\n" +
+	"    <linearGradient\n" +
+	"       inkscape:collect=\"always\"\n" +
+	"       xlink:href=\"#linearGradient9123\"\n" +
+	"       id=\"linearGradient12199\"\n" +
+	"       gradientUnits=\"userSpaceOnUse\"\n" +
+	"       gradientTransform=\"scale(1.004535,0.995485)\"\n" +
+	"       x1=\"126.40201\"\n" +
+	"       y1=\"20.281345\"\n" +
+	"       x2=\"126.40201\"\n" +
+	"       y2=\"224.01366\" />\n" +
+	"    <linearGradient\n" +
+	"       inkscape:collect=\"always\"\n" +
+	"       xlink:href=\"#linearGradient9123\"\n" +
+	"       id=\"linearGradient12195\"\n" +
+	"       gradientUnits=\"userSpaceOnUse\"\n" +
+	"       gradientTransform=\"scale(1.004535,0.995485)\"\n" +
+	"       x1=\"126.40201\"\n" +
+	"       y1=\"20.281345\"\n" +
+	"       x2=\"126.40201\"\n" +
+	"       y2=\"224.01366\" />\n" +
+	"    <linearGradient\n" +
+	"       inkscape:collect=\"always\"\n" +
+	"       xlink:href=\"#linearGradient9123\"\n" +
+	"       id=\"linearGradient12191\"\n" +
+	"       gradientUnits=\"userSpaceOnUse\"\n" +
+	"       gradientTransform=\"scale(1.004535,0.995485)\"\n" +
+	"       x1=\"126.40201\"\n" +
+	"       y1=\"20.281345\"\n" +
+	"       x2=\"126.40201\"\n" +
+	"       y2=\"224.01366\" />\n" +
+	"    <linearGradient\n" +
+	"       inkscape:collect=\"always\"\n" +
+	"       xlink:href=\"#linearGradient9123\"\n" +
+	"       id=\"linearGradient12187\"\n" +
+	"       gradientUnits=\"userSpaceOnUse\"\n" +
+	"       gradientTransform=\"scale(1.004535,0.995485)\"\n" +
+	"       x1=\"126.40201\"\n" +
+	"       y1=\"20.281345\"\n" +
+	"       x2=\"126.40201\"\n" +
+	"       y2=\"224.01366\" />\n" +
+	"    <linearGradient\n" +
+	"       inkscape:collect=\"always\"\n" +
+	"       xlink:href=\"#linearGradient9123\"\n" +
+	"       id=\"linearGradient9137\"\n" +
+	"       gradientUnits=\"userSpaceOnUse\"\n" +
+	"       gradientTransform=\"scale(1.004535,0.995485)\"\n" +
+	"       x1=\"126.40201\"\n" +
+	"       y1=\"20.281345\"\n" +
+	"       x2=\"126.40201\"\n" +
+	"       y2=\"224.01366\" />\n" +
+	"    <linearGradient\n" +
+	"       inkscape:collect=\"always\"\n" +
+	"       xlink:href=\"#linearGradient9123\"\n" +
+	"       id=\"linearGradient9133\"\n" +
+	"       gradientUnits=\"userSpaceOnUse\"\n" +
+	"       gradientTransform=\"scale(1.004535,0.995485)\"\n" +
+	"       x1=\"126.40201\"\n" +
+	"       y1=\"20.281345\"\n" +
+	"       x2=\"126.40201\"\n" +
+	"       y2=\"224.01366\" />\n" +
+	"    <radialGradient\n" +
+	"       r=\"264.09177\"\n" +
+	"       fy=\"16.497328\"\n" +
+	"       fx=\"129.96965\"\n" +
+	"       cy=\"16.497328\"\n" +
+	"       cx=\"129.96965\"\n" +
+	"       gradientTransform=\"matrix(0.981673,0,0,0.981673,2.369397,1.623515)\"\n" +
+	"       gradientUnits=\"userSpaceOnUse\"\n" +
+	"       id=\"radialGradient7759\"\n" +
+	"       xlink:href=\"#linearGradient4385\"\n" +
+	"       inkscape:collect=\"always\" />\n" +
+	"    <radialGradient\n" +
+	"       r=\"264.09177\"\n" +
+	"       fy=\"16.497328\"\n" +
+	"       fx=\"129.96965\"\n" +
+	"       cy=\"16.497328\"\n" +
+	"       cx=\"129.96965\"\n" +
+	"       gradientTransform=\"scale(1.006043,0.993993)\"\n" +
+	"       gradientUnits=\"userSpaceOnUse\"\n" +
+	"       id=\"radialGradient7753\"\n" +
+	"       xlink:href=\"#linearGradient4385\"\n" +
+	"       inkscape:collect=\"always\" />\n" +
+	"    <radialGradient\n" +
+	"       inkscape:collect=\"always\"\n" +
+	"       xlink:href=\"#linearGradient4385\"\n" +
+	"       id=\"radialGradient4393\"\n" +
+	"       gradientTransform=\"scale(1.006043,0.993993)\"\n" +
+	"       cx=\"129.96965\"\n" +
+	"       cy=\"16.497328\"\n" +
+	"       fx=\"129.96965\"\n" +
+	"       fy=\"16.497328\"\n" +
+	"       r=\"264.09177\"\n" +
+	"       gradientUnits=\"userSpaceOnUse\" />\n" +
+	"    <linearGradient\n" +
+	"       id=\"linearGradient4385\">\n" +
+	"      <stop\n" +
+	"         style=\"stop-color:#ff6549;stop-opacity:1.0000000;\"\n" +
+	"         offset=\"0.0000000\"\n" +
+	"         id=\"stop4387\" />\n" +
+	"      <stop\n" +
+	"         style=\"stop-color:#e34e34;stop-opacity:0;\"\n" +
+	"         offset=\"1\"\n" +
+	"         id=\"stop4389\" />\n" +
+	"    </linearGradient>\n" +
+	"    <linearGradient\n" +
+	"       id=\"linearGradient3014\">\n" +
+	"      <stop\n" +
+	"         style=\"stop-color:#3da3f1;stop-opacity:1;\"\n" +
+	"         offset=\"0\"\n" +
+	"         id=\"stop3016\" />\n" +
+	"      <stop\n" +
+	"         style=\"stop-color:#60b3f3;stop-opacity:0;\"\n" +
+	"         offset=\"1\"\n" +
+	"         id=\"stop3018\" />\n" +
+	"    </linearGradient>\n" +
+	"    <linearGradient\n" +
+	"       id=\"linearGradient9123\">\n" +
+	"      <stop\n" +
+	"         style=\"stop-color:#ffffff;stop-opacity:0.627451;\"\n" +
+	"         offset=\"0\"\n" +
+	"         id=\"stop9125\" />\n" +
+	"      <stop\n" +
+	"         style=\"stop-color:#ffffff;stop-opacity:0.0000000;\"\n" +
+	"         offset=\"1.0000000\"\n" +
+	"         id=\"stop9127\" />\n" +
+	"    </linearGradient>\n" +
+	"    <linearGradient\n" +
+	"       inkscape:collect=\"always\"\n" +
+	"       xlink:href=\"#linearGradient3216\"\n" +
+	"       id=\"linearGradient3222\"\n" +
+	"       x1=\"16.036528\"\n" +
+	"       y1=\"2.3208282\"\n" +
+	"       x2=\"16.036528\"\n" +
+	"       y2=\"14.058176\"\n" +
+	"       gradientUnits=\"userSpaceOnUse\"\n" +
+	"       gradientTransform=\"matrix(0.951478,0,0,0.951478,0.778124,0.791783)\" />\n" +
+	"    <linearGradient\n" +
+	"       inkscape:collect=\"always\"\n" +
+	"       xlink:href=\"#linearGradient3216\"\n" +
+	"       id=\"linearGradient3226\"\n" +
+	"       gradientUnits=\"userSpaceOnUse\"\n" +
+	"       gradientTransform=\"matrix(0.880035,0,0,0.880035,1.923819,1.95759)\"\n" +
+	"       x1=\"16.036528\"\n" +
+	"       y1=\"2.3208282\"\n" +
+	"       x2=\"16.036528\"\n" +
+	"       y2=\"14.058176\" />\n" +
+	"  </defs>\n" +
+	"  <sodipodi:namedview\n" +
+	"     inkscape:window-y=\"99\"\n" +
+	"     inkscape:window-x=\"346\"\n" +
+	"     inkscape:window-height=\"623\"\n" +
+	"     inkscape:window-width=\"934\"\n" +
+	"     inkscape:current-layer=\"layer1\"\n" +
+	"     inkscape:document-units=\"px\"\n" +
+	"     inkscape:cy=\"16.002268\"\n" +
+	"     inkscape:cx=\"16\"\n" +
+	"     inkscape:zoom=\"13.373104\"\n" +
+	"     inkscape:pageshadow=\"2\"\n" +
+	"     inkscape:pageopacity=\"0.0\"\n" +
+	"     borderopacity=\"1.0\"\n" +
+	"     bordercolor=\"#666666\"\n" +
+	"     pagecolor=\"#ffffff\"\n" +
+	"     id=\"base\"\n" +
+	"     showgrid=\"true\"\n" +
+	"     inkscape:grid-bbox=\"true\"\n" +
+	"     inkscape:grid-points=\"true\" />\n" +
+	"  <metadata\n" +
+	"     id=\"metadata4\">\n" +
+	"    <rdf:RDF>\n" +
+	"      <cc:Work\n" +
+	"         rdf:about=\"\">\n" +
+	"        <dc:format>image/svg+xml</dc:format>\n" +
+	"        <dc:type\n" +
+	"           rdf:resource=\"http://purl.org/dc/dcmitype/StillImage\" />\n" +
+	"      </cc:Work>\n" +
+	"    </rdf:RDF>\n" +
+	"  </metadata>\n" +
+	"  <g\n" +
+	"     id=\"layer1\"\n" +
+	"     inkscape:groupmode=\"layer\"\n" +
+	"     inkscape:label=\"Layer 1\">\n" +
+	"    <path\n" +
+	"       style=\"opacity:1;fill:#444444;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.125;stroke-linecap:roun" + // cont.
+	"d;stroke-linejoin:round;stroke-miterlimit:4;stroke-dashoffset:0;stroke-opacity:1\"\n" +
+	"       d=\"M 12.6875,2.5 C 12.732241,2.4966279 12.767613,2.5028319 12.8125,2.5 C 12.818155,2.4996432 12.838392,2.5001366 " + // cont.
+	"12.84375,2.5 C 12.864337,2.5000923 12.885626,2.4997699 12.90625,2.5 C 12.911622,2.499915 12.931827,2.5002879 12.9375,2.5" + // cont.
+	" C 13.1249,2.4904905 13.31025,2.5 13.5,2.5 C 19.572,2.5 24.5,7.428 24.5,13.5 C 24.5,15.792812 23.795334,17.924655 22.593" + // cont.
+	"75,19.6875 L 29.21875,26.1875 C 29.221476,26.190873 29.247241,26.214813 29.25,26.21875 C 29.258126,26.232108 29.274233,2" + // cont.
+	"6.270184 29.28125,26.28125 C 29.291089,26.297047 29.304247,26.326694 29.3125,26.34375 C 29.540265,26.882593 29.047156,27" + // cont.
+	".997038 28.09375,28.96875 C 27.140344,29.940461 26.04238,30.437898 25.5,30.21875 C 25.482806,30.210785 25.453481,30.1970" + // cont.
+	"37 25.4375,30.1875 C 25.425242,30.179182 25.39272,30.167192 25.375,30.15625 C 25.371066,30.153482 25.347142,30.12771 25." + // cont.
+	"34375,30.125 L 18.40625,23.3125 C 16.92476,24.055811 15.269419,24.5 13.5,24.5 C 7.428,24.5 2.5,19.572 2.5,13.5 C 2.5,7.7" + // cont.
+	"093012 7.005366,2.9282573 12.6875,2.5 z M 12.75,6 C 8.9631232,6.3794116 6,9.614474 6,13.5 C 6,17.64 9.36,21 13.5,21 C 17" + // cont.
+	".64,21 21,17.64 21,13.5 C 21,9.36 17.64,6 13.5,6 C 13.338281,6 13.190435,5.9898999 13.03125,6 C 13.023602,6.0004853 13.0" + // cont.
+	"07766,5.9998705 13,6 C 12.968605,5.999528 12.906295,6.000105 12.875,6 C 12.867271,6.0002672 12.851348,5.9993312 12.84375" + // cont.
+	",6 C 12.813831,6.0026334 12.779818,5.9970125 12.75,6 z \"\n" +
+	"       id=\"rect3229\"\n" +
+	"       sodipodi:nodetypes=\"cssssssccsssssssccssccssssssssc\" />\n" +
+	"  </g>\n" +
+	"</svg>\n" +
+	"" +
+	""
+
+// FileFrontendDistMainCFBJs is file "frontend/dist/main-c7f52b47.js"
+var FileFrontendDistMainCFBJs =
+	"(function (L$1) {\n" +
 	"    'use strict';\n" +
 	"\n" +
+	"    /*\r\n" +
+	"     * L.Control.BoxZoom\r\n" +
+	"     * A visible, clickable control for doing a box zoom.\r\n" +
+	"     * https://github.com/gregallensworth/L.Control.BoxZoom\r\n" +
+	"     */\r\n" +
+	"    L.Control.BoxZoom = L.Control.extend({\r\n" +
+	"        options: {\r\n" +
+	"            position: 'topright',\r\n" +
+	"            title: 'Click here then draw a square on the map, to zoom in to an area',\r\n" +
+	"            aspectRatio: null,\r\n" +
+	"            divClasses: '',\r\n" +
+	"            enableShiftDrag: false,\r\n" +
+	"            iconClasses: '',\r\n" +
+	"            keepOn: false,\r\n" +
+	"        },\r\n" +
+	"        initialize: function (options) {\r\n" +
+	"            L.setOptions(this, options);\r\n" +
+	"            this.map = null;\r\n" +
+	"            this.active = false;\r\n" +
+	"        },\r\n" +
+	"        onAdd: function (map) {\r\n" +
+	"            // add a linkage to the map, since we'll be managing map layers\r\n" +
+	"            this.map = map;\r\n" +
+	"            this.active = false;\r\n" +
+	"\r\n" +
+	"            // create our button: uses FontAwesome cuz that font is... awesome\r\n" +
+	"            // assign this here control as a property of the visible DIV, so we can be more terse when writing click-han" + // cont.
+	"dlers on that visible DIV\r\n" +
+	"            this.controlDiv = L.DomUtil.create('div', 'leaflet-control-boxzoom');\r\n" +
+	"\r\n" +
+	"            // if we're not using an icon, add the background image class\r\n" +
+	"            if (!this.options.iconClasses) {\r\n" +
+	"                L.DomUtil.addClass(this.controlDiv, 'with-background-image');\r\n" +
+	"            }\r\n" +
+	"            if (this.options.divClasses) {\r\n" +
+	"                L.DomUtil.addClass(this.controlDiv, this.options.divClasses);\r\n" +
+	"            }\r\n" +
+	"            this.controlDiv.control = this;\r\n" +
+	"            this.controlDiv.title = this.options.title;\r\n" +
+	"            this.controlDiv.innerHTML = ' ';\r\n" +
+	"            L.DomEvent\r\n" +
+	"                .addListener(this.controlDiv, 'mousedown', L.DomEvent.stopPropagation)\r\n" +
+	"                .addListener(this.controlDiv, 'click', L.DomEvent.stopPropagation)\r\n" +
+	"                .addListener(this.controlDiv, 'click', L.DomEvent.preventDefault)\r\n" +
+	"                .addListener(this.controlDiv, 'click', function () {\r\n" +
+	"                    this.control.toggleState();\r\n" +
+	"                });\r\n" +
+	"\r\n" +
+	"            // start by toggling our state to off; this disables the boxZoom hooks on the map, in favor of this one\r\n" +
+	"            this.setStateOff();\r\n" +
+	"\r\n" +
+	"            if (this.options.iconClasses) {\r\n" +
+	"                var iconElement = L.DomUtil.create('i', this.options.iconClasses, this.controlDiv);\r\n" +
+	"                if (iconElement) {\r\n" +
+	"                    iconElement.style.color = this.options.iconColor || 'black';\r\n" +
+	"                    iconElement.style.textAlign = 'center';\r\n" +
+	"                    iconElement.style.verticalAlign = 'middle';\r\n" +
+	"                } else {\r\n" +
+	"                    console.log('Unable to create element for icon');\r\n" +
+	"                }\r\n" +
+	"            }\r\n" +
+	"\r\n" +
+	"            // if we're enforcing an aspect ratio, then monkey-patch the map's real BoxZoom control to support that\r\n" +
+	"            // after all, this control is just a wrapper over the map's own BoxZoom behavior\r\n" +
+	"            if (this.options.aspectRatio) {\r\n" +
+	"                this.map.boxZoom.aspectRatio = this.options.aspectRatio;\r\n" +
+	"                this.map.boxZoom._onMouseMove = this._boxZoomControlOverride_onMouseMove;\r\n" +
+	"                this.map.boxZoom._onMouseUp = this._boxZoomControlOverride_onMouseUp;\r\n" +
+	"            }\r\n" +
+	"\r\n" +
+	"            // done!\r\n" +
+	"            return this.controlDiv;\r\n" +
+	"        },\r\n" +
+	"\r\n" +
+	"        onRemove: function (map) {\r\n" +
+	"            // on remove: if we had to monkey-patch the aspect-ratio stuff, undo that now\r\n" +
+	"            if (this.options.aspectRatio) {\r\n" +
+	"                delete this.map.boxZoom.aspectRatio;\r\n" +
+	"                this.map.boxZoom._onMouseMove = L.Map.BoxZoom.prototype._onMouseMove;\r\n" +
+	"                this.map.boxZoom._onMouseUp = L.Map.BoxZoom.prototype._onMouseUp;\r\n" +
+	"            }\r\n" +
+	"        },\r\n" +
+	"\r\n" +
+	"        toggleState: function () {\r\n" +
+	"            this.active ? this.setStateOff() : this.setStateOn();\r\n" +
+	"        },\r\n" +
+	"        setStateOn: function () {\r\n" +
+	"            L.DomUtil.addClass(this.controlDiv, 'leaflet-control-boxzoom-active');\r\n" +
+	"            this.active = true;\r\n" +
+	"            this.map.dragging.disable();\r\n" +
+	"            if (!this.options.enableShiftDrag) {\r\n" +
+	"                this.map.boxZoom.addHooks();\r\n" +
+	"            }\r\n" +
+	"\r\n" +
+	"            this.map.on('mousedown', this.handleMouseDown, this);\r\n" +
+	"            if (!this.options.keepOn) {\r\n" +
+	"                this.map.on('boxzoomend', this.setStateOff, this);\r\n" +
+	"            }\r\n" +
+	"\r\n" +
+	"            L.DomUtil.addClass(this.map._container, 'leaflet-control-boxzoom-active');\r\n" +
+	"        },\r\n" +
+	"        setStateOff: function () {\r\n" +
+	"            L.DomUtil.removeClass(this.controlDiv, 'leaflet-control-boxzoom-active');\r\n" +
+	"            this.active = false;\r\n" +
+	"            this.map.off('mousedown', this.handleMouseDown, this);\r\n" +
+	"            this.map.dragging.enable();\r\n" +
+	"            if (!this.options.enableShiftDrag) {\r\n" +
+	"                this.map.boxZoom.removeHooks();\r\n" +
+	"            }\r\n" +
+	"\r\n" +
+	"            L.DomUtil.removeClass(this.map._container, 'leaflet-control-boxzoom-active');\r\n" +
+	"        },\r\n" +
+	"\r\n" +
+	"        handleMouseDown: function (event) {\r\n" +
+	"            this.map.boxZoom._onMouseDown.call(this.map.boxZoom, { clientX: event.originalEvent.clientX, clientY: event." + // cont.
+	"originalEvent.clientY, which: 1, shiftKey: true });\r\n" +
+	"        },\r\n" +
+	"\r\n" +
+	"        // monkey-patched applied to L.Map.BoxZoom to handle aspectRatio and to zoom to the drawn box instead of the mou" + // cont.
+	"seEvent point\r\n" +
+	"        // in these methods,  \"this\" is not the control, but the map's boxZoom instance\r\n" +
+	"        _boxZoomControlOverride_onMouseMove: function (e) {\r\n" +
+	"            if (!this._moved) {\r\n" +
+	"                this._box = L.DomUtil.create('div', 'leaflet-zoom-box', this._pane);\r\n" +
+	"                L.DomUtil.setPosition(this._box, this._startLayerPoint);\r\n" +
+	"\r\n" +
+	"                //TODO refactor: move cursor to styles\r\n" +
+	"                this._container.style.cursor = 'crosshair';\r\n" +
+	"                this._map.fire('boxzoomstart');\r\n" +
+	"            }\r\n" +
+	"\r\n" +
+	"            var startPoint = this._startLayerPoint,\r\n" +
+	"                box = this._box,\r\n" +
+	"\r\n" +
+	"                layerPoint = this._map.mouseEventToLayerPoint(e),\r\n" +
+	"                offset = layerPoint.subtract(startPoint),\r\n" +
+	"\r\n" +
+	"                newPos = new L.Point(\r\n" +
+	"                    Math.min(layerPoint.x, startPoint.x),\r\n" +
+	"                    Math.min(layerPoint.y, startPoint.y));\r\n" +
+	"\r\n" +
+	"            L.DomUtil.setPosition(box, newPos);\r\n" +
+	"\r\n" +
+	"            this._moved = true;\r\n" +
+	"\r\n" +
+	"            var width = (Math.max(0, Math.abs(offset.x) - 4));  // from L.Map.BoxZoom, TODO refactor: remove hardcoded 4" + // cont.
+	" pixels\r\n" +
+	"            var height = (Math.max(0, Math.abs(offset.y) - 4));  // from L.Map.BoxZoom, TODO refactor: remove hardcoded " + // cont.
+	"4 pixels\r\n" +
+	"\r\n" +
+	"            if (this.aspectRatio) {\r\n" +
+	"                height = width / this.aspectRatio;\r\n" +
+	"            }\r\n" +
+	"\r\n" +
+	"            box.style.width = width + 'px';\r\n" +
+	"            box.style.height = height + 'px';\r\n" +
+	"        },\r\n" +
+	"        _boxZoomControlOverride_onMouseUp: function (e) {\r\n" +
+	"            // the stock behavior is to generate a bbox based on the _startLayerPoint and the mouseUp event point\r\n" +
+	"            // we don't want that; we specifically want to use the drawn box with the fixed aspect ratio\r\n" +
+	"\r\n" +
+	"            // fetch the box and convert to a map bbox, before we clear it\r\n" +
+	"            var ul = this._box._leaflet_pos;\r\n" +
+	"            var lr = new L.Point(this._box._leaflet_pos.x + this._box.offsetWidth, this._box._leaflet_pos.y + this._box." + // cont.
+	"offsetHeight);\r\n" +
+	"            var nw = this._map.layerPointToLatLng(ul);\r\n" +
+	"            var se = this._map.layerPointToLatLng(lr);\r\n" +
+	"            if (nw.equals(se)) { return; }\r\n" +
+	"\r\n" +
+	"            this._finish();\r\n" +
+	"\r\n" +
+	"            var bounds = new L.LatLngBounds(nw, se);\r\n" +
+	"            this._map.fitBounds(bounds);\r\n" +
+	"\r\n" +
+	"            this._map.fire('boxzoomend', {\r\n" +
+	"                boxZoomBounds: bounds\r\n" +
+	"            });\r\n" +
+	"        },\r\n" +
+	"    });\r\n" +
+	"    L.Control.boxzoom = function (options) {\r\n" +
+	"        return new L.Control.BoxZoom(options);\r\n" +
+	"    };\n" +
+	"\n" +
+	"    var boxzoom_svg = \"leaflet-control-boxzoom-4be5d249281d260e.svg\";\n" +
+	"\n" +
+	"    function styleInject(css, ref) {\n" +
+	"      if ( ref === void 0 ) ref = {};\n" +
+	"      var insertAt = ref.insertAt;\n" +
+	"\n" +
+	"      if (!css || typeof document === 'undefined') { return; }\n" +
+	"\n" +
+	"      var head = document.head || document.getElementsByTagName('head')[0];\n" +
+	"      var style = document.createElement('style');\n" +
+	"      style.type = 'text/css';\n" +
+	"\n" +
+	"      if (insertAt === 'top') {\n" +
+	"        if (head.firstChild) {\n" +
+	"          head.insertBefore(style, head.firstChild);\n" +
+	"        } else {\n" +
+	"          head.appendChild(style);\n" +
+	"        }\n" +
+	"      } else {\n" +
+	"        head.appendChild(style);\n" +
+	"      }\n" +
+	"\n" +
+	"      if (style.styleSheet) {\n" +
+	"        style.styleSheet.cssText = css;\n" +
+	"      } else {\n" +
+	"        style.appendChild(document.createTextNode(css));\n" +
+	"      }\n" +
+	"    }\n" +
+	"\n" +
+	"    var css_248z = \".leaflet-control-boxzoom{background-color:#fff;border-radius:4px;border:1px solid #ccc;width:25px;he" + // cont.
+	"ight:25px;line-height:25px;box-shadow:0 1px 2px rgba(0,0,0,.65);cursor:pointer!important}.with-background-image{backgrou" + // cont.
+	"nd-image:url(leaflet-control-boxzoom.svg);background-repeat:no-repeat;background-size:21px 21px;background-position:2px " + // cont.
+	"2px}.leaflet-control-boxzoom.leaflet-control-boxzoom-active{background-color:#aaa}.leaflet-container.leaflet-control-box" + // cont.
+	"zoom-active,.leaflet-container.leaflet-control-boxzoom-active path.leaflet-interactive{cursor:crosshair!important}.leafl" + // cont.
+	"et-control-boxzoom i{display:block}.leaflet-control-boxzoom i.icon{font-size:17px;margin-left:1px;margin-top:3px}.leafle" + // cont.
+	"t-control-boxzoom i.fa{margin-top:6px}.leaflet-control-boxzoom i.glyphicon{margin-top:5px}\";\n" +
+	"    styleInject(css_248z);\n" +
+	"\n" +
 	"    var _a, _b;\n" +
+	"    const main_css = `\n" +
+	"    html,body {\n" +
+	"        margin: 0;\n" +
+	"    }\n" +
+	"    .with-background-image {\n" +
+	"        background-image:url(${boxzoom_svg});\n" +
+	"        background-repeat:no-repeat;\n" +
+	"        background-size:21px 21px; /* 25px image, 25px box; subtract 2px for padding on every side = 21px rendering heig" + // cont.
+	"ht */\n" +
+	"        background-position:2px 2px;\n" +
+	"    }\n" +
+	"`;\n" +
+	"    var style = document.createElement('style');\n" +
+	"    style.innerHTML = main_css;\n" +
+	"    document.head.appendChild(style);\n" +
 	"    const params = new URLSearchParams(window.location.search);\n" +
 	"    let path = (_b = (_a = params.get(\"path\")) !== null && _a !== void 0 ? _a : MAPSHOT_CONFIG.path) !== null && _b !== " + // cont.
 	"void 0 ? _b : \"\";\n" +
@@ -544,16 +1105,16 @@ var FileFrontendDistMainCFJs =
 	"        };\n" +
 	"        const worldToLatLng = function (x, y) {\n" +
 	"            const ratio = info.render_size / info.tile_size;\n" +
-	"            return L.latLng(-y * ratio, x * ratio);\n" +
+	"            return L$1.latLng(-y * ratio, x * ratio);\n" +
 	"        };\n" +
 	"        const midPointToLatLng = function (bbox) {\n" +
 	"            return worldToLatLng((bbox.left_top.x + bbox.right_bottom.x) / 2, (bbox.left_top.y + bbox.right_bottom.y) / " + // cont.
 	"2);\n" +
 	"        };\n" +
-	"        const baseLayer = L.tileLayer(path + \"zoom_{z}/tile_{x}_{y}.jpg\", {\n" +
+	"        const baseLayer = L$1.tileLayer(path + \"zoom_{z}/tile_{x}_{y}.jpg\", {\n" +
 	"            tileSize: info.render_size,\n" +
-	"            bounds: L.latLngBounds(worldToLatLng(info.world_min.x, info.world_min.y), worldToLatLng(info.world_max.x, in" + // cont.
-	"fo.world_max.y)),\n" +
+	"            bounds: L$1.latLngBounds(worldToLatLng(info.world_min.x, info.world_min.y), worldToLatLng(info.world_max.x, " + // cont.
+	"info.world_max.y)),\n" +
 	"            noWrap: true,\n" +
 	"            maxNativeZoom: info.zoom_max,\n" +
 	"            minNativeZoom: info.zoom_min,\n" +
@@ -561,45 +1122,48 @@ var FileFrontendDistMainCFJs =
 	"            maxZoom: info.zoom_max + 4,\n" +
 	"        });\n" +
 	"        const debugLayers = [\n" +
-	"            L.marker([0, 0], { title: \"Start\" }).bindPopup(\"Starting point\"),\n" +
+	"            L$1.marker([0, 0], { title: \"Start\" }).bindPopup(\"Starting point\"),\n" +
 	"        ];\n" +
 	"        if (info.player) {\n" +
-	"            debugLayers.push(L.marker(worldToLatLng(info.player.x, info.player.y), { title: \"Player\" }).bindPopup(\"Playe" + // cont.
-	"r\"));\n" +
+	"            debugLayers.push(L$1.marker(worldToLatLng(info.player.x, info.player.y), { title: \"Player\" }).bindPopup(\"Pla" + // cont.
+	"yer\"));\n" +
 	"        }\n" +
-	"        debugLayers.push(L.marker(worldToLatLng(info.world_min.x, info.world_min.y), { title: `${info.world_min.x}, ${in" + // cont.
-	"fo.world_min.y}` }), L.marker(worldToLatLng(info.world_min.x, info.world_max.y), { title: `${info.world_min.x}, ${info.w" + // cont.
-	"orld_max.y}` }), L.marker(worldToLatLng(info.world_max.x, info.world_min.y), { title: `${info.world_max.x}, ${info.world" + // cont.
-	"_min.y}` }), L.marker(worldToLatLng(info.world_max.x, info.world_max.y), { title: `${info.world_max.x}, ${info.world_max" + // cont.
-	".y}` }));\n" +
+	"        debugLayers.push(L$1.marker(worldToLatLng(info.world_min.x, info.world_min.y), { title: `${info.world_min.x}, ${" + // cont.
+	"info.world_min.y}` }), L$1.marker(worldToLatLng(info.world_min.x, info.world_max.y), { title: `${info.world_min.x}, ${in" + // cont.
+	"fo.world_max.y}` }), L$1.marker(worldToLatLng(info.world_max.x, info.world_min.y), { title: `${info.world_max.x}, ${info" + // cont.
+	".world_min.y}` }), L$1.marker(worldToLatLng(info.world_max.x, info.world_max.y), { title: `${info.world_max.x}, ${info.w" + // cont.
+	"orld_max.y}` }));\n" +
 	"        let stationsLayers = [];\n" +
 	"        if (isIterable(info.stations)) {\n" +
 	"            for (const station of info.stations) {\n" +
-	"                stationsLayers.push(L.marker(midPointToLatLng(station.bounding_box), { title: station.backer_name }).bin" + // cont.
-	"dTooltip(station.backer_name, { permanent: true }));\n" +
+	"                stationsLayers.push(L$1.marker(midPointToLatLng(station.bounding_box), { title: station.backer_name }).b" + // cont.
+	"indTooltip(station.backer_name, { permanent: true }));\n" +
 	"            }\n" +
 	"        }\n" +
 	"        let tagsLayers = [];\n" +
 	"        if (isIterable(info.tags)) {\n" +
 	"            for (const tag of info.tags) {\n" +
-	"                tagsLayers.push(L.marker(worldToLatLng(tag.position.x, tag.position.y), { title: `${tag.force_name}: ${t" + // cont.
-	"ag.text}` }).bindTooltip(tag.text, { permanent: true }));\n" +
+	"                tagsLayers.push(L$1.marker(worldToLatLng(tag.position.x, tag.position.y), { title: `${tag.force_name}: $" + // cont.
+	"{tag.text}` }).bindTooltip(tag.text, { permanent: true }));\n" +
 	"            }\n" +
 	"        }\n" +
-	"        const mymap = L.map('map', {\n" +
-	"            crs: L.CRS.Simple,\n" +
+	"        const mymap = L$1.map('map', {\n" +
+	"            crs: L$1.CRS.Simple,\n" +
 	"            layers: [baseLayer],\n" +
 	"        });\n" +
-	"        L.control.layers({ /* Only one default base layer */}, {\n" +
-	"            \"Train stations\": L.layerGroup(stationsLayers),\n" +
-	"            \"Tags\": L.layerGroup(tagsLayers),\n" +
-	"            \"Debug\": L.layerGroup(debugLayers),\n" +
+	"        L$1.control.layers({ /* Only one default base layer */}, {\n" +
+	"            \"Train stations\": L$1.layerGroup(stationsLayers),\n" +
+	"            \"Tags\": L$1.layerGroup(tagsLayers),\n" +
+	"            \"Debug\": L$1.layerGroup(debugLayers),\n" +
+	"        }).addTo(mymap);\n" +
+	"        L$1.Control.boxzoom({\n" +
+	"            position: 'topleft',\n" +
 	"        }).addTo(mymap);\n" +
 	"        mymap.setView([0, 0], 0);\n" +
 	"    });\n" +
 	"\n" +
-	"}());\n" +
-	"//# sourceMappingURL=main-1c3f7217.js.map\n" +
+	"}(L));\n" +
+	"//# sourceMappingURL=main-c7f52b47.js.map\n" +
 	"" +
 	""
 
@@ -1010,22 +1574,562 @@ var FileModGeneratedLua =
 	"-- Automatically generated, do not modify\n" +
 	"local data = {}\n" +
 	"data.version = \"0.0.8\"\n" +
-	"data.version_hash = \"233d78a81b29b5e893d1fda564b839a85fa98f95fd1637439e2dc68d4ad16f35\"\n" +
+	"data.version_hash = \"d34d5fcfdea65b6ea0b625d7d7c54b528f47ce1751d6c3a95900cbb37d544596\"\n" +
 	"data.files = {}\n" +
 	"data.files[\"index.html\"] = function() return [==[\n" +
-	"<html><head><title>Mapshot</title><style>body,html{margin:0}</style><link rel=\"icon\" href=\"thumbnail.png\" sizes=\"144x144" + // cont.
-	"\"><link rel=\"stylesheet\" href=\"https://unpkg.com/leaflet@1.7.1/dist/leaflet.css\" integrity=\"sha512-xodZBNTC5n17Xt2atTPuE" + // cont.
-	"1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==\" crossorigin=\"\"><script src=\"https://unpkg.com/leafl" + // cont.
-	"et@1.7.1/dist/leaflet.js\" integrity=\"sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhi" + // cont.
-	"XZ5V3ynxwA==\" crossorigin=\"\"></script><script>let MAPSHOT_CONFIG={};try{MAPSHOT_CONFIG=__MAPSHOT_CONFIG_TOKEN__}catch(_)" + // cont.
-	"{}</script></head><body><div id=\"map\" style=\"height:100%\"></div><script src=\"./main-1c3f7217.js\" defer=\"\"></script></bod" + // cont.
-	"y></html>]==] end\n" +
+	"<html><head><title>Mapshot</title><link rel=\"icon\" href=\"thumbnail.png\" sizes=\"144x144\"><link rel=\"stylesheet\" href=\"htt" + // cont.
+	"ps://unpkg.com/leaflet@1.7.1/dist/leaflet.css\" integrity=\"sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAsh" + // cont.
+	"OMAS6/keqq/sMZMZ19scR4PsZChSR7A==\" crossorigin=\"\"><script src=\"https://unpkg.com/leaflet@1.7.1/dist/leaflet.js\" integrit" + // cont.
+	"y=\"sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==\" crossorigin=\"\"></scr" + // cont.
+	"ipt><script>let MAPSHOT_CONFIG={};try{MAPSHOT_CONFIG=__MAPSHOT_CONFIG_TOKEN__}catch(_){}</script></head><body><div id=\"m" + // cont.
+	"ap\" style=\"height:100%\"></div><script src=\"./main-c7f52b47.js\" defer=\"\"></script></body></html>]==] end\n" +
 	"\n" +
-	"data.files[\"main-1c3f7217.js\"] = function() return [==[\n" +
-	"(function () {\n" +
+	"data.files[\"leaflet-control-boxzoom-4be5d249281d260e.svg\"] = function() return [==[\n" +
+	"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
+	"<!-- Created with Inkscape (http://www.inkscape.org/) -->\n" +
+	"<svg\n" +
+	"   xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n" +
+	"   xmlns:cc=\"http://web.resource.org/cc/\"\n" +
+	"   xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n" +
+	"   xmlns:svg=\"http://www.w3.org/2000/svg\"\n" +
+	"   xmlns=\"http://www.w3.org/2000/svg\"\n" +
+	"   xmlns:xlink=\"http://www.w3.org/1999/xlink\"\n" +
+	"   xmlns:sodipodi=\"http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd\"\n" +
+	"   xmlns:inkscape=\"http://www.inkscape.org/namespaces/inkscape\"\n" +
+	"   sodipodi:docname=\"magnifying_icon.svg\"\n" +
+	"   sodipodi:docbase=\"C:\\Documents and Settings\\Aqua\\Desktop\"\n" +
+	"   inkscape:version=\"0.45.1\"\n" +
+	"   sodipodi:version=\"0.32\"\n" +
+	"   id=\"svg2325\"\n" +
+	"   height=\"32\"\n" +
+	"   width=\"32\"\n" +
+	"   version=\"1.0\"\n" +
+	"   inkscape:export-filename=\"/home/adrien/Bureau/En cours/Wikipedia.fr/Final/communauté48.png\"\n" +
+	"   inkscape:export-xdpi=\"135\"\n" +
+	"   inkscape:export-ydpi=\"135\"\n" +
+	"   inkscape:output_extension=\"org.inkscape.output.svg.inkscape\">\n" +
+	"  <defs\n" +
+	"     id=\"defs3\">\n" +
+	"    <linearGradient\n" +
+	"       inkscape:collect=\"always\"\n" +
+	"       id=\"linearGradient3216\">\n" +
+	"      <stop\n" +
+	"         style=\"stop-color:#ffffff;stop-opacity:1;\"\n" +
+	"         offset=\"0\"\n" +
+	"         id=\"stop3218\" />\n" +
+	"      <stop\n" +
+	"         style=\"stop-color:#ffffff;stop-opacity:0;\"\n" +
+	"         offset=\"1\"\n" +
+	"         id=\"stop3220\" />\n" +
+	"    </linearGradient>\n" +
+	"    <linearGradient\n" +
+	"       id=\"linearGradient2455\">\n" +
+	"      <stop\n" +
+	"         id=\"stop2457\"\n" +
+	"         offset=\"0.0000000\"\n" +
+	"         style=\"stop-color:#5cd7fa;stop-opacity:1.0000000;\" />\n" +
+	"      <stop\n" +
+	"         id=\"stop2465\"\n" +
+	"         offset=\"0.25000000\"\n" +
+	"         style=\"stop-color:#5cd7fa;stop-opacity:1.0000000;\" />\n" +
+	"      <stop\n" +
+	"         id=\"stop2463\"\n" +
+	"         offset=\"0.68000001\"\n" +
+	"         style=\"stop-color:#3098e2;stop-opacity:1.0000000;\" />\n" +
+	"      <stop\n" +
+	"         id=\"stop2467\"\n" +
+	"         offset=\"0.76999998\"\n" +
+	"         style=\"stop-color:#2686d9;stop-opacity:0.49803922;\" />\n" +
+	"      <stop\n" +
+	"         id=\"stop2459\"\n" +
+	"         offset=\"1\"\n" +
+	"         style=\"stop-color:#1d75d1;stop-opacity:0;\" />\n" +
+	"    </linearGradient>\n" +
+	"    <radialGradient\n" +
+	"       gradientUnits=\"userSpaceOnUse\"\n" +
+	"       r=\"235.21336\"\n" +
+	"       fy=\"24.824932\"\n" +
+	"       fx=\"303.3027\"\n" +
+	"       cy=\"24.824932\"\n" +
+	"       cx=\"303.3027\"\n" +
+	"       gradientTransform=\"matrix(0.131896,0,0,0.122656,-24.18581,-5.466475e-2)\"\n" +
+	"       id=\"radialGradient2461\"\n" +
+	"       xlink:href=\"#linearGradient2455\"\n" +
+	"       inkscape:collect=\"always\" />\n" +
+	"    <linearGradient\n" +
+	"       y2=\"224.01366\"\n" +
+	"       x2=\"126.40201\"\n" +
+	"       y1=\"20.281345\"\n" +
+	"       x1=\"126.40201\"\n" +
+	"       gradientTransform=\"matrix(8.079689e-3,0,0,8.057006e-3,-20.54882,-0.506927)\"\n" +
+	"       gradientUnits=\"userSpaceOnUse\"\n" +
+	"       id=\"linearGradient5439\"\n" +
+	"       xlink:href=\"#linearGradient9123\"\n" +
+	"       inkscape:collect=\"always\" />\n" +
+	"    <radialGradient\n" +
+	"       r=\"203.7394\"\n" +
+	"       fy=\"22.007891\"\n" +
+	"       fx=\"131.50195\"\n" +
+	"       cy=\"22.007891\"\n" +
+	"       cx=\"131.50195\"\n" +
+	"       gradientTransform=\"matrix(8.079993e-3,0,0,8.057006e-3,-20.54889,-0.506927)\"\n" +
+	"       gradientUnits=\"userSpaceOnUse\"\n" +
+	"       id=\"radialGradient5437\"\n" +
+	"       xlink:href=\"#linearGradient3014\"\n" +
+	"       inkscape:collect=\"always\" />\n" +
+	"    <linearGradient\n" +
+	"       y2=\"224.01366\"\n" +
+	"       x2=\"126.40201\"\n" +
+	"       y1=\"20.281345\"\n" +
+	"       x1=\"126.40201\"\n" +
+	"       gradientTransform=\"matrix(8.791556e-2,0,0,8.766874e-2,-0.23325,-0.285795)\"\n" +
+	"       gradientUnits=\"userSpaceOnUse\"\n" +
+	"       id=\"linearGradient2765\"\n" +
+	"       xlink:href=\"#linearGradient9123\"\n" +
+	"       inkscape:collect=\"always\" />\n" +
+	"    <linearGradient\n" +
+	"       inkscape:collect=\"always\"\n" +
+	"       xlink:href=\"#linearGradient9123\"\n" +
+	"       id=\"linearGradient12199\"\n" +
+	"       gradientUnits=\"userSpaceOnUse\"\n" +
+	"       gradientTransform=\"scale(1.004535,0.995485)\"\n" +
+	"       x1=\"126.40201\"\n" +
+	"       y1=\"20.281345\"\n" +
+	"       x2=\"126.40201\"\n" +
+	"       y2=\"224.01366\" />\n" +
+	"    <linearGradient\n" +
+	"       inkscape:collect=\"always\"\n" +
+	"       xlink:href=\"#linearGradient9123\"\n" +
+	"       id=\"linearGradient12195\"\n" +
+	"       gradientUnits=\"userSpaceOnUse\"\n" +
+	"       gradientTransform=\"scale(1.004535,0.995485)\"\n" +
+	"       x1=\"126.40201\"\n" +
+	"       y1=\"20.281345\"\n" +
+	"       x2=\"126.40201\"\n" +
+	"       y2=\"224.01366\" />\n" +
+	"    <linearGradient\n" +
+	"       inkscape:collect=\"always\"\n" +
+	"       xlink:href=\"#linearGradient9123\"\n" +
+	"       id=\"linearGradient12191\"\n" +
+	"       gradientUnits=\"userSpaceOnUse\"\n" +
+	"       gradientTransform=\"scale(1.004535,0.995485)\"\n" +
+	"       x1=\"126.40201\"\n" +
+	"       y1=\"20.281345\"\n" +
+	"       x2=\"126.40201\"\n" +
+	"       y2=\"224.01366\" />\n" +
+	"    <linearGradient\n" +
+	"       inkscape:collect=\"always\"\n" +
+	"       xlink:href=\"#linearGradient9123\"\n" +
+	"       id=\"linearGradient12187\"\n" +
+	"       gradientUnits=\"userSpaceOnUse\"\n" +
+	"       gradientTransform=\"scale(1.004535,0.995485)\"\n" +
+	"       x1=\"126.40201\"\n" +
+	"       y1=\"20.281345\"\n" +
+	"       x2=\"126.40201\"\n" +
+	"       y2=\"224.01366\" />\n" +
+	"    <linearGradient\n" +
+	"       inkscape:collect=\"always\"\n" +
+	"       xlink:href=\"#linearGradient9123\"\n" +
+	"       id=\"linearGradient9137\"\n" +
+	"       gradientUnits=\"userSpaceOnUse\"\n" +
+	"       gradientTransform=\"scale(1.004535,0.995485)\"\n" +
+	"       x1=\"126.40201\"\n" +
+	"       y1=\"20.281345\"\n" +
+	"       x2=\"126.40201\"\n" +
+	"       y2=\"224.01366\" />\n" +
+	"    <linearGradient\n" +
+	"       inkscape:collect=\"always\"\n" +
+	"       xlink:href=\"#linearGradient9123\"\n" +
+	"       id=\"linearGradient9133\"\n" +
+	"       gradientUnits=\"userSpaceOnUse\"\n" +
+	"       gradientTransform=\"scale(1.004535,0.995485)\"\n" +
+	"       x1=\"126.40201\"\n" +
+	"       y1=\"20.281345\"\n" +
+	"       x2=\"126.40201\"\n" +
+	"       y2=\"224.01366\" />\n" +
+	"    <radialGradient\n" +
+	"       r=\"264.09177\"\n" +
+	"       fy=\"16.497328\"\n" +
+	"       fx=\"129.96965\"\n" +
+	"       cy=\"16.497328\"\n" +
+	"       cx=\"129.96965\"\n" +
+	"       gradientTransform=\"matrix(0.981673,0,0,0.981673,2.369397,1.623515)\"\n" +
+	"       gradientUnits=\"userSpaceOnUse\"\n" +
+	"       id=\"radialGradient7759\"\n" +
+	"       xlink:href=\"#linearGradient4385\"\n" +
+	"       inkscape:collect=\"always\" />\n" +
+	"    <radialGradient\n" +
+	"       r=\"264.09177\"\n" +
+	"       fy=\"16.497328\"\n" +
+	"       fx=\"129.96965\"\n" +
+	"       cy=\"16.497328\"\n" +
+	"       cx=\"129.96965\"\n" +
+	"       gradientTransform=\"scale(1.006043,0.993993)\"\n" +
+	"       gradientUnits=\"userSpaceOnUse\"\n" +
+	"       id=\"radialGradient7753\"\n" +
+	"       xlink:href=\"#linearGradient4385\"\n" +
+	"       inkscape:collect=\"always\" />\n" +
+	"    <radialGradient\n" +
+	"       inkscape:collect=\"always\"\n" +
+	"       xlink:href=\"#linearGradient4385\"\n" +
+	"       id=\"radialGradient4393\"\n" +
+	"       gradientTransform=\"scale(1.006043,0.993993)\"\n" +
+	"       cx=\"129.96965\"\n" +
+	"       cy=\"16.497328\"\n" +
+	"       fx=\"129.96965\"\n" +
+	"       fy=\"16.497328\"\n" +
+	"       r=\"264.09177\"\n" +
+	"       gradientUnits=\"userSpaceOnUse\" />\n" +
+	"    <linearGradient\n" +
+	"       id=\"linearGradient4385\">\n" +
+	"      <stop\n" +
+	"         style=\"stop-color:#ff6549;stop-opacity:1.0000000;\"\n" +
+	"         offset=\"0.0000000\"\n" +
+	"         id=\"stop4387\" />\n" +
+	"      <stop\n" +
+	"         style=\"stop-color:#e34e34;stop-opacity:0;\"\n" +
+	"         offset=\"1\"\n" +
+	"         id=\"stop4389\" />\n" +
+	"    </linearGradient>\n" +
+	"    <linearGradient\n" +
+	"       id=\"linearGradient3014\">\n" +
+	"      <stop\n" +
+	"         style=\"stop-color:#3da3f1;stop-opacity:1;\"\n" +
+	"         offset=\"0\"\n" +
+	"         id=\"stop3016\" />\n" +
+	"      <stop\n" +
+	"         style=\"stop-color:#60b3f3;stop-opacity:0;\"\n" +
+	"         offset=\"1\"\n" +
+	"         id=\"stop3018\" />\n" +
+	"    </linearGradient>\n" +
+	"    <linearGradient\n" +
+	"       id=\"linearGradient9123\">\n" +
+	"      <stop\n" +
+	"         style=\"stop-color:#ffffff;stop-opacity:0.627451;\"\n" +
+	"         offset=\"0\"\n" +
+	"         id=\"stop9125\" />\n" +
+	"      <stop\n" +
+	"         style=\"stop-color:#ffffff;stop-opacity:0.0000000;\"\n" +
+	"         offset=\"1.0000000\"\n" +
+	"         id=\"stop9127\" />\n" +
+	"    </linearGradient>\n" +
+	"    <linearGradient\n" +
+	"       inkscape:collect=\"always\"\n" +
+	"       xlink:href=\"#linearGradient3216\"\n" +
+	"       id=\"linearGradient3222\"\n" +
+	"       x1=\"16.036528\"\n" +
+	"       y1=\"2.3208282\"\n" +
+	"       x2=\"16.036528\"\n" +
+	"       y2=\"14.058176\"\n" +
+	"       gradientUnits=\"userSpaceOnUse\"\n" +
+	"       gradientTransform=\"matrix(0.951478,0,0,0.951478,0.778124,0.791783)\" />\n" +
+	"    <linearGradient\n" +
+	"       inkscape:collect=\"always\"\n" +
+	"       xlink:href=\"#linearGradient3216\"\n" +
+	"       id=\"linearGradient3226\"\n" +
+	"       gradientUnits=\"userSpaceOnUse\"\n" +
+	"       gradientTransform=\"matrix(0.880035,0,0,0.880035,1.923819,1.95759)\"\n" +
+	"       x1=\"16.036528\"\n" +
+	"       y1=\"2.3208282\"\n" +
+	"       x2=\"16.036528\"\n" +
+	"       y2=\"14.058176\" />\n" +
+	"  </defs>\n" +
+	"  <sodipodi:namedview\n" +
+	"     inkscape:window-y=\"99\"\n" +
+	"     inkscape:window-x=\"346\"\n" +
+	"     inkscape:window-height=\"623\"\n" +
+	"     inkscape:window-width=\"934\"\n" +
+	"     inkscape:current-layer=\"layer1\"\n" +
+	"     inkscape:document-units=\"px\"\n" +
+	"     inkscape:cy=\"16.002268\"\n" +
+	"     inkscape:cx=\"16\"\n" +
+	"     inkscape:zoom=\"13.373104\"\n" +
+	"     inkscape:pageshadow=\"2\"\n" +
+	"     inkscape:pageopacity=\"0.0\"\n" +
+	"     borderopacity=\"1.0\"\n" +
+	"     bordercolor=\"#666666\"\n" +
+	"     pagecolor=\"#ffffff\"\n" +
+	"     id=\"base\"\n" +
+	"     showgrid=\"true\"\n" +
+	"     inkscape:grid-bbox=\"true\"\n" +
+	"     inkscape:grid-points=\"true\" />\n" +
+	"  <metadata\n" +
+	"     id=\"metadata4\">\n" +
+	"    <rdf:RDF>\n" +
+	"      <cc:Work\n" +
+	"         rdf:about=\"\">\n" +
+	"        <dc:format>image/svg+xml</dc:format>\n" +
+	"        <dc:type\n" +
+	"           rdf:resource=\"http://purl.org/dc/dcmitype/StillImage\" />\n" +
+	"      </cc:Work>\n" +
+	"    </rdf:RDF>\n" +
+	"  </metadata>\n" +
+	"  <g\n" +
+	"     id=\"layer1\"\n" +
+	"     inkscape:groupmode=\"layer\"\n" +
+	"     inkscape:label=\"Layer 1\">\n" +
+	"    <path\n" +
+	"       style=\"opacity:1;fill:#444444;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.125;stroke-linecap:roun" + // cont.
+	"d;stroke-linejoin:round;stroke-miterlimit:4;stroke-dashoffset:0;stroke-opacity:1\"\n" +
+	"       d=\"M 12.6875,2.5 C 12.732241,2.4966279 12.767613,2.5028319 12.8125,2.5 C 12.818155,2.4996432 12.838392,2.5001366 " + // cont.
+	"12.84375,2.5 C 12.864337,2.5000923 12.885626,2.4997699 12.90625,2.5 C 12.911622,2.499915 12.931827,2.5002879 12.9375,2.5" + // cont.
+	" C 13.1249,2.4904905 13.31025,2.5 13.5,2.5 C 19.572,2.5 24.5,7.428 24.5,13.5 C 24.5,15.792812 23.795334,17.924655 22.593" + // cont.
+	"75,19.6875 L 29.21875,26.1875 C 29.221476,26.190873 29.247241,26.214813 29.25,26.21875 C 29.258126,26.232108 29.274233,2" + // cont.
+	"6.270184 29.28125,26.28125 C 29.291089,26.297047 29.304247,26.326694 29.3125,26.34375 C 29.540265,26.882593 29.047156,27" + // cont.
+	".997038 28.09375,28.96875 C 27.140344,29.940461 26.04238,30.437898 25.5,30.21875 C 25.482806,30.210785 25.453481,30.1970" + // cont.
+	"37 25.4375,30.1875 C 25.425242,30.179182 25.39272,30.167192 25.375,30.15625 C 25.371066,30.153482 25.347142,30.12771 25." + // cont.
+	"34375,30.125 L 18.40625,23.3125 C 16.92476,24.055811 15.269419,24.5 13.5,24.5 C 7.428,24.5 2.5,19.572 2.5,13.5 C 2.5,7.7" + // cont.
+	"093012 7.005366,2.9282573 12.6875,2.5 z M 12.75,6 C 8.9631232,6.3794116 6,9.614474 6,13.5 C 6,17.64 9.36,21 13.5,21 C 17" + // cont.
+	".64,21 21,17.64 21,13.5 C 21,9.36 17.64,6 13.5,6 C 13.338281,6 13.190435,5.9898999 13.03125,6 C 13.023602,6.0004853 13.0" + // cont.
+	"07766,5.9998705 13,6 C 12.968605,5.999528 12.906295,6.000105 12.875,6 C 12.867271,6.0002672 12.851348,5.9993312 12.84375" + // cont.
+	",6 C 12.813831,6.0026334 12.779818,5.9970125 12.75,6 z \"\n" +
+	"       id=\"rect3229\"\n" +
+	"       sodipodi:nodetypes=\"cssssssccsssssssccssccssssssssc\" />\n" +
+	"  </g>\n" +
+	"</svg>\n" +
+	"]==] end\n" +
+	"\n" +
+	"data.files[\"main-c7f52b47.js\"] = function() return [==[\n" +
+	"(function (L$1) {\n" +
 	"    'use strict';\n" +
 	"\n" +
+	"    /*\r\n" +
+	"     * L.Control.BoxZoom\r\n" +
+	"     * A visible, clickable control for doing a box zoom.\r\n" +
+	"     * https://github.com/gregallensworth/L.Control.BoxZoom\r\n" +
+	"     */\r\n" +
+	"    L.Control.BoxZoom = L.Control.extend({\r\n" +
+	"        options: {\r\n" +
+	"            position: 'topright',\r\n" +
+	"            title: 'Click here then draw a square on the map, to zoom in to an area',\r\n" +
+	"            aspectRatio: null,\r\n" +
+	"            divClasses: '',\r\n" +
+	"            enableShiftDrag: false,\r\n" +
+	"            iconClasses: '',\r\n" +
+	"            keepOn: false,\r\n" +
+	"        },\r\n" +
+	"        initialize: function (options) {\r\n" +
+	"            L.setOptions(this, options);\r\n" +
+	"            this.map = null;\r\n" +
+	"            this.active = false;\r\n" +
+	"        },\r\n" +
+	"        onAdd: function (map) {\r\n" +
+	"            // add a linkage to the map, since we'll be managing map layers\r\n" +
+	"            this.map = map;\r\n" +
+	"            this.active = false;\r\n" +
+	"\r\n" +
+	"            // create our button: uses FontAwesome cuz that font is... awesome\r\n" +
+	"            // assign this here control as a property of the visible DIV, so we can be more terse when writing click-han" + // cont.
+	"dlers on that visible DIV\r\n" +
+	"            this.controlDiv = L.DomUtil.create('div', 'leaflet-control-boxzoom');\r\n" +
+	"\r\n" +
+	"            // if we're not using an icon, add the background image class\r\n" +
+	"            if (!this.options.iconClasses) {\r\n" +
+	"                L.DomUtil.addClass(this.controlDiv, 'with-background-image');\r\n" +
+	"            }\r\n" +
+	"            if (this.options.divClasses) {\r\n" +
+	"                L.DomUtil.addClass(this.controlDiv, this.options.divClasses);\r\n" +
+	"            }\r\n" +
+	"            this.controlDiv.control = this;\r\n" +
+	"            this.controlDiv.title = this.options.title;\r\n" +
+	"            this.controlDiv.innerHTML = ' ';\r\n" +
+	"            L.DomEvent\r\n" +
+	"                .addListener(this.controlDiv, 'mousedown', L.DomEvent.stopPropagation)\r\n" +
+	"                .addListener(this.controlDiv, 'click', L.DomEvent.stopPropagation)\r\n" +
+	"                .addListener(this.controlDiv, 'click', L.DomEvent.preventDefault)\r\n" +
+	"                .addListener(this.controlDiv, 'click', function () {\r\n" +
+	"                    this.control.toggleState();\r\n" +
+	"                });\r\n" +
+	"\r\n" +
+	"            // start by toggling our state to off; this disables the boxZoom hooks on the map, in favor of this one\r\n" +
+	"            this.setStateOff();\r\n" +
+	"\r\n" +
+	"            if (this.options.iconClasses) {\r\n" +
+	"                var iconElement = L.DomUtil.create('i', this.options.iconClasses, this.controlDiv);\r\n" +
+	"                if (iconElement) {\r\n" +
+	"                    iconElement.style.color = this.options.iconColor || 'black';\r\n" +
+	"                    iconElement.style.textAlign = 'center';\r\n" +
+	"                    iconElement.style.verticalAlign = 'middle';\r\n" +
+	"                } else {\r\n" +
+	"                    console.log('Unable to create element for icon');\r\n" +
+	"                }\r\n" +
+	"            }\r\n" +
+	"\r\n" +
+	"            // if we're enforcing an aspect ratio, then monkey-patch the map's real BoxZoom control to support that\r\n" +
+	"            // after all, this control is just a wrapper over the map's own BoxZoom behavior\r\n" +
+	"            if (this.options.aspectRatio) {\r\n" +
+	"                this.map.boxZoom.aspectRatio = this.options.aspectRatio;\r\n" +
+	"                this.map.boxZoom._onMouseMove = this._boxZoomControlOverride_onMouseMove;\r\n" +
+	"                this.map.boxZoom._onMouseUp = this._boxZoomControlOverride_onMouseUp;\r\n" +
+	"            }\r\n" +
+	"\r\n" +
+	"            // done!\r\n" +
+	"            return this.controlDiv;\r\n" +
+	"        },\r\n" +
+	"\r\n" +
+	"        onRemove: function (map) {\r\n" +
+	"            // on remove: if we had to monkey-patch the aspect-ratio stuff, undo that now\r\n" +
+	"            if (this.options.aspectRatio) {\r\n" +
+	"                delete this.map.boxZoom.aspectRatio;\r\n" +
+	"                this.map.boxZoom._onMouseMove = L.Map.BoxZoom.prototype._onMouseMove;\r\n" +
+	"                this.map.boxZoom._onMouseUp = L.Map.BoxZoom.prototype._onMouseUp;\r\n" +
+	"            }\r\n" +
+	"        },\r\n" +
+	"\r\n" +
+	"        toggleState: function () {\r\n" +
+	"            this.active ? this.setStateOff() : this.setStateOn();\r\n" +
+	"        },\r\n" +
+	"        setStateOn: function () {\r\n" +
+	"            L.DomUtil.addClass(this.controlDiv, 'leaflet-control-boxzoom-active');\r\n" +
+	"            this.active = true;\r\n" +
+	"            this.map.dragging.disable();\r\n" +
+	"            if (!this.options.enableShiftDrag) {\r\n" +
+	"                this.map.boxZoom.addHooks();\r\n" +
+	"            }\r\n" +
+	"\r\n" +
+	"            this.map.on('mousedown', this.handleMouseDown, this);\r\n" +
+	"            if (!this.options.keepOn) {\r\n" +
+	"                this.map.on('boxzoomend', this.setStateOff, this);\r\n" +
+	"            }\r\n" +
+	"\r\n" +
+	"            L.DomUtil.addClass(this.map._container, 'leaflet-control-boxzoom-active');\r\n" +
+	"        },\r\n" +
+	"        setStateOff: function () {\r\n" +
+	"            L.DomUtil.removeClass(this.controlDiv, 'leaflet-control-boxzoom-active');\r\n" +
+	"            this.active = false;\r\n" +
+	"            this.map.off('mousedown', this.handleMouseDown, this);\r\n" +
+	"            this.map.dragging.enable();\r\n" +
+	"            if (!this.options.enableShiftDrag) {\r\n" +
+	"                this.map.boxZoom.removeHooks();\r\n" +
+	"            }\r\n" +
+	"\r\n" +
+	"            L.DomUtil.removeClass(this.map._container, 'leaflet-control-boxzoom-active');\r\n" +
+	"        },\r\n" +
+	"\r\n" +
+	"        handleMouseDown: function (event) {\r\n" +
+	"            this.map.boxZoom._onMouseDown.call(this.map.boxZoom, { clientX: event.originalEvent.clientX, clientY: event." + // cont.
+	"originalEvent.clientY, which: 1, shiftKey: true });\r\n" +
+	"        },\r\n" +
+	"\r\n" +
+	"        // monkey-patched applied to L.Map.BoxZoom to handle aspectRatio and to zoom to the drawn box instead of the mou" + // cont.
+	"seEvent point\r\n" +
+	"        // in these methods,  \"this\" is not the control, but the map's boxZoom instance\r\n" +
+	"        _boxZoomControlOverride_onMouseMove: function (e) {\r\n" +
+	"            if (!this._moved) {\r\n" +
+	"                this._box = L.DomUtil.create('div', 'leaflet-zoom-box', this._pane);\r\n" +
+	"                L.DomUtil.setPosition(this._box, this._startLayerPoint);\r\n" +
+	"\r\n" +
+	"                //TODO refactor: move cursor to styles\r\n" +
+	"                this._container.style.cursor = 'crosshair';\r\n" +
+	"                this._map.fire('boxzoomstart');\r\n" +
+	"            }\r\n" +
+	"\r\n" +
+	"            var startPoint = this._startLayerPoint,\r\n" +
+	"                box = this._box,\r\n" +
+	"\r\n" +
+	"                layerPoint = this._map.mouseEventToLayerPoint(e),\r\n" +
+	"                offset = layerPoint.subtract(startPoint),\r\n" +
+	"\r\n" +
+	"                newPos = new L.Point(\r\n" +
+	"                    Math.min(layerPoint.x, startPoint.x),\r\n" +
+	"                    Math.min(layerPoint.y, startPoint.y));\r\n" +
+	"\r\n" +
+	"            L.DomUtil.setPosition(box, newPos);\r\n" +
+	"\r\n" +
+	"            this._moved = true;\r\n" +
+	"\r\n" +
+	"            var width = (Math.max(0, Math.abs(offset.x) - 4));  // from L.Map.BoxZoom, TODO refactor: remove hardcoded 4" + // cont.
+	" pixels\r\n" +
+	"            var height = (Math.max(0, Math.abs(offset.y) - 4));  // from L.Map.BoxZoom, TODO refactor: remove hardcoded " + // cont.
+	"4 pixels\r\n" +
+	"\r\n" +
+	"            if (this.aspectRatio) {\r\n" +
+	"                height = width / this.aspectRatio;\r\n" +
+	"            }\r\n" +
+	"\r\n" +
+	"            box.style.width = width + 'px';\r\n" +
+	"            box.style.height = height + 'px';\r\n" +
+	"        },\r\n" +
+	"        _boxZoomControlOverride_onMouseUp: function (e) {\r\n" +
+	"            // the stock behavior is to generate a bbox based on the _startLayerPoint and the mouseUp event point\r\n" +
+	"            // we don't want that; we specifically want to use the drawn box with the fixed aspect ratio\r\n" +
+	"\r\n" +
+	"            // fetch the box and convert to a map bbox, before we clear it\r\n" +
+	"            var ul = this._box._leaflet_pos;\r\n" +
+	"            var lr = new L.Point(this._box._leaflet_pos.x + this._box.offsetWidth, this._box._leaflet_pos.y + this._box." + // cont.
+	"offsetHeight);\r\n" +
+	"            var nw = this._map.layerPointToLatLng(ul);\r\n" +
+	"            var se = this._map.layerPointToLatLng(lr);\r\n" +
+	"            if (nw.equals(se)) { return; }\r\n" +
+	"\r\n" +
+	"            this._finish();\r\n" +
+	"\r\n" +
+	"            var bounds = new L.LatLngBounds(nw, se);\r\n" +
+	"            this._map.fitBounds(bounds);\r\n" +
+	"\r\n" +
+	"            this._map.fire('boxzoomend', {\r\n" +
+	"                boxZoomBounds: bounds\r\n" +
+	"            });\r\n" +
+	"        },\r\n" +
+	"    });\r\n" +
+	"    L.Control.boxzoom = function (options) {\r\n" +
+	"        return new L.Control.BoxZoom(options);\r\n" +
+	"    };\n" +
+	"\n" +
+	"    var boxzoom_svg = \"leaflet-control-boxzoom-4be5d249281d260e.svg\";\n" +
+	"\n" +
+	"    function styleInject(css, ref) {\n" +
+	"      if ( ref === void 0 ) ref = {};\n" +
+	"      var insertAt = ref.insertAt;\n" +
+	"\n" +
+	"      if (!css || typeof document === 'undefined') { return; }\n" +
+	"\n" +
+	"      var head = document.head || document.getElementsByTagName('head')[0];\n" +
+	"      var style = document.createElement('style');\n" +
+	"      style.type = 'text/css';\n" +
+	"\n" +
+	"      if (insertAt === 'top') {\n" +
+	"        if (head.firstChild) {\n" +
+	"          head.insertBefore(style, head.firstChild);\n" +
+	"        } else {\n" +
+	"          head.appendChild(style);\n" +
+	"        }\n" +
+	"      } else {\n" +
+	"        head.appendChild(style);\n" +
+	"      }\n" +
+	"\n" +
+	"      if (style.styleSheet) {\n" +
+	"        style.styleSheet.cssText = css;\n" +
+	"      } else {\n" +
+	"        style.appendChild(document.createTextNode(css));\n" +
+	"      }\n" +
+	"    }\n" +
+	"\n" +
+	"    var css_248z = \".leaflet-control-boxzoom{background-color:#fff;border-radius:4px;border:1px solid #ccc;width:25px;he" + // cont.
+	"ight:25px;line-height:25px;box-shadow:0 1px 2px rgba(0,0,0,.65);cursor:pointer!important}.with-background-image{backgrou" + // cont.
+	"nd-image:url(leaflet-control-boxzoom.svg);background-repeat:no-repeat;background-size:21px 21px;background-position:2px " + // cont.
+	"2px}.leaflet-control-boxzoom.leaflet-control-boxzoom-active{background-color:#aaa}.leaflet-container.leaflet-control-box" + // cont.
+	"zoom-active,.leaflet-container.leaflet-control-boxzoom-active path.leaflet-interactive{cursor:crosshair!important}.leafl" + // cont.
+	"et-control-boxzoom i{display:block}.leaflet-control-boxzoom i.icon{font-size:17px;margin-left:1px;margin-top:3px}.leafle" + // cont.
+	"t-control-boxzoom i.fa{margin-top:6px}.leaflet-control-boxzoom i.glyphicon{margin-top:5px}\";\n" +
+	"    styleInject(css_248z);\n" +
+	"\n" +
 	"    var _a, _b;\n" +
+	"    const main_css = `\n" +
+	"    html,body {\n" +
+	"        margin: 0;\n" +
+	"    }\n" +
+	"    .with-background-image {\n" +
+	"        background-image:url(${boxzoom_svg});\n" +
+	"        background-repeat:no-repeat;\n" +
+	"        background-size:21px 21px; /* 25px image, 25px box; subtract 2px for padding on every side = 21px rendering heig" + // cont.
+	"ht */\n" +
+	"        background-position:2px 2px;\n" +
+	"    }\n" +
+	"`;\n" +
+	"    var style = document.createElement('style');\n" +
+	"    style.innerHTML = main_css;\n" +
+	"    document.head.appendChild(style);\n" +
 	"    const params = new URLSearchParams(window.location.search);\n" +
 	"    let path = (_b = (_a = params.get(\"path\")) !== null && _a !== void 0 ? _a : MAPSHOT_CONFIG.path) !== null && _b !== " + // cont.
 	"void 0 ? _b : \"\";\n" +
@@ -1047,16 +2151,16 @@ var FileModGeneratedLua =
 	"        };\n" +
 	"        const worldToLatLng = function (x, y) {\n" +
 	"            const ratio = info.render_size / info.tile_size;\n" +
-	"            return L.latLng(-y * ratio, x * ratio);\n" +
+	"            return L$1.latLng(-y * ratio, x * ratio);\n" +
 	"        };\n" +
 	"        const midPointToLatLng = function (bbox) {\n" +
 	"            return worldToLatLng((bbox.left_top.x + bbox.right_bottom.x) / 2, (bbox.left_top.y + bbox.right_bottom.y) / " + // cont.
 	"2);\n" +
 	"        };\n" +
-	"        const baseLayer = L.tileLayer(path + \"zoom_{z}/tile_{x}_{y}.jpg\", {\n" +
+	"        const baseLayer = L$1.tileLayer(path + \"zoom_{z}/tile_{x}_{y}.jpg\", {\n" +
 	"            tileSize: info.render_size,\n" +
-	"            bounds: L.latLngBounds(worldToLatLng(info.world_min.x, info.world_min.y), worldToLatLng(info.world_max.x, in" + // cont.
-	"fo.world_max.y)),\n" +
+	"            bounds: L$1.latLngBounds(worldToLatLng(info.world_min.x, info.world_min.y), worldToLatLng(info.world_max.x, " + // cont.
+	"info.world_max.y)),\n" +
 	"            noWrap: true,\n" +
 	"            maxNativeZoom: info.zoom_max,\n" +
 	"            minNativeZoom: info.zoom_min,\n" +
@@ -1064,45 +2168,48 @@ var FileModGeneratedLua =
 	"            maxZoom: info.zoom_max + 4,\n" +
 	"        });\n" +
 	"        const debugLayers = [\n" +
-	"            L.marker([0, 0], { title: \"Start\" }).bindPopup(\"Starting point\"),\n" +
+	"            L$1.marker([0, 0], { title: \"Start\" }).bindPopup(\"Starting point\"),\n" +
 	"        ];\n" +
 	"        if (info.player) {\n" +
-	"            debugLayers.push(L.marker(worldToLatLng(info.player.x, info.player.y), { title: \"Player\" }).bindPopup(\"Playe" + // cont.
-	"r\"));\n" +
+	"            debugLayers.push(L$1.marker(worldToLatLng(info.player.x, info.player.y), { title: \"Player\" }).bindPopup(\"Pla" + // cont.
+	"yer\"));\n" +
 	"        }\n" +
-	"        debugLayers.push(L.marker(worldToLatLng(info.world_min.x, info.world_min.y), { title: `${info.world_min.x}, ${in" + // cont.
-	"fo.world_min.y}` }), L.marker(worldToLatLng(info.world_min.x, info.world_max.y), { title: `${info.world_min.x}, ${info.w" + // cont.
-	"orld_max.y}` }), L.marker(worldToLatLng(info.world_max.x, info.world_min.y), { title: `${info.world_max.x}, ${info.world" + // cont.
-	"_min.y}` }), L.marker(worldToLatLng(info.world_max.x, info.world_max.y), { title: `${info.world_max.x}, ${info.world_max" + // cont.
-	".y}` }));\n" +
+	"        debugLayers.push(L$1.marker(worldToLatLng(info.world_min.x, info.world_min.y), { title: `${info.world_min.x}, ${" + // cont.
+	"info.world_min.y}` }), L$1.marker(worldToLatLng(info.world_min.x, info.world_max.y), { title: `${info.world_min.x}, ${in" + // cont.
+	"fo.world_max.y}` }), L$1.marker(worldToLatLng(info.world_max.x, info.world_min.y), { title: `${info.world_max.x}, ${info" + // cont.
+	".world_min.y}` }), L$1.marker(worldToLatLng(info.world_max.x, info.world_max.y), { title: `${info.world_max.x}, ${info.w" + // cont.
+	"orld_max.y}` }));\n" +
 	"        let stationsLayers = [];\n" +
 	"        if (isIterable(info.stations)) {\n" +
 	"            for (const station of info.stations) {\n" +
-	"                stationsLayers.push(L.marker(midPointToLatLng(station.bounding_box), { title: station.backer_name }).bin" + // cont.
-	"dTooltip(station.backer_name, { permanent: true }));\n" +
+	"                stationsLayers.push(L$1.marker(midPointToLatLng(station.bounding_box), { title: station.backer_name }).b" + // cont.
+	"indTooltip(station.backer_name, { permanent: true }));\n" +
 	"            }\n" +
 	"        }\n" +
 	"        let tagsLayers = [];\n" +
 	"        if (isIterable(info.tags)) {\n" +
 	"            for (const tag of info.tags) {\n" +
-	"                tagsLayers.push(L.marker(worldToLatLng(tag.position.x, tag.position.y), { title: `${tag.force_name}: ${t" + // cont.
-	"ag.text}` }).bindTooltip(tag.text, { permanent: true }));\n" +
+	"                tagsLayers.push(L$1.marker(worldToLatLng(tag.position.x, tag.position.y), { title: `${tag.force_name}: $" + // cont.
+	"{tag.text}` }).bindTooltip(tag.text, { permanent: true }));\n" +
 	"            }\n" +
 	"        }\n" +
-	"        const mymap = L.map('map', {\n" +
-	"            crs: L.CRS.Simple,\n" +
+	"        const mymap = L$1.map('map', {\n" +
+	"            crs: L$1.CRS.Simple,\n" +
 	"            layers: [baseLayer],\n" +
 	"        });\n" +
-	"        L.control.layers({ /* Only one default base layer */}, {\n" +
-	"            \"Train stations\": L.layerGroup(stationsLayers),\n" +
-	"            \"Tags\": L.layerGroup(tagsLayers),\n" +
-	"            \"Debug\": L.layerGroup(debugLayers),\n" +
+	"        L$1.control.layers({ /* Only one default base layer */}, {\n" +
+	"            \"Train stations\": L$1.layerGroup(stationsLayers),\n" +
+	"            \"Tags\": L$1.layerGroup(tagsLayers),\n" +
+	"            \"Debug\": L$1.layerGroup(debugLayers),\n" +
+	"        }).addTo(mymap);\n" +
+	"        L$1.Control.boxzoom({\n" +
+	"            position: 'topleft',\n" +
 	"        }).addTo(mymap);\n" +
 	"        mymap.setView([0, 0], 0);\n" +
 	"    });\n" +
 	"\n" +
-	"}());\n" +
-	"//# sourceMappingURL=main-1c3f7217.js.map\n" +
+	"}(L));\n" +
+	"//# sourceMappingURL=main-c7f52b47.js.map\n" +
 	"]==] end\n" +
 	"\n" +
 	"data.files[\"thumbnail.png\"] = function() return game.decode_string(table.concat({\n" +

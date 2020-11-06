@@ -301,11 +301,11 @@ func main() {
 
 	loader := newLoader()
 
-	frontendFiles := sortFiles(append(
+	frontendFiles := sortFiles(append(append(
 		loader.LoadTextGlob("frontend/dist/*.js", nil),
 		loader.LoadTextFile("frontend/dist/index.html"),
 		loader.LoadBinaryFile("thumbnail.png"),
-	))
+	), loader.LoadTextGlob("frontend/dist/*.svg", nil)...))
 
 	modFiles := sortFiles(append(
 		loader.LoadTextGlob("mod/*.lua", []string{"mod/generated.lua"}),

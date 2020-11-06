@@ -1,3 +1,25 @@
+import * as L from "leaflet";
+import "./boxzoom/leaflet-control-boxzoom-src.js";
+
+import boxzoom_svg from "./boxzoom/leaflet-control-boxzoom.svg";
+import "./boxzoom/leaflet-control-boxzoom.css";
+
+const main_css = `
+    html,body {
+        margin: 0;
+    }
+    .with-background-image {
+        background-image:url(${boxzoom_svg});
+        background-repeat:no-repeat;
+        background-size:21px 21px; /* 25px image, 25px box; subtract 2px for padding on every side = 21px rendering height */
+        background-position:2px 2px;
+    }
+`;
+
+var style = document.createElement('style');
+style.innerHTML = main_css;
+document.head.appendChild(style);
+
 // The name of the path to use by default is injected in the HTML.
 declare var MAPSHOT_CONFIG: MapshotConfig;
 
@@ -164,6 +186,10 @@ fetch(path + 'mapshot.json')
             "Train stations": L.layerGroup(stationsLayers),
             "Tags": L.layerGroup(tagsLayers),
             "Debug": L.layerGroup(debugLayers),
+        }).addTo(mymap);
+
+        L.Control.boxzoom({
+            position: 'topleft',
         }).addTo(mymap);
 
         mymap.setView([0, 0], 0);

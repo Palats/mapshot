@@ -1,16 +1,532 @@
 -- Automatically generated, do not modify
 local data = {}
 data.version = "0.0.8"
-data.version_hash = "233d78a81b29b5e893d1fda564b839a85fa98f95fd1637439e2dc68d4ad16f35"
+data.version_hash = "d34d5fcfdea65b6ea0b625d7d7c54b528f47ce1751d6c3a95900cbb37d544596"
 data.files = {}
 data.files["index.html"] = function() return [==[
-<html><head><title>Mapshot</title><style>body,html{margin:0}</style><link rel="icon" href="thumbnail.png" sizes="144x144"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""><script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script><script>let MAPSHOT_CONFIG={};try{MAPSHOT_CONFIG=__MAPSHOT_CONFIG_TOKEN__}catch(_){}</script></head><body><div id="map" style="height:100%"></div><script src="./main-1c3f7217.js" defer=""></script></body></html>]==] end
+<html><head><title>Mapshot</title><link rel="icon" href="thumbnail.png" sizes="144x144"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""><script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script><script>let MAPSHOT_CONFIG={};try{MAPSHOT_CONFIG=__MAPSHOT_CONFIG_TOKEN__}catch(_){}</script></head><body><div id="map" style="height:100%"></div><script src="./main-c7f52b47.js" defer=""></script></body></html>]==] end
 
-data.files["main-1c3f7217.js"] = function() return [==[
-(function () {
+data.files["leaflet-control-boxzoom-4be5d249281d260e.svg"] = function() return [==[
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://web.resource.org/cc/"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   sodipodi:docname="magnifying_icon.svg"
+   sodipodi:docbase="C:\Documents and Settings\Aqua\Desktop"
+   inkscape:version="0.45.1"
+   sodipodi:version="0.32"
+   id="svg2325"
+   height="32"
+   width="32"
+   version="1.0"
+   inkscape:export-filename="/home/adrien/Bureau/En cours/Wikipedia.fr/Final/communauté48.png"
+   inkscape:export-xdpi="135"
+   inkscape:export-ydpi="135"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape">
+  <defs
+     id="defs3">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient3216">
+      <stop
+         style="stop-color:#ffffff;stop-opacity:1;"
+         offset="0"
+         id="stop3218" />
+      <stop
+         style="stop-color:#ffffff;stop-opacity:0;"
+         offset="1"
+         id="stop3220" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient2455">
+      <stop
+         id="stop2457"
+         offset="0.0000000"
+         style="stop-color:#5cd7fa;stop-opacity:1.0000000;" />
+      <stop
+         id="stop2465"
+         offset="0.25000000"
+         style="stop-color:#5cd7fa;stop-opacity:1.0000000;" />
+      <stop
+         id="stop2463"
+         offset="0.68000001"
+         style="stop-color:#3098e2;stop-opacity:1.0000000;" />
+      <stop
+         id="stop2467"
+         offset="0.76999998"
+         style="stop-color:#2686d9;stop-opacity:0.49803922;" />
+      <stop
+         id="stop2459"
+         offset="1"
+         style="stop-color:#1d75d1;stop-opacity:0;" />
+    </linearGradient>
+    <radialGradient
+       gradientUnits="userSpaceOnUse"
+       r="235.21336"
+       fy="24.824932"
+       fx="303.3027"
+       cy="24.824932"
+       cx="303.3027"
+       gradientTransform="matrix(0.131896,0,0,0.122656,-24.18581,-5.466475e-2)"
+       id="radialGradient2461"
+       xlink:href="#linearGradient2455"
+       inkscape:collect="always" />
+    <linearGradient
+       y2="224.01366"
+       x2="126.40201"
+       y1="20.281345"
+       x1="126.40201"
+       gradientTransform="matrix(8.079689e-3,0,0,8.057006e-3,-20.54882,-0.506927)"
+       gradientUnits="userSpaceOnUse"
+       id="linearGradient5439"
+       xlink:href="#linearGradient9123"
+       inkscape:collect="always" />
+    <radialGradient
+       r="203.7394"
+       fy="22.007891"
+       fx="131.50195"
+       cy="22.007891"
+       cx="131.50195"
+       gradientTransform="matrix(8.079993e-3,0,0,8.057006e-3,-20.54889,-0.506927)"
+       gradientUnits="userSpaceOnUse"
+       id="radialGradient5437"
+       xlink:href="#linearGradient3014"
+       inkscape:collect="always" />
+    <linearGradient
+       y2="224.01366"
+       x2="126.40201"
+       y1="20.281345"
+       x1="126.40201"
+       gradientTransform="matrix(8.791556e-2,0,0,8.766874e-2,-0.23325,-0.285795)"
+       gradientUnits="userSpaceOnUse"
+       id="linearGradient2765"
+       xlink:href="#linearGradient9123"
+       inkscape:collect="always" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient9123"
+       id="linearGradient12199"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="scale(1.004535,0.995485)"
+       x1="126.40201"
+       y1="20.281345"
+       x2="126.40201"
+       y2="224.01366" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient9123"
+       id="linearGradient12195"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="scale(1.004535,0.995485)"
+       x1="126.40201"
+       y1="20.281345"
+       x2="126.40201"
+       y2="224.01366" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient9123"
+       id="linearGradient12191"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="scale(1.004535,0.995485)"
+       x1="126.40201"
+       y1="20.281345"
+       x2="126.40201"
+       y2="224.01366" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient9123"
+       id="linearGradient12187"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="scale(1.004535,0.995485)"
+       x1="126.40201"
+       y1="20.281345"
+       x2="126.40201"
+       y2="224.01366" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient9123"
+       id="linearGradient9137"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="scale(1.004535,0.995485)"
+       x1="126.40201"
+       y1="20.281345"
+       x2="126.40201"
+       y2="224.01366" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient9123"
+       id="linearGradient9133"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="scale(1.004535,0.995485)"
+       x1="126.40201"
+       y1="20.281345"
+       x2="126.40201"
+       y2="224.01366" />
+    <radialGradient
+       r="264.09177"
+       fy="16.497328"
+       fx="129.96965"
+       cy="16.497328"
+       cx="129.96965"
+       gradientTransform="matrix(0.981673,0,0,0.981673,2.369397,1.623515)"
+       gradientUnits="userSpaceOnUse"
+       id="radialGradient7759"
+       xlink:href="#linearGradient4385"
+       inkscape:collect="always" />
+    <radialGradient
+       r="264.09177"
+       fy="16.497328"
+       fx="129.96965"
+       cy="16.497328"
+       cx="129.96965"
+       gradientTransform="scale(1.006043,0.993993)"
+       gradientUnits="userSpaceOnUse"
+       id="radialGradient7753"
+       xlink:href="#linearGradient4385"
+       inkscape:collect="always" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4385"
+       id="radialGradient4393"
+       gradientTransform="scale(1.006043,0.993993)"
+       cx="129.96965"
+       cy="16.497328"
+       fx="129.96965"
+       fy="16.497328"
+       r="264.09177"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       id="linearGradient4385">
+      <stop
+         style="stop-color:#ff6549;stop-opacity:1.0000000;"
+         offset="0.0000000"
+         id="stop4387" />
+      <stop
+         style="stop-color:#e34e34;stop-opacity:0;"
+         offset="1"
+         id="stop4389" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient3014">
+      <stop
+         style="stop-color:#3da3f1;stop-opacity:1;"
+         offset="0"
+         id="stop3016" />
+      <stop
+         style="stop-color:#60b3f3;stop-opacity:0;"
+         offset="1"
+         id="stop3018" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient9123">
+      <stop
+         style="stop-color:#ffffff;stop-opacity:0.627451;"
+         offset="0"
+         id="stop9125" />
+      <stop
+         style="stop-color:#ffffff;stop-opacity:0.0000000;"
+         offset="1.0000000"
+         id="stop9127" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3216"
+       id="linearGradient3222"
+       x1="16.036528"
+       y1="2.3208282"
+       x2="16.036528"
+       y2="14.058176"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.951478,0,0,0.951478,0.778124,0.791783)" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3216"
+       id="linearGradient3226"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.880035,0,0,0.880035,1.923819,1.95759)"
+       x1="16.036528"
+       y1="2.3208282"
+       x2="16.036528"
+       y2="14.058176" />
+  </defs>
+  <sodipodi:namedview
+     inkscape:window-y="99"
+     inkscape:window-x="346"
+     inkscape:window-height="623"
+     inkscape:window-width="934"
+     inkscape:current-layer="layer1"
+     inkscape:document-units="px"
+     inkscape:cy="16.002268"
+     inkscape:cx="16"
+     inkscape:zoom="13.373104"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     borderopacity="1.0"
+     bordercolor="#666666"
+     pagecolor="#ffffff"
+     id="base"
+     showgrid="true"
+     inkscape:grid-bbox="true"
+     inkscape:grid-points="true" />
+  <metadata
+     id="metadata4">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     id="layer1"
+     inkscape:groupmode="layer"
+     inkscape:label="Layer 1">
+    <path
+       style="opacity:1;fill:#444444;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.125;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dashoffset:0;stroke-opacity:1"
+       d="M 12.6875,2.5 C 12.732241,2.4966279 12.767613,2.5028319 12.8125,2.5 C 12.818155,2.4996432 12.838392,2.5001366 12.84375,2.5 C 12.864337,2.5000923 12.885626,2.4997699 12.90625,2.5 C 12.911622,2.499915 12.931827,2.5002879 12.9375,2.5 C 13.1249,2.4904905 13.31025,2.5 13.5,2.5 C 19.572,2.5 24.5,7.428 24.5,13.5 C 24.5,15.792812 23.795334,17.924655 22.59375,19.6875 L 29.21875,26.1875 C 29.221476,26.190873 29.247241,26.214813 29.25,26.21875 C 29.258126,26.232108 29.274233,26.270184 29.28125,26.28125 C 29.291089,26.297047 29.304247,26.326694 29.3125,26.34375 C 29.540265,26.882593 29.047156,27.997038 28.09375,28.96875 C 27.140344,29.940461 26.04238,30.437898 25.5,30.21875 C 25.482806,30.210785 25.453481,30.197037 25.4375,30.1875 C 25.425242,30.179182 25.39272,30.167192 25.375,30.15625 C 25.371066,30.153482 25.347142,30.12771 25.34375,30.125 L 18.40625,23.3125 C 16.92476,24.055811 15.269419,24.5 13.5,24.5 C 7.428,24.5 2.5,19.572 2.5,13.5 C 2.5,7.7093012 7.005366,2.9282573 12.6875,2.5 z M 12.75,6 C 8.9631232,6.3794116 6,9.614474 6,13.5 C 6,17.64 9.36,21 13.5,21 C 17.64,21 21,17.64 21,13.5 C 21,9.36 17.64,6 13.5,6 C 13.338281,6 13.190435,5.9898999 13.03125,6 C 13.023602,6.0004853 13.007766,5.9998705 13,6 C 12.968605,5.999528 12.906295,6.000105 12.875,6 C 12.867271,6.0002672 12.851348,5.9993312 12.84375,6 C 12.813831,6.0026334 12.779818,5.9970125 12.75,6 z "
+       id="rect3229"
+       sodipodi:nodetypes="cssssssccsssssssccssccssssssssc" />
+  </g>
+</svg>
+]==] end
+
+data.files["main-c7f52b47.js"] = function() return [==[
+(function (L$1) {
     'use strict';
 
+    /*
+     * L.Control.BoxZoom
+     * A visible, clickable control for doing a box zoom.
+     * https://github.com/gregallensworth/L.Control.BoxZoom
+     */
+    L.Control.BoxZoom = L.Control.extend({
+        options: {
+            position: 'topright',
+            title: 'Click here then draw a square on the map, to zoom in to an area',
+            aspectRatio: null,
+            divClasses: '',
+            enableShiftDrag: false,
+            iconClasses: '',
+            keepOn: false,
+        },
+        initialize: function (options) {
+            L.setOptions(this, options);
+            this.map = null;
+            this.active = false;
+        },
+        onAdd: function (map) {
+            // add a linkage to the map, since we'll be managing map layers
+            this.map = map;
+            this.active = false;
+
+            // create our button: uses FontAwesome cuz that font is... awesome
+            // assign this here control as a property of the visible DIV, so we can be more terse when writing click-handlers on that visible DIV
+            this.controlDiv = L.DomUtil.create('div', 'leaflet-control-boxzoom');
+
+            // if we're not using an icon, add the background image class
+            if (!this.options.iconClasses) {
+                L.DomUtil.addClass(this.controlDiv, 'with-background-image');
+            }
+            if (this.options.divClasses) {
+                L.DomUtil.addClass(this.controlDiv, this.options.divClasses);
+            }
+            this.controlDiv.control = this;
+            this.controlDiv.title = this.options.title;
+            this.controlDiv.innerHTML = ' ';
+            L.DomEvent
+                .addListener(this.controlDiv, 'mousedown', L.DomEvent.stopPropagation)
+                .addListener(this.controlDiv, 'click', L.DomEvent.stopPropagation)
+                .addListener(this.controlDiv, 'click', L.DomEvent.preventDefault)
+                .addListener(this.controlDiv, 'click', function () {
+                    this.control.toggleState();
+                });
+
+            // start by toggling our state to off; this disables the boxZoom hooks on the map, in favor of this one
+            this.setStateOff();
+
+            if (this.options.iconClasses) {
+                var iconElement = L.DomUtil.create('i', this.options.iconClasses, this.controlDiv);
+                if (iconElement) {
+                    iconElement.style.color = this.options.iconColor || 'black';
+                    iconElement.style.textAlign = 'center';
+                    iconElement.style.verticalAlign = 'middle';
+                } else {
+                    console.log('Unable to create element for icon');
+                }
+            }
+
+            // if we're enforcing an aspect ratio, then monkey-patch the map's real BoxZoom control to support that
+            // after all, this control is just a wrapper over the map's own BoxZoom behavior
+            if (this.options.aspectRatio) {
+                this.map.boxZoom.aspectRatio = this.options.aspectRatio;
+                this.map.boxZoom._onMouseMove = this._boxZoomControlOverride_onMouseMove;
+                this.map.boxZoom._onMouseUp = this._boxZoomControlOverride_onMouseUp;
+            }
+
+            // done!
+            return this.controlDiv;
+        },
+
+        onRemove: function (map) {
+            // on remove: if we had to monkey-patch the aspect-ratio stuff, undo that now
+            if (this.options.aspectRatio) {
+                delete this.map.boxZoom.aspectRatio;
+                this.map.boxZoom._onMouseMove = L.Map.BoxZoom.prototype._onMouseMove;
+                this.map.boxZoom._onMouseUp = L.Map.BoxZoom.prototype._onMouseUp;
+            }
+        },
+
+        toggleState: function () {
+            this.active ? this.setStateOff() : this.setStateOn();
+        },
+        setStateOn: function () {
+            L.DomUtil.addClass(this.controlDiv, 'leaflet-control-boxzoom-active');
+            this.active = true;
+            this.map.dragging.disable();
+            if (!this.options.enableShiftDrag) {
+                this.map.boxZoom.addHooks();
+            }
+
+            this.map.on('mousedown', this.handleMouseDown, this);
+            if (!this.options.keepOn) {
+                this.map.on('boxzoomend', this.setStateOff, this);
+            }
+
+            L.DomUtil.addClass(this.map._container, 'leaflet-control-boxzoom-active');
+        },
+        setStateOff: function () {
+            L.DomUtil.removeClass(this.controlDiv, 'leaflet-control-boxzoom-active');
+            this.active = false;
+            this.map.off('mousedown', this.handleMouseDown, this);
+            this.map.dragging.enable();
+            if (!this.options.enableShiftDrag) {
+                this.map.boxZoom.removeHooks();
+            }
+
+            L.DomUtil.removeClass(this.map._container, 'leaflet-control-boxzoom-active');
+        },
+
+        handleMouseDown: function (event) {
+            this.map.boxZoom._onMouseDown.call(this.map.boxZoom, { clientX: event.originalEvent.clientX, clientY: event.originalEvent.clientY, which: 1, shiftKey: true });
+        },
+
+        // monkey-patched applied to L.Map.BoxZoom to handle aspectRatio and to zoom to the drawn box instead of the mouseEvent point
+        // in these methods,  "this" is not the control, but the map's boxZoom instance
+        _boxZoomControlOverride_onMouseMove: function (e) {
+            if (!this._moved) {
+                this._box = L.DomUtil.create('div', 'leaflet-zoom-box', this._pane);
+                L.DomUtil.setPosition(this._box, this._startLayerPoint);
+
+                //TODO refactor: move cursor to styles
+                this._container.style.cursor = 'crosshair';
+                this._map.fire('boxzoomstart');
+            }
+
+            var startPoint = this._startLayerPoint,
+                box = this._box,
+
+                layerPoint = this._map.mouseEventToLayerPoint(e),
+                offset = layerPoint.subtract(startPoint),
+
+                newPos = new L.Point(
+                    Math.min(layerPoint.x, startPoint.x),
+                    Math.min(layerPoint.y, startPoint.y));
+
+            L.DomUtil.setPosition(box, newPos);
+
+            this._moved = true;
+
+            var width = (Math.max(0, Math.abs(offset.x) - 4));  // from L.Map.BoxZoom, TODO refactor: remove hardcoded 4 pixels
+            var height = (Math.max(0, Math.abs(offset.y) - 4));  // from L.Map.BoxZoom, TODO refactor: remove hardcoded 4 pixels
+
+            if (this.aspectRatio) {
+                height = width / this.aspectRatio;
+            }
+
+            box.style.width = width + 'px';
+            box.style.height = height + 'px';
+        },
+        _boxZoomControlOverride_onMouseUp: function (e) {
+            // the stock behavior is to generate a bbox based on the _startLayerPoint and the mouseUp event point
+            // we don't want that; we specifically want to use the drawn box with the fixed aspect ratio
+
+            // fetch the box and convert to a map bbox, before we clear it
+            var ul = this._box._leaflet_pos;
+            var lr = new L.Point(this._box._leaflet_pos.x + this._box.offsetWidth, this._box._leaflet_pos.y + this._box.offsetHeight);
+            var nw = this._map.layerPointToLatLng(ul);
+            var se = this._map.layerPointToLatLng(lr);
+            if (nw.equals(se)) { return; }
+
+            this._finish();
+
+            var bounds = new L.LatLngBounds(nw, se);
+            this._map.fitBounds(bounds);
+
+            this._map.fire('boxzoomend', {
+                boxZoomBounds: bounds
+            });
+        },
+    });
+    L.Control.boxzoom = function (options) {
+        return new L.Control.BoxZoom(options);
+    };
+
+    var boxzoom_svg = "leaflet-control-boxzoom-4be5d249281d260e.svg";
+
+    function styleInject(css, ref) {
+      if ( ref === void 0 ) ref = {};
+      var insertAt = ref.insertAt;
+
+      if (!css || typeof document === 'undefined') { return; }
+
+      var head = document.head || document.getElementsByTagName('head')[0];
+      var style = document.createElement('style');
+      style.type = 'text/css';
+
+      if (insertAt === 'top') {
+        if (head.firstChild) {
+          head.insertBefore(style, head.firstChild);
+        } else {
+          head.appendChild(style);
+        }
+      } else {
+        head.appendChild(style);
+      }
+
+      if (style.styleSheet) {
+        style.styleSheet.cssText = css;
+      } else {
+        style.appendChild(document.createTextNode(css));
+      }
+    }
+
+    var css_248z = ".leaflet-control-boxzoom{background-color:#fff;border-radius:4px;border:1px solid #ccc;width:25px;height:25px;line-height:25px;box-shadow:0 1px 2px rgba(0,0,0,.65);cursor:pointer!important}.with-background-image{background-image:url(leaflet-control-boxzoom.svg);background-repeat:no-repeat;background-size:21px 21px;background-position:2px 2px}.leaflet-control-boxzoom.leaflet-control-boxzoom-active{background-color:#aaa}.leaflet-container.leaflet-control-boxzoom-active,.leaflet-container.leaflet-control-boxzoom-active path.leaflet-interactive{cursor:crosshair!important}.leaflet-control-boxzoom i{display:block}.leaflet-control-boxzoom i.icon{font-size:17px;margin-left:1px;margin-top:3px}.leaflet-control-boxzoom i.fa{margin-top:6px}.leaflet-control-boxzoom i.glyphicon{margin-top:5px}";
+    styleInject(css_248z);
+
     var _a, _b;
+    const main_css = `
+    html,body {
+        margin: 0;
+    }
+    .with-background-image {
+        background-image:url(${boxzoom_svg});
+        background-repeat:no-repeat;
+        background-size:21px 21px; /* 25px image, 25px box; subtract 2px for padding on every side = 21px rendering height */
+        background-position:2px 2px;
+    }
+`;
+    var style = document.createElement('style');
+    style.innerHTML = main_css;
+    document.head.appendChild(style);
     const params = new URLSearchParams(window.location.search);
     let path = (_b = (_a = params.get("path")) !== null && _a !== void 0 ? _a : MAPSHOT_CONFIG.path) !== null && _b !== void 0 ? _b : "";
     if (!!path && path[path.length - 1] != "/") {
@@ -31,14 +547,14 @@ data.files["main-1c3f7217.js"] = function() return [==[
         };
         const worldToLatLng = function (x, y) {
             const ratio = info.render_size / info.tile_size;
-            return L.latLng(-y * ratio, x * ratio);
+            return L$1.latLng(-y * ratio, x * ratio);
         };
         const midPointToLatLng = function (bbox) {
             return worldToLatLng((bbox.left_top.x + bbox.right_bottom.x) / 2, (bbox.left_top.y + bbox.right_bottom.y) / 2);
         };
-        const baseLayer = L.tileLayer(path + "zoom_{z}/tile_{x}_{y}.jpg", {
+        const baseLayer = L$1.tileLayer(path + "zoom_{z}/tile_{x}_{y}.jpg", {
             tileSize: info.render_size,
-            bounds: L.latLngBounds(worldToLatLng(info.world_min.x, info.world_min.y), worldToLatLng(info.world_max.x, info.world_max.y)),
+            bounds: L$1.latLngBounds(worldToLatLng(info.world_min.x, info.world_min.y), worldToLatLng(info.world_max.x, info.world_max.y)),
             noWrap: true,
             maxNativeZoom: info.zoom_max,
             minNativeZoom: info.zoom_min,
@@ -46,38 +562,41 @@ data.files["main-1c3f7217.js"] = function() return [==[
             maxZoom: info.zoom_max + 4,
         });
         const debugLayers = [
-            L.marker([0, 0], { title: "Start" }).bindPopup("Starting point"),
+            L$1.marker([0, 0], { title: "Start" }).bindPopup("Starting point"),
         ];
         if (info.player) {
-            debugLayers.push(L.marker(worldToLatLng(info.player.x, info.player.y), { title: "Player" }).bindPopup("Player"));
+            debugLayers.push(L$1.marker(worldToLatLng(info.player.x, info.player.y), { title: "Player" }).bindPopup("Player"));
         }
-        debugLayers.push(L.marker(worldToLatLng(info.world_min.x, info.world_min.y), { title: `${info.world_min.x}, ${info.world_min.y}` }), L.marker(worldToLatLng(info.world_min.x, info.world_max.y), { title: `${info.world_min.x}, ${info.world_max.y}` }), L.marker(worldToLatLng(info.world_max.x, info.world_min.y), { title: `${info.world_max.x}, ${info.world_min.y}` }), L.marker(worldToLatLng(info.world_max.x, info.world_max.y), { title: `${info.world_max.x}, ${info.world_max.y}` }));
+        debugLayers.push(L$1.marker(worldToLatLng(info.world_min.x, info.world_min.y), { title: `${info.world_min.x}, ${info.world_min.y}` }), L$1.marker(worldToLatLng(info.world_min.x, info.world_max.y), { title: `${info.world_min.x}, ${info.world_max.y}` }), L$1.marker(worldToLatLng(info.world_max.x, info.world_min.y), { title: `${info.world_max.x}, ${info.world_min.y}` }), L$1.marker(worldToLatLng(info.world_max.x, info.world_max.y), { title: `${info.world_max.x}, ${info.world_max.y}` }));
         let stationsLayers = [];
         if (isIterable(info.stations)) {
             for (const station of info.stations) {
-                stationsLayers.push(L.marker(midPointToLatLng(station.bounding_box), { title: station.backer_name }).bindTooltip(station.backer_name, { permanent: true }));
+                stationsLayers.push(L$1.marker(midPointToLatLng(station.bounding_box), { title: station.backer_name }).bindTooltip(station.backer_name, { permanent: true }));
             }
         }
         let tagsLayers = [];
         if (isIterable(info.tags)) {
             for (const tag of info.tags) {
-                tagsLayers.push(L.marker(worldToLatLng(tag.position.x, tag.position.y), { title: `${tag.force_name}: ${tag.text}` }).bindTooltip(tag.text, { permanent: true }));
+                tagsLayers.push(L$1.marker(worldToLatLng(tag.position.x, tag.position.y), { title: `${tag.force_name}: ${tag.text}` }).bindTooltip(tag.text, { permanent: true }));
             }
         }
-        const mymap = L.map('map', {
-            crs: L.CRS.Simple,
+        const mymap = L$1.map('map', {
+            crs: L$1.CRS.Simple,
             layers: [baseLayer],
         });
-        L.control.layers({ /* Only one default base layer */}, {
-            "Train stations": L.layerGroup(stationsLayers),
-            "Tags": L.layerGroup(tagsLayers),
-            "Debug": L.layerGroup(debugLayers),
+        L$1.control.layers({ /* Only one default base layer */}, {
+            "Train stations": L$1.layerGroup(stationsLayers),
+            "Tags": L$1.layerGroup(tagsLayers),
+            "Debug": L$1.layerGroup(debugLayers),
+        }).addTo(mymap);
+        L$1.Control.boxzoom({
+            position: 'topleft',
         }).addTo(mymap);
         mymap.setView([0, 0], 0);
     });
 
-}());
-//# sourceMappingURL=main-1c3f7217.js.map
+}(L));
+//# sourceMappingURL=main-c7f52b47.js.map
 ]==] end
 
 data.files["thumbnail.png"] = function() return game.decode_string(table.concat({
