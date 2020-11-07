@@ -12,7 +12,8 @@ const main_css = `
     }
     .with-background-image {
         background-image:url(${boxzoom_svg});
-        background-size:26px 26px;
+        background-size:22px 22px;
+        background-position:4px 4px;
     }
     .leaflet-touch .leaflet-control-zoomslider {
         border: none;
@@ -258,7 +259,6 @@ fetch(path + 'mapshot.json')
 
         // Update URL when overlays are added/removed.
         const onLayerChange = (e: L.LayersControlEvent) => {
-            console.log(layerKeys.get(e.layer), e);
             const key = layerKeys.get(e.layer);
             if (!key) {
                 console.log("unknown layer", e.name);
