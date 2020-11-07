@@ -5,7 +5,7 @@ package embed
 var Version = "0.0.8"
 
 // VersionHash is a hash of the mod content
-var VersionHash = "ccb4d77ca60a883c1a60f466b2b8d95db6c7217eebf1977582d4154b4c22f87a"
+var VersionHash = "1d32fbf392f101378b03121d05983aace370d0074a924ae5dc665c743569189b"
 
 // ModFiles is the list of files for the Factorio mod.
 var ModFiles = map[string]string{
@@ -26,7 +26,7 @@ var ModFiles = map[string]string{
 var FrontendFiles = map[string]string{
 	"index.html": FileFrontendDistIndexHTML,
 	"leaflet-control-boxzoom-4be5d249281d260e.svg": FileFrontendDistLeafletControlBoxzoomBeDDESvg,
-	"main-b9795425.js": FileFrontendDistMainBJs,
+	"main-e917b583.js": FileFrontendDistMainEBJs,
 	"thumbnail.png": FileThumbnailPng,
 }
 
@@ -364,6 +364,13 @@ var FileReadmeMd =
 	"hrough any HTTP server (e.g., `python3 -m http.server 8080` from the `script-output` directory) or your favorite web fil" + // cont.
 	"e hosting.\n" +
 	"\n" +
+	"The viewer has the following URL query parameters:\n" +
+	"* `path`: string, URL of the mapshot to display.\n" +
+	"* `x`, `y`: float, center position in Factorio coordinates.\n" +
+	"* `z` : float, zoom level.\n" +
+	"* `lt`, `lg`, `ld`: \"0\"|\"1\", show/hide various layers (train stations, tags, debug).\n" +
+	"\n" +
+	"\n" +
 	"## Generated content\n" +
 	"\n" +
 	"### Directory hierarchy\n" +
@@ -441,8 +448,10 @@ var FileChangelogTxt =
 	"---------------------------------------------------------------------------------------------------\n" +
 	"Version: 0.0.9\n" +
 	"  UI:\n" +
+	"    - URL reflect the current view (position, zoom, layers), allowing to share specific positions\n" +
+	"      of the map.\n" +
 	"    - A button to zoom to a selected region (boxzoom).\n" +
-	"    - More precise zoom levels\n" +
+	"    - More precise zoom levels.\n" +
 	"---------------------------------------------------------------------------------------------------\n" +
 	"Version: 0.0.8\n" +
 	"Date: 2020.11.01\n" +
@@ -533,7 +542,7 @@ var FileFrontendDistIndexHTML =
 	"OMAS6/keqq/sMZMZ19scR4PsZChSR7A==\" crossorigin=\"\"><script src=\"https://unpkg.com/leaflet@1.7.1/dist/leaflet.js\" integrit" + // cont.
 	"y=\"sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==\" crossorigin=\"\"></scr" + // cont.
 	"ipt><script>let MAPSHOT_CONFIG={};try{MAPSHOT_CONFIG=__MAPSHOT_CONFIG_TOKEN__}catch(_){}</script></head><body><div id=\"m" + // cont.
-	"ap\" style=\"height:100%\"></div><script src=\"./main-b9795425.js\" defer=\"\"></script></body></html>" +
+	"ap\" style=\"height:100%\"></div><script src=\"./main-e917b583.js\" defer=\"\"></script></body></html>" +
 	""
 
 // FileFrontendDistLeafletControlBoxzoomBeDDESvg is file "frontend/dist/leaflet-control-boxzoom-4be5d249281d260e.svg"
@@ -843,8 +852,8 @@ var FileFrontendDistLeafletControlBoxzoomBeDDESvg =
 	"" +
 	""
 
-// FileFrontendDistMainBJs is file "frontend/dist/main-b9795425.js"
-var FileFrontendDistMainBJs =
+// FileFrontendDistMainEBJs is file "frontend/dist/main-e917b583.js"
+var FileFrontendDistMainEBJs =
 	"(function (L$1) {\n" +
 	"    'use strict';\n" +
 	"\n" +
@@ -1085,6 +1094,10 @@ var FileFrontendDistMainBJs =
 	"    var style = document.createElement('style');\n" +
 	"    style.innerHTML = main_css;\n" +
 	"    document.head.appendChild(style);\n" +
+	"    function parseNumber(v, defvalue) {\n" +
+	"        const c = Number(v);\n" +
+	"        return isNaN(c) ? defvalue : c;\n" +
+	"    }\n" +
 	"    const params = new URLSearchParams(window.location.search);\n" +
 	"    let path = (_b = (_a = params.get(\"path\")) !== null && _a !== void 0 ? _a : MAPSHOT_CONFIG.path) !== null && _b !== " + // cont.
 	"void 0 ? _b : \"\";\n" +
@@ -1108,6 +1121,13 @@ var FileFrontendDistMainBJs =
 	"            const ratio = info.render_size / info.tile_size;\n" +
 	"            return L$1.latLng(-y * ratio, x * ratio);\n" +
 	"        };\n" +
+	"        const latLngToWorld = function (l) {\n" +
+	"            const ratio = info.tile_size / info.render_size;\n" +
+	"            return {\n" +
+	"                x: l.lng * ratio,\n" +
+	"                y: -l.lat * ratio,\n" +
+	"            };\n" +
+	"        };\n" +
 	"        const midPointToLatLng = function (bbox) {\n" +
 	"            return worldToLatLng((bbox.left_top.x + bbox.right_bottom.x) / 2, (bbox.left_top.y + bbox.right_bottom.y) / " + // cont.
 	"2);\n" +
@@ -1122,6 +1142,36 @@ var FileFrontendDistMainBJs =
 	"            minZoom: info.zoom_min - 4,\n" +
 	"            maxZoom: info.zoom_max + 4,\n" +
 	"        });\n" +
+	"        const mymap = L$1.map('map', {\n" +
+	"            crs: L$1.CRS.Simple,\n" +
+	"            layers: [baseLayer],\n" +
+	"            zoomSnap: 0.1,\n" +
+	"        });\n" +
+	"        const layerControl = L$1.control.layers().addTo(mymap);\n" +
+	"        const layerKeys = new Map();\n" +
+	"        const registerLayer = function (key, name, layer) {\n" +
+	"            layerControl.addOverlay(layer, name);\n" +
+	"            layerKeys.set(layer, key);\n" +
+	"        };\n" +
+	"        // Layer: train stations\n" +
+	"        let stationsLayers = [];\n" +
+	"        if (isIterable(info.stations)) {\n" +
+	"            for (const station of info.stations) {\n" +
+	"                stationsLayers.push(L$1.marker(midPointToLatLng(station.bounding_box), { title: station.backer_name }).b" + // cont.
+	"indTooltip(station.backer_name, { permanent: true }));\n" +
+	"            }\n" +
+	"        }\n" +
+	"        registerLayer(\"lt\", \"Train stations\", L$1.layerGroup(stationsLayers));\n" +
+	"        // Layer: tags\n" +
+	"        let tagsLayers = [];\n" +
+	"        if (isIterable(info.tags)) {\n" +
+	"            for (const tag of info.tags) {\n" +
+	"                tagsLayers.push(L$1.marker(worldToLatLng(tag.position.x, tag.position.y), { title: `${tag.force_name}: $" + // cont.
+	"{tag.text}` }).bindTooltip(tag.text, { permanent: true }));\n" +
+	"            }\n" +
+	"        }\n" +
+	"        registerLayer(\"lg\", \"Tags\", L$1.layerGroup(tagsLayers));\n" +
+	"        // Layer: debug\n" +
 	"        const debugLayers = [\n" +
 	"            L$1.marker([0, 0], { title: \"Start\" }).bindPopup(\"Starting point\"),\n" +
 	"        ];\n" +
@@ -1134,38 +1184,57 @@ var FileFrontendDistMainBJs =
 	"fo.world_max.y}` }), L$1.marker(worldToLatLng(info.world_max.x, info.world_min.y), { title: `${info.world_max.x}, ${info" + // cont.
 	".world_min.y}` }), L$1.marker(worldToLatLng(info.world_max.x, info.world_max.y), { title: `${info.world_max.x}, ${info.w" + // cont.
 	"orld_max.y}` }));\n" +
-	"        let stationsLayers = [];\n" +
-	"        if (isIterable(info.stations)) {\n" +
-	"            for (const station of info.stations) {\n" +
-	"                stationsLayers.push(L$1.marker(midPointToLatLng(station.bounding_box), { title: station.backer_name }).b" + // cont.
-	"indTooltip(station.backer_name, { permanent: true }));\n" +
-	"            }\n" +
-	"        }\n" +
-	"        let tagsLayers = [];\n" +
-	"        if (isIterable(info.tags)) {\n" +
-	"            for (const tag of info.tags) {\n" +
-	"                tagsLayers.push(L$1.marker(worldToLatLng(tag.position.x, tag.position.y), { title: `${tag.force_name}: $" + // cont.
-	"{tag.text}` }).bindTooltip(tag.text, { permanent: true }));\n" +
-	"            }\n" +
-	"        }\n" +
-	"        const mymap = L$1.map('map', {\n" +
-	"            crs: L$1.CRS.Simple,\n" +
-	"            layers: [baseLayer],\n" +
-	"            zoomSnap: 0.1,\n" +
-	"        });\n" +
-	"        L$1.control.layers({ /* Only one default base layer */}, {\n" +
-	"            \"Train stations\": L$1.layerGroup(stationsLayers),\n" +
-	"            \"Tags\": L$1.layerGroup(tagsLayers),\n" +
-	"            \"Debug\": L$1.layerGroup(debugLayers),\n" +
-	"        }).addTo(mymap);\n" +
+	"        registerLayer(\"ld\", \"Debug\", L$1.layerGroup(debugLayers));\n" +
+	"        // Add a control to zoom to a region.\n" +
 	"        L$1.Control.boxzoom({\n" +
 	"            position: 'topleft',\n" +
 	"        }).addTo(mymap);\n" +
-	"        mymap.setView([0, 0], 0);\n" +
+	"        // Set original view (position/zoom/layers).\n" +
+	"        const queryParams = new URLSearchParams(window.location.search);\n" +
+	"        let x = parseNumber(queryParams.get(\"x\"), 0);\n" +
+	"        let y = parseNumber(queryParams.get(\"y\"), 0);\n" +
+	"        let z = parseNumber(queryParams.get(\"z\"), 0);\n" +
+	"        mymap.setView(worldToLatLng(x, y), z);\n" +
+	"        layerKeys.forEach((key, layer) => {\n" +
+	"            const p = queryParams.get(key);\n" +
+	"            if (p == \"0\") {\n" +
+	"                mymap.removeLayer(layer);\n" +
+	"            }\n" +
+	"            if (p == \"1\") {\n" +
+	"                mymap.addLayer(layer);\n" +
+	"            }\n" +
+	"        });\n" +
+	"        // Update URL when position/view changes.\n" +
+	"        const onViewChange = (e) => {\n" +
+	"            const z = mymap.getZoom();\n" +
+	"            const { x, y } = latLngToWorld(mymap.getCenter());\n" +
+	"            const queryParams = new URLSearchParams(window.location.search);\n" +
+	"            queryParams.set(\"x\", x.toFixed(1));\n" +
+	"            queryParams.set(\"y\", y.toFixed(1));\n" +
+	"            queryParams.set(\"z\", z.toFixed(1));\n" +
+	"            history.replaceState(null, \"\", \"?\" + queryParams.toString());\n" +
+	"        };\n" +
+	"        mymap.on('zoomend', onViewChange);\n" +
+	"        mymap.on('moveend', onViewChange);\n" +
+	"        mymap.on('resize', onViewChange);\n" +
+	"        // Update URL when overlays are added/removed.\n" +
+	"        const onLayerChange = (e) => {\n" +
+	"            console.log(layerKeys.get(e.layer), e);\n" +
+	"            const key = layerKeys.get(e.layer);\n" +
+	"            if (!key) {\n" +
+	"                console.log(\"unknown layer\", e.name);\n" +
+	"                return;\n" +
+	"            }\n" +
+	"            const queryParams = new URLSearchParams(window.location.search);\n" +
+	"            queryParams.set(key, e.type == \"overlayadd\" ? \"1\" : \"0\");\n" +
+	"            history.replaceState(null, \"\", \"?\" + queryParams.toString());\n" +
+	"        };\n" +
+	"        mymap.on('overlayadd', onLayerChange);\n" +
+	"        mymap.on('overlayremove', onLayerChange);\n" +
 	"    });\n" +
 	"\n" +
 	"}(L));\n" +
-	"//# sourceMappingURL=main-b9795425.js.map\n" +
+	"//# sourceMappingURL=main-e917b583.js.map\n" +
 	"" +
 	""
 
@@ -1576,7 +1645,7 @@ var FileModGeneratedLua =
 	"-- Automatically generated, do not modify\n" +
 	"local data = {}\n" +
 	"data.version = \"0.0.8\"\n" +
-	"data.version_hash = \"ccb4d77ca60a883c1a60f466b2b8d95db6c7217eebf1977582d4154b4c22f87a\"\n" +
+	"data.version_hash = \"1d32fbf392f101378b03121d05983aace370d0074a924ae5dc665c743569189b\"\n" +
 	"data.files = {}\n" +
 	"data.files[\"index.html\"] = function() return [==[\n" +
 	"<html><head><title>Mapshot</title><link rel=\"icon\" href=\"thumbnail.png\" sizes=\"144x144\"><link rel=\"stylesheet\" href=\"htt" + // cont.
@@ -1584,7 +1653,7 @@ var FileModGeneratedLua =
 	"OMAS6/keqq/sMZMZ19scR4PsZChSR7A==\" crossorigin=\"\"><script src=\"https://unpkg.com/leaflet@1.7.1/dist/leaflet.js\" integrit" + // cont.
 	"y=\"sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==\" crossorigin=\"\"></scr" + // cont.
 	"ipt><script>let MAPSHOT_CONFIG={};try{MAPSHOT_CONFIG=__MAPSHOT_CONFIG_TOKEN__}catch(_){}</script></head><body><div id=\"m" + // cont.
-	"ap\" style=\"height:100%\"></div><script src=\"./main-b9795425.js\" defer=\"\"></script></body></html>]==] end\n" +
+	"ap\" style=\"height:100%\"></div><script src=\"./main-e917b583.js\" defer=\"\"></script></body></html>]==] end\n" +
 	"\n" +
 	"data.files[\"leaflet-control-boxzoom-4be5d249281d260e.svg\"] = function() return [==[\n" +
 	"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
@@ -1891,7 +1960,7 @@ var FileModGeneratedLua =
 	"</svg>\n" +
 	"]==] end\n" +
 	"\n" +
-	"data.files[\"main-b9795425.js\"] = function() return [==[\n" +
+	"data.files[\"main-e917b583.js\"] = function() return [==[\n" +
 	"(function (L$1) {\n" +
 	"    'use strict';\n" +
 	"\n" +
@@ -2132,6 +2201,10 @@ var FileModGeneratedLua =
 	"    var style = document.createElement('style');\n" +
 	"    style.innerHTML = main_css;\n" +
 	"    document.head.appendChild(style);\n" +
+	"    function parseNumber(v, defvalue) {\n" +
+	"        const c = Number(v);\n" +
+	"        return isNaN(c) ? defvalue : c;\n" +
+	"    }\n" +
 	"    const params = new URLSearchParams(window.location.search);\n" +
 	"    let path = (_b = (_a = params.get(\"path\")) !== null && _a !== void 0 ? _a : MAPSHOT_CONFIG.path) !== null && _b !== " + // cont.
 	"void 0 ? _b : \"\";\n" +
@@ -2155,6 +2228,13 @@ var FileModGeneratedLua =
 	"            const ratio = info.render_size / info.tile_size;\n" +
 	"            return L$1.latLng(-y * ratio, x * ratio);\n" +
 	"        };\n" +
+	"        const latLngToWorld = function (l) {\n" +
+	"            const ratio = info.tile_size / info.render_size;\n" +
+	"            return {\n" +
+	"                x: l.lng * ratio,\n" +
+	"                y: -l.lat * ratio,\n" +
+	"            };\n" +
+	"        };\n" +
 	"        const midPointToLatLng = function (bbox) {\n" +
 	"            return worldToLatLng((bbox.left_top.x + bbox.right_bottom.x) / 2, (bbox.left_top.y + bbox.right_bottom.y) / " + // cont.
 	"2);\n" +
@@ -2169,6 +2249,36 @@ var FileModGeneratedLua =
 	"            minZoom: info.zoom_min - 4,\n" +
 	"            maxZoom: info.zoom_max + 4,\n" +
 	"        });\n" +
+	"        const mymap = L$1.map('map', {\n" +
+	"            crs: L$1.CRS.Simple,\n" +
+	"            layers: [baseLayer],\n" +
+	"            zoomSnap: 0.1,\n" +
+	"        });\n" +
+	"        const layerControl = L$1.control.layers().addTo(mymap);\n" +
+	"        const layerKeys = new Map();\n" +
+	"        const registerLayer = function (key, name, layer) {\n" +
+	"            layerControl.addOverlay(layer, name);\n" +
+	"            layerKeys.set(layer, key);\n" +
+	"        };\n" +
+	"        // Layer: train stations\n" +
+	"        let stationsLayers = [];\n" +
+	"        if (isIterable(info.stations)) {\n" +
+	"            for (const station of info.stations) {\n" +
+	"                stationsLayers.push(L$1.marker(midPointToLatLng(station.bounding_box), { title: station.backer_name }).b" + // cont.
+	"indTooltip(station.backer_name, { permanent: true }));\n" +
+	"            }\n" +
+	"        }\n" +
+	"        registerLayer(\"lt\", \"Train stations\", L$1.layerGroup(stationsLayers));\n" +
+	"        // Layer: tags\n" +
+	"        let tagsLayers = [];\n" +
+	"        if (isIterable(info.tags)) {\n" +
+	"            for (const tag of info.tags) {\n" +
+	"                tagsLayers.push(L$1.marker(worldToLatLng(tag.position.x, tag.position.y), { title: `${tag.force_name}: $" + // cont.
+	"{tag.text}` }).bindTooltip(tag.text, { permanent: true }));\n" +
+	"            }\n" +
+	"        }\n" +
+	"        registerLayer(\"lg\", \"Tags\", L$1.layerGroup(tagsLayers));\n" +
+	"        // Layer: debug\n" +
 	"        const debugLayers = [\n" +
 	"            L$1.marker([0, 0], { title: \"Start\" }).bindPopup(\"Starting point\"),\n" +
 	"        ];\n" +
@@ -2181,38 +2291,57 @@ var FileModGeneratedLua =
 	"fo.world_max.y}` }), L$1.marker(worldToLatLng(info.world_max.x, info.world_min.y), { title: `${info.world_max.x}, ${info" + // cont.
 	".world_min.y}` }), L$1.marker(worldToLatLng(info.world_max.x, info.world_max.y), { title: `${info.world_max.x}, ${info.w" + // cont.
 	"orld_max.y}` }));\n" +
-	"        let stationsLayers = [];\n" +
-	"        if (isIterable(info.stations)) {\n" +
-	"            for (const station of info.stations) {\n" +
-	"                stationsLayers.push(L$1.marker(midPointToLatLng(station.bounding_box), { title: station.backer_name }).b" + // cont.
-	"indTooltip(station.backer_name, { permanent: true }));\n" +
-	"            }\n" +
-	"        }\n" +
-	"        let tagsLayers = [];\n" +
-	"        if (isIterable(info.tags)) {\n" +
-	"            for (const tag of info.tags) {\n" +
-	"                tagsLayers.push(L$1.marker(worldToLatLng(tag.position.x, tag.position.y), { title: `${tag.force_name}: $" + // cont.
-	"{tag.text}` }).bindTooltip(tag.text, { permanent: true }));\n" +
-	"            }\n" +
-	"        }\n" +
-	"        const mymap = L$1.map('map', {\n" +
-	"            crs: L$1.CRS.Simple,\n" +
-	"            layers: [baseLayer],\n" +
-	"            zoomSnap: 0.1,\n" +
-	"        });\n" +
-	"        L$1.control.layers({ /* Only one default base layer */}, {\n" +
-	"            \"Train stations\": L$1.layerGroup(stationsLayers),\n" +
-	"            \"Tags\": L$1.layerGroup(tagsLayers),\n" +
-	"            \"Debug\": L$1.layerGroup(debugLayers),\n" +
-	"        }).addTo(mymap);\n" +
+	"        registerLayer(\"ld\", \"Debug\", L$1.layerGroup(debugLayers));\n" +
+	"        // Add a control to zoom to a region.\n" +
 	"        L$1.Control.boxzoom({\n" +
 	"            position: 'topleft',\n" +
 	"        }).addTo(mymap);\n" +
-	"        mymap.setView([0, 0], 0);\n" +
+	"        // Set original view (position/zoom/layers).\n" +
+	"        const queryParams = new URLSearchParams(window.location.search);\n" +
+	"        let x = parseNumber(queryParams.get(\"x\"), 0);\n" +
+	"        let y = parseNumber(queryParams.get(\"y\"), 0);\n" +
+	"        let z = parseNumber(queryParams.get(\"z\"), 0);\n" +
+	"        mymap.setView(worldToLatLng(x, y), z);\n" +
+	"        layerKeys.forEach((key, layer) => {\n" +
+	"            const p = queryParams.get(key);\n" +
+	"            if (p == \"0\") {\n" +
+	"                mymap.removeLayer(layer);\n" +
+	"            }\n" +
+	"            if (p == \"1\") {\n" +
+	"                mymap.addLayer(layer);\n" +
+	"            }\n" +
+	"        });\n" +
+	"        // Update URL when position/view changes.\n" +
+	"        const onViewChange = (e) => {\n" +
+	"            const z = mymap.getZoom();\n" +
+	"            const { x, y } = latLngToWorld(mymap.getCenter());\n" +
+	"            const queryParams = new URLSearchParams(window.location.search);\n" +
+	"            queryParams.set(\"x\", x.toFixed(1));\n" +
+	"            queryParams.set(\"y\", y.toFixed(1));\n" +
+	"            queryParams.set(\"z\", z.toFixed(1));\n" +
+	"            history.replaceState(null, \"\", \"?\" + queryParams.toString());\n" +
+	"        };\n" +
+	"        mymap.on('zoomend', onViewChange);\n" +
+	"        mymap.on('moveend', onViewChange);\n" +
+	"        mymap.on('resize', onViewChange);\n" +
+	"        // Update URL when overlays are added/removed.\n" +
+	"        const onLayerChange = (e) => {\n" +
+	"            console.log(layerKeys.get(e.layer), e);\n" +
+	"            const key = layerKeys.get(e.layer);\n" +
+	"            if (!key) {\n" +
+	"                console.log(\"unknown layer\", e.name);\n" +
+	"                return;\n" +
+	"            }\n" +
+	"            const queryParams = new URLSearchParams(window.location.search);\n" +
+	"            queryParams.set(key, e.type == \"overlayadd\" ? \"1\" : \"0\");\n" +
+	"            history.replaceState(null, \"\", \"?\" + queryParams.toString());\n" +
+	"        };\n" +
+	"        mymap.on('overlayadd', onLayerChange);\n" +
+	"        mymap.on('overlayremove', onLayerChange);\n" +
 	"    });\n" +
 	"\n" +
 	"}(L));\n" +
-	"//# sourceMappingURL=main-b9795425.js.map\n" +
+	"//# sourceMappingURL=main-e917b583.js.map\n" +
 	"]==] end\n" +
 	"\n" +
 	"data.files[\"thumbnail.png\"] = function() return game.decode_string(table.concat({\n" +

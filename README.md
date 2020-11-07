@@ -93,6 +93,13 @@ By default, it serves on port 8080 - thus accessible at http://localhost:8080 if
 
 The generated content has static frontend code generated next to the images. This means you can also serve the content through any HTTP server (e.g., `python3 -m http.server 8080` from the `script-output` directory) or your favorite web file hosting.
 
+The viewer has the following URL query parameters:
+* `path`: string, URL of the mapshot to display.
+* `x`, `y`: float, center position in Factorio coordinates.
+* `z` : float, zoom level.
+* `lt`, `lg`, `ld`: "0"|"1", show/hide various layers (train stations, tags, debug).
+
+
 ## Generated content
 
 ### Directory hierarchy

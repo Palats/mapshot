@@ -1,10 +1,10 @@
 -- Automatically generated, do not modify
 local data = {}
 data.version = "0.0.8"
-data.version_hash = "ccb4d77ca60a883c1a60f466b2b8d95db6c7217eebf1977582d4154b4c22f87a"
+data.version_hash = "1d32fbf392f101378b03121d05983aace370d0074a924ae5dc665c743569189b"
 data.files = {}
 data.files["index.html"] = function() return [==[
-<html><head><title>Mapshot</title><link rel="icon" href="thumbnail.png" sizes="144x144"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""><script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script><script>let MAPSHOT_CONFIG={};try{MAPSHOT_CONFIG=__MAPSHOT_CONFIG_TOKEN__}catch(_){}</script></head><body><div id="map" style="height:100%"></div><script src="./main-b9795425.js" defer=""></script></body></html>]==] end
+<html><head><title>Mapshot</title><link rel="icon" href="thumbnail.png" sizes="144x144"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""><script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script><script>let MAPSHOT_CONFIG={};try{MAPSHOT_CONFIG=__MAPSHOT_CONFIG_TOKEN__}catch(_){}</script></head><body><div id="map" style="height:100%"></div><script src="./main-e917b583.js" defer=""></script></body></html>]==] end
 
 data.files["leaflet-control-boxzoom-4be5d249281d260e.svg"] = function() return [==[
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
@@ -299,7 +299,7 @@ data.files["leaflet-control-boxzoom-4be5d249281d260e.svg"] = function() return [
 </svg>
 ]==] end
 
-data.files["main-b9795425.js"] = function() return [==[
+data.files["main-e917b583.js"] = function() return [==[
 (function (L$1) {
     'use strict';
 
@@ -527,6 +527,10 @@ data.files["main-b9795425.js"] = function() return [==[
     var style = document.createElement('style');
     style.innerHTML = main_css;
     document.head.appendChild(style);
+    function parseNumber(v, defvalue) {
+        const c = Number(v);
+        return isNaN(c) ? defvalue : c;
+    }
     const params = new URLSearchParams(window.location.search);
     let path = (_b = (_a = params.get("path")) !== null && _a !== void 0 ? _a : MAPSHOT_CONFIG.path) !== null && _b !== void 0 ? _b : "";
     if (!!path && path[path.length - 1] != "/") {
@@ -549,6 +553,13 @@ data.files["main-b9795425.js"] = function() return [==[
             const ratio = info.render_size / info.tile_size;
             return L$1.latLng(-y * ratio, x * ratio);
         };
+        const latLngToWorld = function (l) {
+            const ratio = info.tile_size / info.render_size;
+            return {
+                x: l.lng * ratio,
+                y: -l.lat * ratio,
+            };
+        };
         const midPointToLatLng = function (bbox) {
             return worldToLatLng((bbox.left_top.x + bbox.right_bottom.x) / 2, (bbox.left_top.y + bbox.right_bottom.y) / 2);
         };
@@ -561,6 +572,34 @@ data.files["main-b9795425.js"] = function() return [==[
             minZoom: info.zoom_min - 4,
             maxZoom: info.zoom_max + 4,
         });
+        const mymap = L$1.map('map', {
+            crs: L$1.CRS.Simple,
+            layers: [baseLayer],
+            zoomSnap: 0.1,
+        });
+        const layerControl = L$1.control.layers().addTo(mymap);
+        const layerKeys = new Map();
+        const registerLayer = function (key, name, layer) {
+            layerControl.addOverlay(layer, name);
+            layerKeys.set(layer, key);
+        };
+        // Layer: train stations
+        let stationsLayers = [];
+        if (isIterable(info.stations)) {
+            for (const station of info.stations) {
+                stationsLayers.push(L$1.marker(midPointToLatLng(station.bounding_box), { title: station.backer_name }).bindTooltip(station.backer_name, { permanent: true }));
+            }
+        }
+        registerLayer("lt", "Train stations", L$1.layerGroup(stationsLayers));
+        // Layer: tags
+        let tagsLayers = [];
+        if (isIterable(info.tags)) {
+            for (const tag of info.tags) {
+                tagsLayers.push(L$1.marker(worldToLatLng(tag.position.x, tag.position.y), { title: `${tag.force_name}: ${tag.text}` }).bindTooltip(tag.text, { permanent: true }));
+            }
+        }
+        registerLayer("lg", "Tags", L$1.layerGroup(tagsLayers));
+        // Layer: debug
         const debugLayers = [
             L$1.marker([0, 0], { title: "Start" }).bindPopup("Starting point"),
         ];
@@ -568,36 +607,57 @@ data.files["main-b9795425.js"] = function() return [==[
             debugLayers.push(L$1.marker(worldToLatLng(info.player.x, info.player.y), { title: "Player" }).bindPopup("Player"));
         }
         debugLayers.push(L$1.marker(worldToLatLng(info.world_min.x, info.world_min.y), { title: `${info.world_min.x}, ${info.world_min.y}` }), L$1.marker(worldToLatLng(info.world_min.x, info.world_max.y), { title: `${info.world_min.x}, ${info.world_max.y}` }), L$1.marker(worldToLatLng(info.world_max.x, info.world_min.y), { title: `${info.world_max.x}, ${info.world_min.y}` }), L$1.marker(worldToLatLng(info.world_max.x, info.world_max.y), { title: `${info.world_max.x}, ${info.world_max.y}` }));
-        let stationsLayers = [];
-        if (isIterable(info.stations)) {
-            for (const station of info.stations) {
-                stationsLayers.push(L$1.marker(midPointToLatLng(station.bounding_box), { title: station.backer_name }).bindTooltip(station.backer_name, { permanent: true }));
-            }
-        }
-        let tagsLayers = [];
-        if (isIterable(info.tags)) {
-            for (const tag of info.tags) {
-                tagsLayers.push(L$1.marker(worldToLatLng(tag.position.x, tag.position.y), { title: `${tag.force_name}: ${tag.text}` }).bindTooltip(tag.text, { permanent: true }));
-            }
-        }
-        const mymap = L$1.map('map', {
-            crs: L$1.CRS.Simple,
-            layers: [baseLayer],
-            zoomSnap: 0.1,
-        });
-        L$1.control.layers({ /* Only one default base layer */}, {
-            "Train stations": L$1.layerGroup(stationsLayers),
-            "Tags": L$1.layerGroup(tagsLayers),
-            "Debug": L$1.layerGroup(debugLayers),
-        }).addTo(mymap);
+        registerLayer("ld", "Debug", L$1.layerGroup(debugLayers));
+        // Add a control to zoom to a region.
         L$1.Control.boxzoom({
             position: 'topleft',
         }).addTo(mymap);
-        mymap.setView([0, 0], 0);
+        // Set original view (position/zoom/layers).
+        const queryParams = new URLSearchParams(window.location.search);
+        let x = parseNumber(queryParams.get("x"), 0);
+        let y = parseNumber(queryParams.get("y"), 0);
+        let z = parseNumber(queryParams.get("z"), 0);
+        mymap.setView(worldToLatLng(x, y), z);
+        layerKeys.forEach((key, layer) => {
+            const p = queryParams.get(key);
+            if (p == "0") {
+                mymap.removeLayer(layer);
+            }
+            if (p == "1") {
+                mymap.addLayer(layer);
+            }
+        });
+        // Update URL when position/view changes.
+        const onViewChange = (e) => {
+            const z = mymap.getZoom();
+            const { x, y } = latLngToWorld(mymap.getCenter());
+            const queryParams = new URLSearchParams(window.location.search);
+            queryParams.set("x", x.toFixed(1));
+            queryParams.set("y", y.toFixed(1));
+            queryParams.set("z", z.toFixed(1));
+            history.replaceState(null, "", "?" + queryParams.toString());
+        };
+        mymap.on('zoomend', onViewChange);
+        mymap.on('moveend', onViewChange);
+        mymap.on('resize', onViewChange);
+        // Update URL when overlays are added/removed.
+        const onLayerChange = (e) => {
+            console.log(layerKeys.get(e.layer), e);
+            const key = layerKeys.get(e.layer);
+            if (!key) {
+                console.log("unknown layer", e.name);
+                return;
+            }
+            const queryParams = new URLSearchParams(window.location.search);
+            queryParams.set(key, e.type == "overlayadd" ? "1" : "0");
+            history.replaceState(null, "", "?" + queryParams.toString());
+        };
+        mymap.on('overlayadd', onLayerChange);
+        mymap.on('overlayremove', onLayerChange);
     });
 
 }(L));
-//# sourceMappingURL=main-b9795425.js.map
+//# sourceMappingURL=main-e917b583.js.map
 ]==] end
 
 data.files["thumbnail.png"] = function() return game.decode_string(table.concat({

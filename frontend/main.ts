@@ -96,6 +96,11 @@ interface MapshotJSON {
     tags?: FactorioTag[] | {},
 }
 
+function parseNumber(v: any, defvalue: number): number {
+    const c = Number(v);
+    return isNaN(c) ? defvalue : c;
+}
+
 const params = new URLSearchParams(window.location.search);
 let path = params.get("path") ?? MAPSHOT_CONFIG.path ?? "";
 if (!!path && path[path.length - 1] != "/") {
@@ -125,6 +130,14 @@ fetch(path + 'mapshot.json')
             );
         };
 
+        const latLngToWorld = function (l: L.LatLng) {
+            const ratio = info.tile_size / info.render_size;
+            return {
+                x: l.lng * ratio,
+                y: -l.lat * ratio,
+            }
+        }
+
         const midPointToLatLng = function (bbox: FactorioBoundingBox) {
             return worldToLatLng(
                 (bbox.left_top.x + bbox.right_bottom.x) / 2,
@@ -145,6 +158,44 @@ fetch(path + 'mapshot.json')
             maxZoom: info.zoom_max + 4,
         });
 
+        const mymap = L.map('map', {
+            crs: L.CRS.Simple,
+            layers: [baseLayer],
+            zoomSnap: 0.1,
+        });
+        const layerControl = L.control.layers().addTo(mymap);
+
+        const layerKeys = new Map<L.Layer, string>();
+        const registerLayer = function (key: string, name: string, layer: L.Layer) {
+            layerControl.addOverlay(layer, name);
+            layerKeys.set(layer, key);
+        }
+
+        // Layer: train stations
+        let stationsLayers = [];
+        if (isIterable(info.stations)) {
+            for (const station of info.stations) {
+                stationsLayers.push(L.marker(
+                    midPointToLatLng(station.bounding_box),
+                    { title: station.backer_name },
+                ).bindTooltip(station.backer_name, { permanent: true }))
+            }
+        }
+        registerLayer("lt", "Train stations", L.layerGroup(stationsLayers));
+
+        // Layer: tags
+        let tagsLayers = [];
+        if (isIterable(info.tags)) {
+            for (const tag of info.tags) {
+                tagsLayers.push(L.marker(
+                    worldToLatLng(tag.position.x, tag.position.y),
+                    { title: `${tag.force_name}: ${tag.text}` },
+                ).bindTooltip(tag.text, { permanent: true }))
+            }
+        }
+        registerLayer("lg", "Tags", L.layerGroup(tagsLayers));
+
+        // Layer: debug
         const debugLayers = [
             L.marker([0, 0], { title: "Start" }).bindPopup("Starting point"),
         ]
@@ -157,41 +208,55 @@ fetch(path + 'mapshot.json')
             L.marker(worldToLatLng(info.world_max.x, info.world_min.y), { title: `${info.world_max.x}, ${info.world_min.y}` }),
             L.marker(worldToLatLng(info.world_max.x, info.world_max.y), { title: `${info.world_max.x}, ${info.world_max.y}` }),
         );
+        registerLayer("ld", "Debug", L.layerGroup(debugLayers));
 
-        let stationsLayers = [];
-        if (isIterable(info.stations)) {
-            for (const station of info.stations) {
-                stationsLayers.push(L.marker(
-                    midPointToLatLng(station.bounding_box),
-                    { title: station.backer_name },
-                ).bindTooltip(station.backer_name, { permanent: true }))
-            }
-        }
-
-        let tagsLayers = [];
-        if (isIterable(info.tags)) {
-            for (const tag of info.tags) {
-                tagsLayers.push(L.marker(
-                    worldToLatLng(tag.position.x, tag.position.y),
-                    { title: `${tag.force_name}: ${tag.text}` },
-                ).bindTooltip(tag.text, { permanent: true }))
-            }
-        }
-
-        const mymap = L.map('map', {
-            crs: L.CRS.Simple,
-            layers: [baseLayer],
-            zoomSnap: 0.1,
-        });
-        L.control.layers({/* Only one default base layer */ }, {
-            "Train stations": L.layerGroup(stationsLayers),
-            "Tags": L.layerGroup(tagsLayers),
-            "Debug": L.layerGroup(debugLayers),
-        }).addTo(mymap);
-
+        // Add a control to zoom to a region.
         L.Control.boxzoom({
             position: 'topleft',
         }).addTo(mymap);
 
-        mymap.setView([0, 0], 0);
+        // Set original view (position/zoom/layers).
+        const queryParams = new URLSearchParams(window.location.search);
+        let x = parseNumber(queryParams.get("x"), 0);
+        let y = parseNumber(queryParams.get("y"), 0);
+        let z = parseNumber(queryParams.get("z"), 0);
+        mymap.setView(worldToLatLng(x, y), z);
+        layerKeys.forEach((key, layer) => {
+            const p = queryParams.get(key);
+            if (p == "0") {
+                mymap.removeLayer(layer);
+            }
+            if (p == "1") {
+                mymap.addLayer(layer);
+            }
+        });
+
+        // Update URL when position/view changes.
+        const onViewChange = (e: L.LeafletEvent) => {
+            const z = mymap.getZoom();
+            const { x, y } = latLngToWorld(mymap.getCenter());
+            const queryParams = new URLSearchParams(window.location.search);
+            queryParams.set("x", x.toFixed(1));
+            queryParams.set("y", y.toFixed(1));
+            queryParams.set("z", z.toFixed(1));
+            history.replaceState(null, "", "?" + queryParams.toString());
+        }
+        mymap.on('zoomend', onViewChange);
+        mymap.on('moveend', onViewChange);
+        mymap.on('resize', onViewChange);
+
+        // Update URL when overlays are added/removed.
+        const onLayerChange = (e: L.LayersControlEvent) => {
+            console.log(layerKeys.get(e.layer), e);
+            const key = layerKeys.get(e.layer);
+            if (!key) {
+                console.log("unknown layer", e.name);
+                return;
+            }
+            const queryParams = new URLSearchParams(window.location.search);
+            queryParams.set(key, e.type == "overlayadd" ? "1" : "0");
+            history.replaceState(null, "", "?" + queryParams.toString());
+        }
+        mymap.on('overlayadd', onLayerChange);
+        mymap.on('overlayremove', onLayerChange);
     });
