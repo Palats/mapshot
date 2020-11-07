@@ -181,6 +181,7 @@ fetch(path + 'mapshot.json')
         const mymap = L.map('map', {
             crs: L.CRS.Simple,
             layers: [baseLayer],
+            zoomSnap: 0.1,
         });
         L.control.layers({/* Only one default base layer */ }, {
             "Train stations": L.layerGroup(stationsLayers),

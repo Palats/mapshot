@@ -5,7 +5,7 @@ package embed
 var Version = "0.0.8"
 
 // VersionHash is a hash of the mod content
-var VersionHash = "d34d5fcfdea65b6ea0b625d7d7c54b528f47ce1751d6c3a95900cbb37d544596"
+var VersionHash = "ccb4d77ca60a883c1a60f466b2b8d95db6c7217eebf1977582d4154b4c22f87a"
 
 // ModFiles is the list of files for the Factorio mod.
 var ModFiles = map[string]string{
@@ -26,7 +26,7 @@ var ModFiles = map[string]string{
 var FrontendFiles = map[string]string{
 	"index.html": FileFrontendDistIndexHTML,
 	"leaflet-control-boxzoom-4be5d249281d260e.svg": FileFrontendDistLeafletControlBoxzoomBeDDESvg,
-	"main-c7f52b47.js": FileFrontendDistMainCFBJs,
+	"main-b9795425.js": FileFrontendDistMainBJs,
 	"thumbnail.png": FileThumbnailPng,
 }
 
@@ -442,6 +442,7 @@ var FileChangelogTxt =
 	"Version: 0.0.9\n" +
 	"  UI:\n" +
 	"    - A button to zoom to a selected region (boxzoom).\n" +
+	"    - More precise zoom levels\n" +
 	"---------------------------------------------------------------------------------------------------\n" +
 	"Version: 0.0.8\n" +
 	"Date: 2020.11.01\n" +
@@ -532,7 +533,7 @@ var FileFrontendDistIndexHTML =
 	"OMAS6/keqq/sMZMZ19scR4PsZChSR7A==\" crossorigin=\"\"><script src=\"https://unpkg.com/leaflet@1.7.1/dist/leaflet.js\" integrit" + // cont.
 	"y=\"sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==\" crossorigin=\"\"></scr" + // cont.
 	"ipt><script>let MAPSHOT_CONFIG={};try{MAPSHOT_CONFIG=__MAPSHOT_CONFIG_TOKEN__}catch(_){}</script></head><body><div id=\"m" + // cont.
-	"ap\" style=\"height:100%\"></div><script src=\"./main-c7f52b47.js\" defer=\"\"></script></body></html>" +
+	"ap\" style=\"height:100%\"></div><script src=\"./main-b9795425.js\" defer=\"\"></script></body></html>" +
 	""
 
 // FileFrontendDistLeafletControlBoxzoomBeDDESvg is file "frontend/dist/leaflet-control-boxzoom-4be5d249281d260e.svg"
@@ -842,8 +843,8 @@ var FileFrontendDistLeafletControlBoxzoomBeDDESvg =
 	"" +
 	""
 
-// FileFrontendDistMainCFBJs is file "frontend/dist/main-c7f52b47.js"
-var FileFrontendDistMainCFBJs =
+// FileFrontendDistMainBJs is file "frontend/dist/main-b9795425.js"
+var FileFrontendDistMainBJs =
 	"(function (L$1) {\n" +
 	"    'use strict';\n" +
 	"\n" +
@@ -1150,6 +1151,7 @@ var FileFrontendDistMainCFBJs =
 	"        const mymap = L$1.map('map', {\n" +
 	"            crs: L$1.CRS.Simple,\n" +
 	"            layers: [baseLayer],\n" +
+	"            zoomSnap: 0.1,\n" +
 	"        });\n" +
 	"        L$1.control.layers({ /* Only one default base layer */}, {\n" +
 	"            \"Train stations\": L$1.layerGroup(stationsLayers),\n" +
@@ -1163,7 +1165,7 @@ var FileFrontendDistMainCFBJs =
 	"    });\n" +
 	"\n" +
 	"}(L));\n" +
-	"//# sourceMappingURL=main-c7f52b47.js.map\n" +
+	"//# sourceMappingURL=main-b9795425.js.map\n" +
 	"" +
 	""
 
@@ -1574,7 +1576,7 @@ var FileModGeneratedLua =
 	"-- Automatically generated, do not modify\n" +
 	"local data = {}\n" +
 	"data.version = \"0.0.8\"\n" +
-	"data.version_hash = \"d34d5fcfdea65b6ea0b625d7d7c54b528f47ce1751d6c3a95900cbb37d544596\"\n" +
+	"data.version_hash = \"ccb4d77ca60a883c1a60f466b2b8d95db6c7217eebf1977582d4154b4c22f87a\"\n" +
 	"data.files = {}\n" +
 	"data.files[\"index.html\"] = function() return [==[\n" +
 	"<html><head><title>Mapshot</title><link rel=\"icon\" href=\"thumbnail.png\" sizes=\"144x144\"><link rel=\"stylesheet\" href=\"htt" + // cont.
@@ -1582,7 +1584,7 @@ var FileModGeneratedLua =
 	"OMAS6/keqq/sMZMZ19scR4PsZChSR7A==\" crossorigin=\"\"><script src=\"https://unpkg.com/leaflet@1.7.1/dist/leaflet.js\" integrit" + // cont.
 	"y=\"sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==\" crossorigin=\"\"></scr" + // cont.
 	"ipt><script>let MAPSHOT_CONFIG={};try{MAPSHOT_CONFIG=__MAPSHOT_CONFIG_TOKEN__}catch(_){}</script></head><body><div id=\"m" + // cont.
-	"ap\" style=\"height:100%\"></div><script src=\"./main-c7f52b47.js\" defer=\"\"></script></body></html>]==] end\n" +
+	"ap\" style=\"height:100%\"></div><script src=\"./main-b9795425.js\" defer=\"\"></script></body></html>]==] end\n" +
 	"\n" +
 	"data.files[\"leaflet-control-boxzoom-4be5d249281d260e.svg\"] = function() return [==[\n" +
 	"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
@@ -1889,7 +1891,7 @@ var FileModGeneratedLua =
 	"</svg>\n" +
 	"]==] end\n" +
 	"\n" +
-	"data.files[\"main-c7f52b47.js\"] = function() return [==[\n" +
+	"data.files[\"main-b9795425.js\"] = function() return [==[\n" +
 	"(function (L$1) {\n" +
 	"    'use strict';\n" +
 	"\n" +
@@ -2196,6 +2198,7 @@ var FileModGeneratedLua =
 	"        const mymap = L$1.map('map', {\n" +
 	"            crs: L$1.CRS.Simple,\n" +
 	"            layers: [baseLayer],\n" +
+	"            zoomSnap: 0.1,\n" +
 	"        });\n" +
 	"        L$1.control.layers({ /* Only one default base layer */}, {\n" +
 	"            \"Train stations\": L$1.layerGroup(stationsLayers),\n" +
@@ -2209,7 +2212,7 @@ var FileModGeneratedLua =
 	"    });\n" +
 	"\n" +
 	"}(L));\n" +
-	"//# sourceMappingURL=main-c7f52b47.js.map\n" +
+	"//# sourceMappingURL=main-b9795425.js.map\n" +
 	"]==] end\n" +
 	"\n" +
 	"data.files[\"thumbnail.png\"] = function() return game.decode_string(table.concat({\n" +

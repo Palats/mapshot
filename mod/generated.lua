@@ -1,10 +1,10 @@
 -- Automatically generated, do not modify
 local data = {}
 data.version = "0.0.8"
-data.version_hash = "d34d5fcfdea65b6ea0b625d7d7c54b528f47ce1751d6c3a95900cbb37d544596"
+data.version_hash = "ccb4d77ca60a883c1a60f466b2b8d95db6c7217eebf1977582d4154b4c22f87a"
 data.files = {}
 data.files["index.html"] = function() return [==[
-<html><head><title>Mapshot</title><link rel="icon" href="thumbnail.png" sizes="144x144"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""><script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script><script>let MAPSHOT_CONFIG={};try{MAPSHOT_CONFIG=__MAPSHOT_CONFIG_TOKEN__}catch(_){}</script></head><body><div id="map" style="height:100%"></div><script src="./main-c7f52b47.js" defer=""></script></body></html>]==] end
+<html><head><title>Mapshot</title><link rel="icon" href="thumbnail.png" sizes="144x144"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""><script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script><script>let MAPSHOT_CONFIG={};try{MAPSHOT_CONFIG=__MAPSHOT_CONFIG_TOKEN__}catch(_){}</script></head><body><div id="map" style="height:100%"></div><script src="./main-b9795425.js" defer=""></script></body></html>]==] end
 
 data.files["leaflet-control-boxzoom-4be5d249281d260e.svg"] = function() return [==[
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
@@ -299,7 +299,7 @@ data.files["leaflet-control-boxzoom-4be5d249281d260e.svg"] = function() return [
 </svg>
 ]==] end
 
-data.files["main-c7f52b47.js"] = function() return [==[
+data.files["main-b9795425.js"] = function() return [==[
 (function (L$1) {
     'use strict';
 
@@ -583,6 +583,7 @@ data.files["main-c7f52b47.js"] = function() return [==[
         const mymap = L$1.map('map', {
             crs: L$1.CRS.Simple,
             layers: [baseLayer],
+            zoomSnap: 0.1,
         });
         L$1.control.layers({ /* Only one default base layer */}, {
             "Train stations": L$1.layerGroup(stationsLayers),
@@ -596,7 +597,7 @@ data.files["main-c7f52b47.js"] = function() return [==[
     });
 
 }(L));
-//# sourceMappingURL=main-c7f52b47.js.map
+//# sourceMappingURL=main-b9795425.js.map
 ]==] end
 
 data.files["thumbnail.png"] = function() return game.decode_string(table.concat({

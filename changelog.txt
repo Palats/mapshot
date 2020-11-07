@@ -2,6 +2,7 @@
 Version: 0.0.9
   UI:
     - A button to zoom to a selected region (boxzoom).
+    - More precise zoom levels
 ---------------------------------------------------------------------------------------------------
 Version: 0.0.8
 Date: 2020.11.01
