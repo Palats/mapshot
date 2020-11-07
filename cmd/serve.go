@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"html/template"
@@ -188,17 +189,21 @@ func init() {
 	cmdServe.PersistentFlags().IntVar(&port, "port", 8080, "Port to listen on.")
 	cmdRoot.AddCommand(cmdServe)
 
+	modTime := time.Now()
+
 	// Build a mux to serve frontend files from embed/ module.
 	builtinFrontendMux = http.NewServeMux()
 	for fname, content := range embed.FrontendFiles {
 		fname := fname
 		content := content
 		builtinFrontendMux.HandleFunc("/"+fname, func(w http.ResponseWriter, req *http.Request) {
-			w.Write([]byte(content))
+			b := bytes.NewReader([]byte(content))
+			http.ServeContent(w, req, fname, modTime, b)
 		})
 		if fname == "index.html" {
 			builtinFrontendMux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-				w.Write([]byte(content))
+				b := bytes.NewReader([]byte(content))
+				http.ServeContent(w, req, fname, modTime, b)
 			})
 		}
 	}
