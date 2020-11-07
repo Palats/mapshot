@@ -1,8 +1,10 @@
 import * as L from "leaflet";
 import "./boxzoom/leaflet-control-boxzoom-src.js";
+import "./zoomslider/L.Control.Zoomslider.js";
 
 import boxzoom_svg from "./boxzoom/leaflet-control-boxzoom.svg";
 import "./boxzoom/leaflet-control-boxzoom.css";
+import "./zoomslider/L.Control.Zoomslider.css";
 
 const main_css = `
     html,body {
@@ -10,9 +12,15 @@ const main_css = `
     }
     .with-background-image {
         background-image:url(${boxzoom_svg});
-        background-repeat:no-repeat;
-        background-size:21px 21px; /* 25px image, 25px box; subtract 2px for padding on every side = 21px rendering height */
-        background-position:2px 2px;
+        background-size:26px 26px;
+    }
+    .leaflet-touch .leaflet-control-zoomslider {
+        border: none;
+    }
+    .leaflet-control-boxzoom {
+        border:none;
+        width:30px;
+        height:30px;
     }
 `;
 
@@ -162,6 +170,9 @@ fetch(path + 'mapshot.json')
             crs: L.CRS.Simple,
             layers: [baseLayer],
             zoomSnap: 0.1,
+            zoomsliderControl: true,
+            zoomControl: false,
+            zoomDelta: 1.0,
         });
         const layerControl = L.control.layers().addTo(mymap);
 
