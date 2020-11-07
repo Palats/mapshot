@@ -4,6 +4,7 @@ Version: 0.0.9
     - URL reflect the current view (position, zoom, layers), allowing to share specific positions
       of the map.
     - A button to zoom to a selected region (boxzoom).
+    - A slider to select zoom level.
     - More precise zoom levels.
 ---------------------------------------------------------------------------------------------------
 Version: 0.0.8
