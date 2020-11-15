@@ -8,7 +8,21 @@ import "./zoomslider/L.Control.Zoomslider.css";
 
 import * as common from "./common";
 
-export var svg = boxzoom_svg as string;
+common.globalCSS(`
+    .with-background-image {
+        background-image:url(${boxzoom_svg});
+        background-size:22px 22px;
+        background-position:4px 4px;
+    }
+    .leaflet-touch .leaflet-control-zoomslider {
+        border: none;
+    }
+    .leaflet-control-boxzoom {
+        border:none;
+        width:30px;
+        height:30px;
+    }
+`);
 
 export function run(config: common.MapshotConfig, info: common.MapshotJSON) {
     const worldToLatLng = function (x: number, y: number) {

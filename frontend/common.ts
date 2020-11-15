@@ -84,3 +84,9 @@ export function isIterable<T>(obj: Iterable<T> | any): obj is Iterable<T> {
     }
     return typeof obj[Symbol.iterator] === "function";
 }
+
+export function globalCSS(css: string) {
+    var style = document.createElement('style');
+    style.innerHTML = css;
+    document.head.appendChild(style);
+}
