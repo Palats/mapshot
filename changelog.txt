@@ -1,5 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.0.10
+  Settings:
+    - `prefix` is now considered a directory name. A slash is added automatically if needed.
+---------------------------------------------------------------------------------------------------
 Version: 0.0.9
+Date: 2020.11.07
   UI:
     - URL reflect the current view (position, zoom, layers), allowing to share specific positions
       of the map.

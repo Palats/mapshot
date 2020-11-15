@@ -15,7 +15,7 @@ data:extend({
         setting_type = "runtime-per-user",
         default_value = "mapshot/",
         localised_name = "Prefix",
-        localised_description = "Prefix to add to all generated filenames.",
+        localised_description = "Directory (relative to script-output/) for all generated content.",
         order = "001",
     },
     {

@@ -19,6 +19,10 @@ function build_params(player)
     params[k] = v
   end
 
+  if (string.sub(params.prefix, -1) ~= "/") then
+    params.prefix = params.prefix .. "/"
+  end
+
   params.tilemin = factorio_fit_zoom(params.resolution, params.tilemin, "tilemin", player)
   params.tilemax = factorio_fit_zoom(params.resolution, params.tilemax, "tilemax", player)
 
