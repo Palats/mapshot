@@ -7,7 +7,6 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -221,6 +220,7 @@ func (f *Factorio) CopyMods(dstMods string, filterOut []string) error {
 
 // Settings for creating a Factorio helper instance.
 type Settings struct {
+	flagPrefix  string
 	datadir     string
 	binary      string
 	verbose     bool
@@ -230,6 +230,7 @@ type Settings struct {
 
 // Register add flags to configure how to call Factorio on the flagset.
 func (s *Settings) Register(flags *pflag.FlagSet, prefix string) *Settings {
+	s.flagPrefix = prefix
 	flags.StringVar(&s.datadir, prefix+"datadir", "", "Path to factorio data dir. Tries default locations if empty.")
 	flags.StringVar(&s.binary, prefix+"binary", "", "Path to factorio binary. Tries default locations if empty.")
 	flags.BoolVar(&s.verbose, prefix+"verbose", false, "If true, stream Factorio stdout/stderr to the console.")
@@ -276,7 +277,7 @@ func (s *Settings) DataDir() (string, error) {
 	}
 	if s == nil {
 		glog.Infof("No Factorio data dir found")
-		return "", errors.New("no factorio data dir found; use --alsologtostderr for more info and --datadir to specify its location")
+		return "", fmt.Errorf("no factorio data dir found; use --alsologtostderr for more info and --%sdatadir to specify its location", s.flagPrefix)
 	}
 	glog.Infof("Using Factorio data dir: %s", match)
 	return match, nil
@@ -325,7 +326,7 @@ func (s *Settings) Binary() (string, error) {
 	}
 	if match == "" {
 		glog.Infof("No factorio binary found")
-		return "", errors.New("no factorio binary found; use --alsologtostderr for more info and --binary to specify its location")
+		return "", fmt.Errorf("no factorio binary found; use --alsologtostderr for more info and --%sbinary to specify its location", s.flagPrefix)
 	}
 	glog.Infof("Using Factorio binary: %s", match)
 	return match, nil
