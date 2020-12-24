@@ -2,6 +2,8 @@
 Version: 0.0.10
   Settings:
     - `prefix` is now considered a directory name. A slash is added automatically if needed.
+  Factorio:
+    - Bumped to 1.1, though there is no change between 1.0 and 1.1 impacting Mapshot.
 ---------------------------------------------------------------------------------------------------
 Version: 0.0.9
 Date: 2020.11.07

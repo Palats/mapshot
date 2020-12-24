@@ -36,7 +36,7 @@ This will:
  - The UI frontend will use the file watched by the `npm` command - so any
    changes to the frontend code will be reflected on a page reload.
 
-The main limitation of the `dev` mode is that files is that the fiels embedded in the CLI binary will not be automatically updated. In practice, the only consequence is that generated `index.html` and companions files will not be up to date. However, the HTTP server in the CLI do not use them anyway.
+The main limitation of the `dev` mode is that files is that the fields embedded in the CLI binary will not be automatically updated. In practice, the only consequence is that generated `index.html` and companions files will not be up to date. However, the HTTP server in the CLI do not use them anyway.
 
 The frontend can load arbitrary mapshots by adding `?path=mapshot/<name>` query parameters.
 
