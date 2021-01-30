@@ -24,6 +24,24 @@ common.globalCSS(`
     }
 `);
 
+/*
+ * Workaround for 1px lines appearing in some browsers due to fractional transforms
+ * and resulting anti-aliasing.
+ * https://github.com/Leaflet/Leaflet/issues/3575#issuecomment-150544739
+ */
+function leafletHack() {
+    const originalInitTile = (L.GridLayer.prototype as any)._initTile;
+    L.GridLayer.include({
+        _initTile: function (tile: any) {
+            originalInitTile.call(this, tile);
+            var tileSize = this.getTileSize();
+            tile.style.width = tileSize.x + 1 + 'px';
+            tile.style.height = tileSize.y + 1 + 'px';
+        }
+    });
+}
+leafletHack();
+
 export function run(config: common.MapshotConfig, info: common.MapshotJSON) {
     const worldToLatLng = function (x: number, y: number) {
         const ratio = info.render_size / info.tile_size;
