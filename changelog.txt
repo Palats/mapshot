@@ -1,5 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.0.11
+  Bugs:
+    - Reduced occurrence of vertical/horizontal lines visible between tiles.
+
+---------------------------------------------------------------------------------------------------
 Version: 0.0.10
+Date: 2020.12.24
   Settings:
     - `prefix` is now considered a directory name. A slash is added automatically if needed.
   Factorio:
