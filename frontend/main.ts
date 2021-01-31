@@ -1,6 +1,7 @@
 import * as common from "./common";
 import * as viewer from "./viewer";
 import * as listing from "./listing";
+import { html, render } from 'lit-html';
 
 common.globalCSS(`
     html,body {
@@ -33,9 +34,11 @@ function runListing() {
     fetch('shots.json')
         .then(resp => resp.json())
         .then((shots: common.ShotsJSON) => {
-            listing.run(config, shots);
+            render(html`<mapshot-listing .info=${shots}>foo</mapshot-listing>`, document.body);
         });
 }
+
+listing.MapshotListing;
 
 if (config.path) {
     runViewer();

@@ -4,6 +4,7 @@ import html from '@open-wc/rollup-plugin-html';
 import copy from 'rollup-plugin-copy'
 import postcss from 'rollup-plugin-postcss'
 import url from '@rollup/plugin-url';
+import { terser } from "rollup-plugin-terser";
 
 export default {
     input: 'index.html',
@@ -33,5 +34,6 @@ export default {
         html(),
         typescript(),
         nodeResolve(),
+        terser(),
     ],
 };
