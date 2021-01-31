@@ -5,10 +5,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"os"
 	"path/filepath"
+	"sort"
 	"sync"
 	"time"
 
@@ -18,23 +20,48 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// ShotInfo gives information about a single mapshot.
-type ShotInfo struct {
-	Name string `json:"name,omitempty"`
+// shotInfo gives internal information about a single mapshot.
+type shotInfo struct {
+	name string
 	// HTTP path were the tiles & data is served.
-	Path string `json:"path,omitempty"`
-
+	path     string
+	savename string
+	json     *MapshotJSON
 	// Filesystem path of this mapshot.
 	fsPath string
 }
 
-func findShots(baseDir string) ([]ShotInfo, error) {
+// ShotsJSON is the data sent to the UI to build the listing.
+type ShotsJSON struct {
+	All []*ShotsJSONSave `json:"all"`
+}
+
+// ShotsJSONSave is part of ShotsJSON.
+type ShotsJSONSave struct {
+	Savename string           `json:"savename"`
+	Versions []*ShotsJSONInfo `json:"versions"`
+}
+
+// ShotsJSONInfo is part of ShotsJSONSave.
+type ShotsJSONInfo struct {
+	Name        string `json:"name,omitempty"`
+	Path        string `json:"path,omitempty"`
+	TicksPlayed int64  `json:"ticks_played,omitempty"`
+}
+
+// MapshotJSON is a partial representation of the content of mapshot.json.
+type MapshotJSON struct {
+	// Many field omitted that are not used from go.
+	TicksPlayed int64 `json:"ticks_played,omitempty"`
+}
+
+func findShots(baseDir string) ([]shotInfo, error) {
 	realDir, err := filepath.EvalSymlinks(baseDir)
 	if err != nil {
 		return nil, fmt.Errorf("unable to eval symlinks for %s: %w", baseDir, err)
 	}
 	glog.Infof("Looking for shots in %s", realDir)
-	var shots []ShotInfo
+	var shots []shotInfo
 	err = filepath.Walk(realDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -43,16 +70,32 @@ func findShots(baseDir string) ([]ShotInfo, error) {
 			return nil
 		}
 		glog.Infof("found mapshot.json: %s", path)
+		raw, err := ioutil.ReadFile(path)
+		if err != nil {
+			glog.Errorf("file %s is not readable", path)
+			return nil
+		}
+
+		mapshotData := &MapshotJSON{}
+		if err := json.Unmarshal(raw, mapshotData); err != nil {
+			glog.Errorf("file %s does not have valid JSON", path)
+			return nil
+		}
+
 		shotPath := filepath.Dir(path)
-		name, err := filepath.Rel(realDir, shotPath)
+		relpath, err := filepath.Rel(realDir, shotPath)
 		if err != nil {
 			glog.Infof("unable to get relative path of %q: %v", shotPath, err)
 			return nil
 		}
-		shots = append(shots, ShotInfo{
-			fsPath: shotPath,
-			Name:   name,
-			Path:   "/data/" + filepath.ToSlash(name) + "/",
+		savename := filepath.Dir(relpath)
+
+		shots = append(shots, shotInfo{
+			fsPath:   shotPath,
+			name:     relpath,
+			savename: savename,
+			json:     mapshotData,
+			path:     "/data/" + filepath.ToSlash(relpath) + "/",
 		})
 		return nil
 	})
@@ -98,29 +141,56 @@ func (s *Server) watch(ctx context.Context) {
 }
 
 func (s *Server) updateMux() {
+	// Find all existing mapshots.
 	shots, err := findShots(s.baseDir)
 	if err != nil {
 		shots = nil
 		glog.Errorf("unable to find mapshots at %s: %v", s.baseDir, err)
 	}
 
-	mux := http.NewServeMux()
+	// Build shots.json
+	sort.Slice(shots, func(i, j int) bool {
+		return shots[i].json.TicksPlayed > shots[j].json.TicksPlayed
+	})
+	kwShots := map[string]*ShotsJSONSave{}
+	var savenames []string
 	for _, shot := range shots {
-		mux.Handle(shot.Path, http.StripPrefix(shot.Path, http.FileServer(http.Dir(shot.fsPath))))
+		if kwShots[shot.savename] == nil {
+			savenames = append(savenames, shot.savename)
+			kwShots[shot.savename] = &ShotsJSONSave{
+				Savename: shot.savename,
+			}
+		}
+		kwShots[shot.savename].Versions = append(kwShots[shot.savename].Versions, &ShotsJSONInfo{
+			Name:        shot.name,
+			Path:        shot.path,
+			TicksPlayed: shot.json.TicksPlayed,
+		})
+	}
+	sort.Strings(savenames)
+
+	var data ShotsJSON
+	for _, savename := range savenames {
+		data.All = append(data.All, kwShots[savename])
 	}
 
-	data, err := json.Marshal(map[string]interface{}{
-		"all": shots,
-	})
+	jsonData, err := json.Marshal(data)
 	if err != nil {
-		data = nil
+		jsonData = nil
 		glog.Errorf("unable to build shots.json: %v", err)
 	}
 
+	// Serve each shot data
+	mux := http.NewServeMux()
+	for _, shot := range shots {
+		mux.Handle(shot.path, http.StripPrefix(shot.path, http.FileServer(http.Dir(shot.fsPath))))
+	}
+
+	// Serve basic site.
 	mux.Handle("/", s.frontendMux)
 	mux.HandleFunc("/shots.json", func(w http.ResponseWriter, req *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		w.Write(data)
+		w.Write(jsonData)
 	})
 
 	// Keep /map/ for backward compatibility - it used to be the path for

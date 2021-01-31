@@ -34,7 +34,7 @@ function runListing() {
     fetch('shots.json')
         .then(resp => resp.json())
         .then((shots: common.ShotsJSON) => {
-            render(html`<mapshot-listing .info=${shots}>foo</mapshot-listing>`, document.body);
+            render(html`<mapshot-listing .shots=${shots}>foo</mapshot-listing>`, document.body);
         });
 }
 
