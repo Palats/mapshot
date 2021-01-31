@@ -79,7 +79,7 @@ export function run(config: common.MapshotConfig, info: common.MapshotJSON) {
         maxZoom: info.zoom_max + 4,
     });
 
-    const mymap = L.map('map', {
+    const mymap = L.map('content', {
         crs: L.CRS.Simple,
         layers: [baseLayer],
         zoomSnap: 0.1,

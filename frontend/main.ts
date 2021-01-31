@@ -1,5 +1,6 @@
 import * as common from "./common";
 import * as viewer from "./viewer";
+import * as listing from "./listing";
 
 common.globalCSS(`
     html,body {
@@ -28,4 +29,16 @@ function runViewer() {
         });
 }
 
-runViewer();
+function runListing() {
+    fetch('shots.json')
+        .then(resp => resp.json())
+        .then((shots: common.ShotsJSON) => {
+            listing.run(config, shots);
+        });
+}
+
+if (config.path) {
+    runViewer();
+} else {
+    runListing();
+}

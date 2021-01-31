@@ -3,8 +3,8 @@ package cmd
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
-	"html/template"
 	"math/rand"
 	"net/http"
 	"os"
@@ -18,19 +18,23 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type shotInfo struct {
-	name     string
-	fsPath   string
-	httpPath string
+// ShotInfo gives information about a single mapshot.
+type ShotInfo struct {
+	Name string `json:"name,omitempty"`
+	// HTTP path were the tiles & data is served.
+	Path string `json:"path,omitempty"`
+
+	// Filesystem path of this mapshot.
+	fsPath string
 }
 
-func findShots(baseDir string) ([]shotInfo, error) {
+func findShots(baseDir string) ([]ShotInfo, error) {
 	realDir, err := filepath.EvalSymlinks(baseDir)
 	if err != nil {
 		return nil, fmt.Errorf("unable to eval symlinks for %s: %w", baseDir, err)
 	}
 	glog.Infof("Looking for shots in %s", realDir)
-	var shots []shotInfo
+	var shots []ShotInfo
 	err = filepath.Walk(realDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -45,10 +49,10 @@ func findShots(baseDir string) ([]shotInfo, error) {
 			glog.Infof("unable to get relative path of %q: %v", shotPath, err)
 			return nil
 		}
-		shots = append(shots, shotInfo{
-			fsPath:   shotPath,
-			name:     name,
-			httpPath: "/data/" + filepath.ToSlash(name) + "/",
+		shots = append(shots, ShotInfo{
+			fsPath: shotPath,
+			Name:   name,
+			Path:   "/data/" + filepath.ToSlash(name) + "/",
 		})
 		return nil
 	})
@@ -99,7 +103,30 @@ func (s *Server) updateMux() {
 		shots = nil
 		glog.Errorf("unable to find mapshots at %s: %v", s.baseDir, err)
 	}
-	mux := s.buildMux(shots)
+
+	mux := http.NewServeMux()
+	for _, shot := range shots {
+		mux.Handle(shot.Path, http.StripPrefix(shot.Path, http.FileServer(http.Dir(shot.fsPath))))
+	}
+
+	data, err := json.Marshal(map[string]interface{}{
+		"all": shots,
+	})
+	if err != nil {
+		data = nil
+		glog.Errorf("unable to build shots.json: %v", err)
+	}
+
+	mux.Handle("/", s.frontendMux)
+	mux.HandleFunc("/shots.json", func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(data)
+	})
+
+	// Keep /map/ for backward compatibility - it used to be the path for
+	// specific renders.
+	mux.Handle("/map/", http.StripPrefix("/map", s.frontendMux))
+
 	s.m.Lock()
 	defer s.m.Unlock()
 	// Only update if reading did not fail - or if it was the first call, to
@@ -109,53 +136,12 @@ func (s *Server) updateMux() {
 	}
 }
 
-func (s *Server) buildMux(shots []shotInfo) *http.ServeMux {
-	mux := http.NewServeMux()
-
-	data := []map[string]string{}
-	for _, shot := range shots {
-		data = append(data, map[string]string{
-			"name": shot.name,
-			"path": shot.httpPath,
-		})
-		mux.Handle(shot.httpPath, http.StripPrefix(shot.httpPath, http.FileServer(http.Dir(shot.fsPath))))
-	}
-
-	mux.Handle("/map/", http.StripPrefix("/map", s.frontendMux))
-	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-		if err := indexHTML.Execute(w, data); err != nil {
-			http.Error(w, fmt.Sprintf("unable to generate file: %v", err), http.StatusInternalServerError)
-			return
-		}
-	})
-
-	return mux
-}
-
 func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	s.m.Lock()
 	mux := s.mux
 	s.m.Unlock()
 	mux.ServeHTTP(w, req)
 }
-
-var indexHTML = template.Must(template.New("name").Parse(`
-<html>
-<head>
-	<title>Mapshot for Factorio</title>
-	<link rel="icon" href="map/thumbnail.png" sizes="144x144">
-</head>
-<body>
-	{{if not .}}
-	No mapshots have been found. Create some and re-start mapshot server.
-	{{end}}
-	<ul>
-	{{range .}}
-	<li><a href="map?path={{.path}}">{{.name}}</a></li>
-	{{end}}
-	</ul>
-</body>
-`))
 
 var cmdServe = &cobra.Command{
 	Use:   "serve",
