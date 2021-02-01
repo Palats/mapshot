@@ -48,7 +48,11 @@ func devFactorio(ctx context.Context, fact *factorio.Factorio, checkoutDir strin
 func devServe(ctx context.Context, fact *factorio.Factorio, checkoutDir string) error {
 	baseDir := fact.ScriptOutput()
 	fmt.Printf("Serving data from %s\n", baseDir)
-	s := newServer(baseDir, http.FileServer(http.Dir(path.Join(checkoutDir, "frontend", "dist"))))
+	s := newServer(
+		baseDir,
+		http.FileServer(http.Dir(path.Join(checkoutDir, "frontend", "dist", "listing"))),
+		http.FileServer(http.Dir(path.Join(checkoutDir, "frontend", "dist", "viewer"))),
+	)
 	go s.watch(ctx)
 
 	addr := fmt.Sprintf(":%d", port)

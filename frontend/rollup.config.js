@@ -6,11 +6,27 @@ import postcss from 'rollup-plugin-postcss'
 import url from '@rollup/plugin-url';
 import { terser } from "rollup-plugin-terser";
 
-export default {
-    input: 'index.html',
+let plugins = [
+    postcss({
+        minimize: true,
+        plugins: []
+    }),
+    url({
+        limit: 2048,
+        include: ['**/*.svg', '**/*.png', '**/*.jpg', '**/*.gif'],
+        fileName: '[name]-[hash][extname]',
+    }),
+    html({ name: "index.html" }),
+    typescript(),
+    nodeResolve(),
+    terser(),
+];
+
+export default [{
+    input: 'viewer.html',
     external: ['leaflet'],
     output: {
-        dir: 'dist',
+        dir: 'dist/viewer',
         format: 'iife',
         sourcemap: true,
         entryFileNames: '[name]-[hash].js',
@@ -20,20 +36,21 @@ export default {
     },
     plugins: [
         copy({
-            targets: [{ src: '../thumbnail.png', dest: 'dist' }]
+            targets: [{ src: '../thumbnail.png', dest: 'dist/viewer' }]
         }),
-        postcss({
-            minimize: true,
-            plugins: []
+    ].concat(plugins),
+}, {
+    input: 'listing.html',
+    external: ['leaflet'],
+    output: {
+        dir: 'dist/listing',
+        format: 'iife',
+        sourcemap: true,
+        entryFileNames: '[name]-[hash].js',
+    },
+    plugins: [
+        copy({
+            targets: [{ src: '../thumbnail.png', dest: 'dist/listing' }]
         }),
-        url({
-            limit: 2048,
-            include: ['**/*.svg', '**/*.png', '**/*.jpg', '**/*.gif'],
-            fileName: '[name]-[hash][extname]',
-        }),
-        html(),
-        typescript(),
-        nodeResolve(),
-        terser(),
-    ],
-};
+    ].concat(plugins),
+}];

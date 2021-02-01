@@ -1,8 +1,9 @@
 import * as common from "./common";
 import { LitElement, html, customElement, property } from 'lit-element';
+import { render } from 'lit-html';
 
 @customElement('factorio-ticks')
-export class FactorioTicks extends LitElement {
+class FactorioTicks extends LitElement {
     @property({ type: Number })
     ticks: number = 0;
 
@@ -16,7 +17,7 @@ export class FactorioTicks extends LitElement {
 }
 
 @customElement('mapshot-listing')
-export class MapshotListing extends LitElement {
+class MapshotListing extends LitElement {
     @property({ type: Object })
     shots: common.ShotsJSON | undefined;
 
@@ -29,7 +30,7 @@ export class MapshotListing extends LitElement {
                 ${this.shots.all.map((save) => html`
                     <li>${save.savename}<ul>
                         ${save.versions.map((si) => html`
-                        <li><a href="?path=${si.path}">
+                        <li><a href="map?path=${si.path}">
                             <factorio-ticks .ticks=${si.ticks_played}></factorio-ticks>
                         </a></li>`)}
                     </ul></li>
@@ -38,3 +39,11 @@ export class MapshotListing extends LitElement {
         `;
     }
 }
+
+// ------ Bootstrap ------
+
+fetch('shots.json')
+    .then(resp => resp.json())
+    .then((shots: common.ShotsJSON) => {
+        render(html`<mapshot-listing .shots=${shots}>foo</mapshot-listing>`, document.body);
+    });

@@ -108,17 +108,18 @@ func findShots(baseDir string) ([]shotInfo, error) {
 // Server implements a server presenting available mapshots and serving their
 // content.
 type Server struct {
-	baseDir     string
-	frontendMux http.Handler
+	baseDir               string
+	listingMux, viewerMux http.Handler
 
 	m   sync.Mutex
 	mux *http.ServeMux
 }
 
-func newServer(baseDir string, frontendMux http.Handler) *Server {
+func newServer(baseDir string, listingMux, viewerMux http.Handler) *Server {
 	s := &Server{
-		baseDir:     baseDir,
-		frontendMux: frontendMux,
+		baseDir:    baseDir,
+		listingMux: listingMux,
+		viewerMux:  viewerMux,
 	}
 	s.updateMux()
 	return s
@@ -187,15 +188,14 @@ func (s *Server) updateMux() {
 	}
 
 	// Serve basic site.
-	mux.Handle("/", s.frontendMux)
+	mux.Handle("/", s.listingMux)
 	mux.HandleFunc("/shots.json", func(w http.ResponseWriter, req *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(jsonData)
 	})
 
-	// Keep /map/ for backward compatibility - it used to be the path for
-	// specific renders.
-	mux.Handle("/map/", http.StripPrefix("/map", s.frontendMux))
+	// Serve map viewer.
+	mux.Handle("/map/", http.StripPrefix("/map", s.viewerMux))
 
 	s.m.Lock()
 	defer s.m.Unlock()
@@ -229,7 +229,7 @@ It serves data from Factorio script-output directory.
 
 		baseDir := fact.ScriptOutput()
 		fmt.Printf("Serving data from %s\n", baseDir)
-		s := newServer(baseDir, builtinFrontendMux)
+		s := newServer(baseDir, builtinListingMux, builtinViewerMux)
 		go s.watch(cmd.Context())
 
 		addr := fmt.Sprintf(":%d", port)
@@ -238,29 +238,31 @@ It serves data from Factorio script-output directory.
 	},
 }
 
+func buildMux(files map[string]string) *http.ServeMux {
+	mux := http.NewServeMux()
+	for fname, content := range files {
+		fname := fname
+		content := content
+		mux.HandleFunc("/"+fname, func(w http.ResponseWriter, req *http.Request) {
+			b := bytes.NewReader([]byte(content))
+			http.ServeContent(w, req, fname, builtinModTime, b)
+		})
+		if fname == "index.html" {
+			mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
+				b := bytes.NewReader([]byte(content))
+				http.ServeContent(w, req, fname, builtinModTime, b)
+			})
+		}
+	}
+	return mux
+}
+
 var port int
-var builtinFrontendMux *http.ServeMux
+var builtinModTime = time.Now()
+var builtinListingMux = buildMux(embed.ListingFiles)
+var builtinViewerMux = buildMux(embed.ViewerFiles)
 
 func init() {
 	cmdServe.PersistentFlags().IntVar(&port, "port", 8080, "Port to listen on.")
 	cmdRoot.AddCommand(cmdServe)
-
-	modTime := time.Now()
-
-	// Build a mux to serve frontend files from embed/ module.
-	builtinFrontendMux = http.NewServeMux()
-	for fname, content := range embed.FrontendFiles {
-		fname := fname
-		content := content
-		builtinFrontendMux.HandleFunc("/"+fname, func(w http.ResponseWriter, req *http.Request) {
-			b := bytes.NewReader([]byte(content))
-			http.ServeContent(w, req, fname, modTime, b)
-		})
-		if fname == "index.html" {
-			builtinFrontendMux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-				b := bytes.NewReader([]byte(content))
-				http.ServeContent(w, req, fname, modTime, b)
-			})
-		}
-	}
 }

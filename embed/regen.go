@@ -49,7 +49,7 @@ func getVersion() string {
 	return version
 }
 
-func genLua(frontendFiles []*FileInfo, version, versionHash string) {
+func genLua(viewerFiles []*FileInfo, version, versionHash string) {
 	f, err := os.Create("mod/generated.lua")
 	if err != nil {
 		log.Fatal(err)
@@ -68,7 +68,7 @@ func genLua(frontendFiles []*FileInfo, version, versionHash string) {
 	writeLn(fmt.Sprintf("data.version_hash = %q", versionHash))
 	writeLn("data.files = {}")
 
-	for _, fi := range frontendFiles {
+	for _, fi := range viewerFiles {
 		key := filepath.Base(fi.Filename)
 
 		if fi.Binary {
@@ -123,7 +123,7 @@ func filenameToVar(fname string) string {
 	return "File" + s
 }
 
-func genGo(modFiles []*FileInfo, frontendFiles []*FileInfo, version string, versionHash string) {
+func genGo(modFiles, viewerFiles, listingFiles []*FileInfo, version string, versionHash string) {
 	f, err := os.Create("embed/generated.go")
 	if err != nil {
 		log.Fatal(err)
@@ -157,9 +157,18 @@ func genGo(modFiles []*FileInfo, frontendFiles []*FileInfo, version string, vers
 	writeLn("}")
 	writeLn("")
 
-	writeLn("// FrontendFiles is the files for the UI to navigate the mapshots.")
-	writeLn("var FrontendFiles = map[string]string{")
-	for _, fi := range frontendFiles {
+	writeLn("// ViewerFiles is the files for the UI to navigate a single mapshot (map view).")
+	writeLn("var ViewerFiles = map[string]string{")
+	for _, fi := range viewerFiles {
+		files = append(files, fi)
+		writeLn(fmt.Sprintf("\t%q: %s,", filepath.Base(fi.Filename), filenameToVar(fi.Filename)))
+	}
+	writeLn("}")
+	writeLn("")
+
+	writeLn("// ListingFiles is the files for the UI to navigate the list of mapshots.")
+	writeLn("var ListingFiles = map[string]string{")
+	for _, fi := range listingFiles {
 		files = append(files, fi)
 		writeLn(fmt.Sprintf("\t%q: %s,", filepath.Base(fi.Filename), filenameToVar(fi.Filename)))
 	}
@@ -301,11 +310,17 @@ func main() {
 
 	loader := newLoader()
 
-	frontendFiles := sortFiles(append(append(
-		loader.LoadTextGlob("frontend/dist/*.js", nil),
-		loader.LoadTextFile("frontend/dist/index.html"),
+	viewerFiles := sortFiles(append(append(
+		loader.LoadTextGlob("frontend/dist/viewer/*.js", nil),
+		loader.LoadTextFile("frontend/dist/viewer/index.html"),
 		loader.LoadBinaryFile("thumbnail.png"),
-	), loader.LoadTextGlob("frontend/dist/*.svg", nil)...))
+	), loader.LoadTextGlob("frontend/dist/viewer/*.svg", nil)...))
+
+	listingFiles := sortFiles(append(append(
+		loader.LoadTextGlob("frontend/dist/listing/*.js", nil),
+		loader.LoadTextFile("frontend/dist/listing/index.html"),
+		loader.LoadBinaryFile("thumbnail.png"),
+	)))
 
 	modFiles := sortFiles(append(
 		loader.LoadTextGlob("mod/*.lua", []string{"mod/generated.lua"}),
@@ -324,7 +339,7 @@ func main() {
 	fmt.Println("Version hash:", versionHash)
 
 	// Generate Lua file first as it will be embedded also in Go module files.
-	genLua(frontendFiles, version, versionHash)
+	genLua(viewerFiles, version, versionHash)
 	modFiles = append(modFiles, loader.LoadTextFile("mod/generated.lua"))
-	genGo(modFiles, frontendFiles, version, versionHash)
+	genGo(modFiles, viewerFiles, listingFiles, version, versionHash)
 }
