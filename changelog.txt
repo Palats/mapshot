@@ -1,11 +1,10 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.0.11
+Date: 2021.02.07
   UI:
-    - Listing of available mapshots is now dynamic, which will open for more options.
-    - Show available per save & chronological order.
     - Static link to the latest version of a save.
-  Changes:
-    - On the UI, `/map` path is not used anymore.
+    - Show available mapshots per save & chronological order.
+    - Listing of available mapshots is now dynamic, which will open for more options.
   Bugs:
     - Reduced occurrence of vertical/horizontal lines visible between tiles.
 
