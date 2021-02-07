@@ -28,7 +28,7 @@ class MapshotListing extends LitElement {
         return html`
             <ul>
                 ${this.shots.all.map((save) => html`
-                    <li>${save.savename}<ul>
+                    <li><a href="map?l=${save.savename}">${save.savename}</a><ul>
                         ${save.versions.map((si) => html`
                         <li><a href="map?path=${si.path}">
                             <factorio-ticks .ticks=${si.ticks_played}></factorio-ticks>

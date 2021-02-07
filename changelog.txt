@@ -3,6 +3,7 @@ Version: 0.0.11
   UI:
     - Listing of available mapshots is now dynamic, which will open for more options.
     - Show available per save & chronological order.
+    - Static link to the latest version of a save.
   Changes:
     - On the UI, `/map` path is not used anymore.
   Bugs:

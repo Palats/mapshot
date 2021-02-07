@@ -191,21 +191,34 @@ function run(config: common.MapshotConfig, info: common.MapshotJSON) {
 
 // ------ Bootstrap ------
 
+function load(config: common.MapshotConfig) {
+    console.log("Config", config);
+
+    fetch(config.path + 'mapshot.json')
+        .then(resp => resp.json())
+        .then((info: common.MapshotJSON) => {
+            console.log("Map info", info);
+            run(config, info);
+        });
+}
+
+
 // The name of the path to use by default is injected in the HTML.
 declare var MAPSHOT_CONFIG: common.MapshotConfig;
 
-const config = JSON.parse(JSON.stringify(MAPSHOT_CONFIG ?? {}));
-
 const params = new URLSearchParams(window.location.search);
-config.path = params.get("path") ?? config.path ?? "";
-if (!!config.path && config.path[config.path.length - 1] != "/") {
-    config.path = config.path + "/";
-}
-console.log("Config", config);
+if (params.get("l")) {
+    fetch("/latest/" + params.get("l"))
+        .then(resp => resp.json())
+        .then((config: common.MapshotConfig) => {
+            load(config);
+        });
+} else {
+    const config = JSON.parse(JSON.stringify(MAPSHOT_CONFIG ?? {}));
 
-fetch(config.path + 'mapshot.json')
-    .then(resp => resp.json())
-    .then((info: common.MapshotJSON) => {
-        console.log("Map info", info);
-        run(config, info);
-    });
+    config.path = params.get("path") ?? config.path ?? "";
+    if (!!config.path && config.path[config.path.length - 1] != "/") {
+        config.path = config.path + "/";
+    }
+    load(config);
+}

@@ -24,7 +24,8 @@ import (
 type shotInfo struct {
 	name string
 	// HTTP path were the tiles & data is served.
-	path     string
+	path string
+	// Name of the save. Always uses slashes.
 	savename string
 	json     *MapshotJSON
 	// Filesystem path of this mapshot.
@@ -53,6 +54,11 @@ type ShotsJSONInfo struct {
 type MapshotJSON struct {
 	// Many field omitted that are not used from go.
 	TicksPlayed int64 `json:"ticks_played,omitempty"`
+}
+
+// MapshotConfigJSON is a representation of the viewer configuration.
+type MapshotConfigJSON struct {
+	Path string `json:"path"`
 }
 
 func findShots(baseDir string) ([]shotInfo, error) {
@@ -88,11 +94,11 @@ func findShots(baseDir string) ([]shotInfo, error) {
 			glog.Infof("unable to get relative path of %q: %v", shotPath, err)
 			return nil
 		}
-		savename := filepath.Dir(relpath)
+		savename := filepath.ToSlash(filepath.Dir(relpath))
 
 		shots = append(shots, shotInfo{
 			fsPath:   shotPath,
-			name:     relpath,
+			name:     filepath.ToSlash(relpath),
 			savename: savename,
 			json:     mapshotData,
 			path:     "/data/" + filepath.ToSlash(relpath) + "/",
@@ -185,6 +191,27 @@ func (s *Server) updateMux() {
 	mux := http.NewServeMux()
 	for _, shot := range shots {
 		mux.Handle(shot.path, http.StripPrefix(shot.path, http.FileServer(http.Dir(shot.fsPath))))
+	}
+
+	// Serve pointer to latest
+	for _, versions := range data.All {
+		savename := versions.Savename
+		if len(versions.Versions) < 1 {
+			continue
+		}
+		latest := versions.Versions[0]
+
+		cfg := &MapshotConfigJSON{
+			Path: latest.Path,
+		}
+		jsonCfg, err := json.Marshal(cfg)
+		if err != nil {
+			glog.Errorf("unable to build mapshot config: %v", err)
+		}
+		mux.HandleFunc("/latest/"+savename, func(w http.ResponseWriter, req *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.Write(jsonCfg)
+		})
 	}
 
 	// Serve basic site.

@@ -138,6 +138,7 @@ In practice, if adding a caching layer in front of `./mapshot serve`, everything
 
 * `/` (not subpaths) is the mapshot view HTML and listing UI. It changes rarely - on every new release of the mod. Caching is likely fine for hours. Note: this is content from the `serve` command, not the html/js files generated in `script-output`.
 * `/shots.json` is the list of available mapshots. It changes content in place everytime a new one mapshot is created. Caching should probably be short term to allow to see new content.
+* `/latest/*` is information to link to the latest version of a given save. It can change when a new mapshot is created.
 * `/thumbnail.png` is used as a favicon. It might change in place in the future, but can be cached heavily as it is non-critical.
 
 ### Example
