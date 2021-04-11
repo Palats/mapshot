@@ -126,6 +126,15 @@ function mapshot(player, params)
     end
   end
 
+  local players = {}
+  for _, player in pairs(game.players) do
+    table.insert(players, {
+      name = player.name,
+      color = player.color,
+      position = player.position,
+    })
+  end
+
   -- Write metadata.
   game.write_file(data_prefix .. "mapshot.json", game.table_to_json({
     savename = params.savename,
@@ -137,11 +146,11 @@ function mapshot(player, params)
     render_size = render_size,
     world_min = world_min,
     world_max = world_max,
-    player = player.position,
     zoom_min = 0,
     zoom_max = tile_range_max - tile_range_min,
     seed = game.default_map_gen_settings.seed,
     map_exchange = game.get_map_exchange_string(),
+    players = players,
     stations = stations,
     tags = tags,
   }))
