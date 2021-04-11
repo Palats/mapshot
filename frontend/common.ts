@@ -4,6 +4,13 @@ export interface MapshotConfig {
     path?: string;
 }
 
+export interface FactorioColor {
+    a: number,
+    r: number,
+    g: number,
+    b: number,
+}
+
 export interface FactorioPosition {
     x: number,
     y: number,
@@ -17,6 +24,12 @@ export interface FactorioBoundingBox {
 export interface FactorioIcon {
     name: string,
     type: string,
+}
+
+export interface FactorioPlayer {
+    name: string,
+    position: FactorioPosition,
+    color: FactorioColor,
 }
 
 export interface FactorioStation {
@@ -63,8 +76,8 @@ export interface MapshotJSON {
     // Maximal available zoom level index (most detailed)
     zoom_max: number,
 
-    // Current position of the player.
-    player?: FactorioPosition,
+    // Lis of players.
+    players?: FactorioPlayer[] | {},
     // List of train stations.
     stations?: FactorioStation[] | {},
     // List of map tags.
