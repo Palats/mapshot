@@ -76,6 +76,8 @@ export interface MapshotJSON {
     // Maximal available zoom level index (most detailed)
     zoom_max: number,
 
+    // Current position of the player.
+    player?: FactorioPosition,
     // List of players.
     players?: FactorioPlayer[] | {},
     // List of train stations.

@@ -144,6 +144,10 @@ function run(config: common.MapshotConfig, info: common.MapshotJSON) {
         }
     }
 
+    if(info.player) {
+        debugLayers.push(L.marker(worldToLatLng(info.player.x, info.player.y), {title: "Player"}).bindPopup("Player"));
+    }
+
     debugLayers.push(
         L.marker(worldToLatLng(info.world_min.x, info.world_min.y), { title: `${info.world_min.x}, ${info.world_min.y}` }),
         L.marker(worldToLatLng(info.world_min.x, info.world_max.y), { title: `${info.world_min.x}, ${info.world_max.y}` }),
