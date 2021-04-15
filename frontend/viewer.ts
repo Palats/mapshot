@@ -127,9 +127,27 @@ function run(config: common.MapshotConfig, info: common.MapshotJSON) {
     const debugLayers = [
         L.marker([0, 0], { title: "Start" }).bindPopup("Starting point"),
     ]
-    if (info.player) {
-        debugLayers.push(L.marker(worldToLatLng(info.player.x, info.player.y), { title: "Player" }).bindPopup("Player"))
+
+    if (common.isIterable(info.players)) {
+        for (const player of info.players) {
+            debugLayers.push(
+                L.marker(
+                    worldToLatLng(player.position.x, player.position.y),
+                    {
+                        title: player.name,
+                        alt: `Player: ${player.name}`
+                    },
+                ).bindTooltip(player.name, {
+                    permanent: true
+                })
+            )
+        }
     }
+
+    if(info.player) {
+        debugLayers.push(L.marker(worldToLatLng(info.player.x, info.player.y), {title: "Player"}).bindPopup("Player"));
+    }
+
     debugLayers.push(
         L.marker(worldToLatLng(info.world_min.x, info.world_min.y), { title: `${info.world_min.x}, ${info.world_min.y}` }),
         L.marker(worldToLatLng(info.world_min.x, info.world_max.y), { title: `${info.world_min.x}, ${info.world_max.y}` }),
