@@ -104,7 +104,7 @@ function mapshot(player, params)
 
   -- Find train stations
   local stations = {}
-  for _, ent in ipairs(surface.find_entities_filtered({area=area, name="train-stop"})) do
+  for _, ent in ipairs(surface.find_entities_filtered({area=area, type="train-stop"})) do
     table.insert(stations, {
       backer_name = ent.backer_name,
       bounding_box = ent.bounding_box,
