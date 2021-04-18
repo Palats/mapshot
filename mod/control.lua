@@ -23,8 +23,8 @@ function build_params(player)
     params.prefix = params.prefix .. "/"
   end
 
-  params.tilemin = factorio_fit_zoom(params.resolution, params.tilemin, "tilemin", player)
-  params.tilemax = factorio_fit_zoom(params.resolution, params.tilemax, "tilemax", player)
+  params.tilemin = factorio_fit_zoom(params.resolution, params.tilemin, "tilemin")
+  params.tilemax = factorio_fit_zoom(params.resolution, params.tilemax, "tilemax")
 
   return params
 end
@@ -36,19 +36,19 @@ function factorio_zoom(render_size, tile_size)
   return render_size / 32 / tile_size
 end
 
-function factorio_fit_zoom(render_size, tile_size, name, player)
+function factorio_fit_zoom(render_size, tile_size, name)
   if (factorio_zoom(render_size, tile_size) < factorio_min_zoom) then
     local old = tile_size
     tile_size = render_size / 32 / factorio_min_zoom
     local msg = "Parameter " .. name .. " changed from " .. old .. " to " .. tile_size .. " to fit within Factorio minimal zoom of " .. factorio_min_zoom
-    player.print(msg)
+    game.print(msg)
     log(msg)
   end
   return tile_size
 end
 
 -- Generate a full map screenshot.
-function mapshot(player, params)
+function mapshot(params)
   log("mapshot params:\n" .. serpent.block(params))
 
   local unique_id = gen_unique_id()
@@ -60,7 +60,7 @@ function mapshot(player, params)
   local prefix = params.prefix .. savename .. "/"
   local data_dir = "d-" .. unique_id
   local data_prefix = prefix .. data_dir .. "/"
-  player.print("Mapshot '" .. prefix .. "' ...")
+  game.print("Mapshot '" .. prefix .. "' ...")
   log("Mapshot target " .. prefix)
   log("Mapshot data target " .. data_prefix)
   log("Mapshot unique id " .. unique_id)
@@ -86,10 +86,10 @@ function mapshot(player, params)
   end
   if chunk_count == 0 then
     log("no matching chunk")
-    player.print("No matching chunk")
+    game.print("No matching chunk")
     return
   end
-  player.print("Map: (" .. world_min.x .. ", " .. world_min.y .. ")-(" .. world_max.x .. ", " .. world_max.y .. ")")
+  game.print("Map: (" .. world_min.x .. ", " .. world_min.y .. ")-(" .. world_max.x .. ", " .. world_max.y .. ")")
   local area = {
     left_top = {world_min.x, world_min.y},
     right_bottom = {world_max.x, world_max.y},
@@ -171,21 +171,21 @@ function mapshot(player, params)
   for tile_range = tile_range_max, tile_range_min, -1 do
     local tile_size = math.pow(2, tile_range)
     local render_zoom = tile_range_max - tile_range
-    gen_layer(player, params, tile_size, render_size, world_min, world_max, data_prefix .. "zoom_" .. render_zoom .. "/")
+    gen_layer(params, tile_size, render_size, world_min, world_max, data_prefix .. "zoom_" .. render_zoom .. "/")
   end
 
-  player.print("Mapshot done at " .. data_prefix)
+  game.print("Mapshot done at " .. data_prefix)
   log("Mapshot done at " .. data_prefix)
 
   return data_prefix
 end
 
-function gen_layer(player, params, tile_size, render_size, world_min, world_max, data_prefix)
+function gen_layer(params, tile_size, render_size, world_min, world_max, data_prefix)
   local tile_min = { x = math.floor(world_min.x / tile_size), y = math.floor(world_min.y / tile_size) }
   local tile_max = { x = math.floor(world_max.x / tile_size), y = math.floor(world_max.y / tile_size) }
 
   local msg =  "Tile size " .. tile_size .. ": " .. (tile_max.x - tile_min.x + 1) * (tile_max.y - tile_min.y + 1) .. " tiles to generate"
-  player.print(msg)
+  game.print(msg)
   log(msg)
 
   for tile_y = tile_min.y, tile_max.y do
@@ -244,7 +244,7 @@ script.on_event(defines.events.on_tick, function(evt)
 
   if params.onstartup ~= "" then
     log("onstartup requested id=" .. params.onstartup)
-    local data_prefix = mapshot(player, params)
+    local data_prefix = mapshot(params)
 
     -- Ensure that screen shots are written before marking as done.
     game.set_wait_for_screenshots_to_finish()
@@ -273,5 +273,5 @@ commands.add_command("mapshot", "screenshot the whole map", function(evt)
   if evt.parameter ~= nil and #evt.parameter > 0 then
     params.savename = evt.parameter
   end
-  mapshot(player, params)
+  mapshot(params)
 end)
