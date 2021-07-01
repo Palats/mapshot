@@ -26,22 +26,25 @@ const (
 	ModsDir = "mods"
 	// SavesDir is the datadir subdirectory for game saves.
 	SavesDir = "saves"
-	// ScriptOutput is the datadir subdir for where mods can write data.
-	ScriptOutput = "script-output"
 )
 
 // Factorio offers methods to manipulate a Factorio install.
 type Factorio struct {
-	datadir     string
-	binary      string
-	verbose     bool
-	keepRunning bool
-	extraArgs   []string
+	datadir      string
+	scriptOutput string
+	binary       string
+	verbose      bool
+	keepRunning  bool
+	extraArgs    []string
 }
 
 // New creates a new Factorio instance from the settings.
 func New(s *Settings) (*Factorio, error) {
-	datadir, err := s.DataDir()
+	datadir := s.DataDir()
+	if datadir == "" {
+		return nil, fmt.Errorf("no factorio data dir found; use --alsologtostderr for more info and --%sdatadir to specify its location", s.flagPrefix)
+	}
+	scriptOutput, err := s.ScriptOutput()
 	if err != nil {
 		return nil, err
 	}
@@ -58,11 +61,12 @@ func New(s *Settings) (*Factorio, error) {
 		}
 	}
 	return &Factorio{
-		datadir:     datadir,
-		binary:      binary,
-		verbose:     s.verbose,
-		extraArgs:   extraArgs,
-		keepRunning: s.keepRunning,
+		datadir:      datadir,
+		scriptOutput: scriptOutput,
+		binary:       binary,
+		verbose:      s.verbose,
+		extraArgs:    extraArgs,
+		keepRunning:  s.keepRunning,
 	}, nil
 }
 
@@ -88,7 +92,7 @@ func (f *Factorio) ModsDir() string {
 
 // ScriptOutput is the place where mods can write data.
 func (f *Factorio) ScriptOutput() string {
-	return filepath.Join(f.DataDir(), ScriptOutput)
+	return f.scriptOutput
 }
 
 // FindSaveFile try to find the savegame with the given name. It will look in
@@ -220,18 +224,20 @@ func (f *Factorio) CopyMods(dstMods string, filterOut []string) error {
 
 // Settings for creating a Factorio helper instance.
 type Settings struct {
-	flagPrefix  string
-	datadir     string
-	binary      string
-	verbose     bool
-	keepRunning bool
-	extraArgs   string
+	flagPrefix   string
+	datadir      string
+	scriptOutput string
+	binary       string
+	verbose      bool
+	keepRunning  bool
+	extraArgs    string
 }
 
 // Register add flags to configure how to call Factorio on the flagset.
 func (s *Settings) Register(flags *pflag.FlagSet, prefix string) *Settings {
 	s.flagPrefix = prefix
 	flags.StringVar(&s.datadir, prefix+"datadir", "", "Path to factorio data dir. Tries default locations if empty.")
+	flags.StringVar(&s.scriptOutput, prefix+"scriptoutput", "", "Path to factorio script-output dir. If unspecified, uses <datadir>/script-output.")
 	flags.StringVar(&s.binary, prefix+"binary", "", "Path to factorio binary. Tries default locations if empty.")
 	flags.BoolVar(&s.verbose, prefix+"verbose", false, "If true, stream Factorio stdout/stderr to the console.")
 	flags.BoolVar(&s.keepRunning, prefix+"keep_running", false, "If true, wait for Factorio to exit instead of stopping it.")
@@ -240,7 +246,8 @@ func (s *Settings) Register(flags *pflag.FlagSet, prefix string) *Settings {
 }
 
 // DataDir returns the place where saves, mods and others are located.
-func (s *Settings) DataDir() (string, error) {
+// Returns "" if no directory is found.
+func (s *Settings) DataDir() string {
 	// List is in reverse order of priority - last one will be preferred.
 	candidates := []string{
 		`/opt/factorio`,
@@ -275,12 +282,36 @@ func (s *Settings) DataDir() (string, error) {
 		glog.Infof("Found factorio data dir: %s", s)
 		match = s
 	}
-	if s == nil {
+	if match == "" {
 		glog.Infof("No Factorio data dir found")
-		return "", fmt.Errorf("no factorio data dir found; use --alsologtostderr for more info and --%sdatadir to specify its location", s.flagPrefix)
+		return ""
 	}
 	glog.Infof("Using Factorio data dir: %s", match)
-	return match, nil
+	return match
+}
+
+// ScriptOutput returns the Factorio script-output directory.
+func (s *Settings) ScriptOutput() (string, error) {
+	if s.scriptOutput == "" {
+		dataDir := s.DataDir()
+		if dataDir == "" {
+			return "", fmt.Errorf("no factorio data dir found; use --alsologtostderr for more info; use --%sscriptoutput to specify directly the script-output location", s.flagPrefix)
+		}
+		// Don't check extra subpath when using the default script-output
+		// location - Factorio might not have created it by default, and not
+		// everything requires to have it.
+		return filepath.Join(dataDir, "script-output"), nil
+	}
+
+	d := s.scriptOutput
+	info, err := os.Stat(d)
+	if os.IsNotExist(err) {
+		return "", fmt.Errorf("script-output dir %s does not exists", d)
+	}
+	if !info.IsDir() {
+		return "", fmt.Errorf("script-output path %s is a file, not a directory", d)
+	}
+	return d, nil
 }
 
 // Binary returns the path to the Factorio binary.

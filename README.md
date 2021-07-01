@@ -93,7 +93,7 @@ The CLI can be used to serve the mapshots:
 ./mapshot serve
 ```
 
-By default, it serves on port 8080 - thus accessible at http://localhost:8080 if it is running on your local machine. It serves all the mapshots available in the `script-output` directory of Factorio. It provides a very basic list of available mapshots and refreshes this list every few seconds. (Note: it uses frontend code built into the binary. It ignores the frontend files such as `index.html` and Javascript files present next to the mapshots.)
+By default, it serves on port 8080 - thus accessible at http://localhost:8080 if it is running on your local machine. It serves all the mapshots available in the `script-output` directory of Factorio. Directory can be overriden using flag `--factorio_scriptoutput`. It provides a very basic list of available mapshots and refreshes this list every few seconds. (Note: it uses frontend code built into the binary. It ignores the frontend files such as `index.html` and Javascript files present next to the mapshots.)
 
 The generated content has static frontend code generated next to the images. This means you can also serve the content through any HTTP server (e.g., `python3 -m http.server 8080` from the `script-output` directory) or your favorite web file hosting.
 

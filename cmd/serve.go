@@ -15,7 +15,6 @@ import (
 	"time"
 
 	"github.com/Palats/mapshot/embed"
-	"github.com/Palats/mapshot/factorio"
 	"github.com/golang/glog"
 	"github.com/spf13/cobra"
 )
@@ -249,12 +248,10 @@ It serves data from Factorio script-output directory.
 	`,
 	Args: cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fact, err := factorio.New(factorioSettings)
+		baseDir, err := factorioSettings.ScriptOutput()
 		if err != nil {
 			return err
 		}
-
-		baseDir := fact.ScriptOutput()
 		fmt.Printf("Serving data from %s\n", baseDir)
 		s := newServer(baseDir, builtinListingMux, builtinViewerMux)
 		go s.watch(cmd.Context())
