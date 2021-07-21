@@ -72,6 +72,8 @@ Parameters:
 
 ### Headless server
 
+NOTE: This is hacky and you need some familiarity with Linux; also, you are mostly on your own.
+
 Mapshot requires a running Factorio with UI to do the rendering - this is a constraint of Factorio itself. On Linux, this means a X server must be available. On a Linux headless server, it is still possible to do renders using [Xvfb](https://en.wikipedia.org/wiki/Xvfb).
 
 On Ubuntu, Xvfb can be installed through `apt-get install xvfb`. Once you have it installed, you can create a mapshot by running the command through `xvfb-run`; for example:
@@ -84,6 +86,7 @@ It can be a bit fiddly with OpenGL; a few tips:
 * Make sure you have a recent version of Xvfb / distro. For example, on Ubuntu 18.04 there are issues with OpenGL, while it works fine on Ubuntu 20.04.
 * I had some success running it in Docker, using an Ubuntu 20.04 image.
 * https://github.com/Palats/mapshot/issues/8 has a suggestion using virtualgl.
+* For Factorio 1.1.36 (and probably later, until fixed), https://github.com/Palats/mapshot/issues/16#issuecomment-883306221 has a suggested solution.
 
 ## Serving the maps
 
