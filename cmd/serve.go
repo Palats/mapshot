@@ -47,12 +47,14 @@ type ShotsJSONInfo struct {
 	Name        string `json:"name,omitempty"`
 	Path        string `json:"path,omitempty"`
 	TicksPlayed int64  `json:"ticks_played,omitempty"`
+	Surface     string `json:"surface,omitempty"`
 }
 
 // MapshotJSON is a partial representation of the content of mapshot.json.
 type MapshotJSON struct {
 	// Many field omitted that are not used from go.
-	TicksPlayed int64 `json:"ticks_played,omitempty"`
+	Surface     string `json:"surface,omitempty"`
+	TicksPlayed int64  `json:"ticks_played,omitempty"`
 }
 
 // MapshotConfigJSON is a representation of the viewer configuration.
@@ -170,6 +172,7 @@ func (s *Server) updateMux() {
 		kwShots[shot.savename].Versions = append(kwShots[shot.savename].Versions, &ShotsJSONInfo{
 			Name:        shot.name,
 			Path:        shot.path,
+			Surface:     shot.json.Surface,
 			TicksPlayed: shot.json.TicksPlayed,
 		})
 	}

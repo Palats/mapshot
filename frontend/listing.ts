@@ -77,7 +77,7 @@ class MapshotListing extends LitElement {
                             ${save.versions.map((si) => html`
                                 <li>
                                     <a href="map?path=${si.path}"><factorio-relticks .ticks=${si.ticks_played} .refticks=${save.versions[0].ticks_played}></factorio-relticks></a>
-                                    (<factorio-ticks .ticks=${si.ticks_played}></factorio-ticks>)
+                                    (Surface: ${si.surface ? si.surface : "nauvis"}; <factorio-ticks .ticks=${si.ticks_played}></factorio-ticks>)
                                 </li>`)}
                         </ul>
                     </div>

@@ -67,6 +67,7 @@ Parameters:
 * _Prefix to add to all generated filenames._ (`prefix`) : Mapshot will prefix all files it creates with that value. Factorio mods only allow writing within `script-output` subdirectory of Factorio data dir; the prefix is relative to that directory.
 * _Pixel size for generated tiles._ (`resolution`) : Size in pixels for the generated images. There is not a lot of reasons to change this value - if you want more or less details, change `tilemin`.
 * _Pixel size for generated tiles._ (`jpgquality`) : Compression quality for the generated image.
+* _Surface name._ (`surface`) : Which game surface to generate, defaulting to `nauvis`. Useful only with some mods, such as Space Exploration.
 
 *Warning: the generation time & disk usage increases very quickly. At maximum resolution, it will take forever to generate and use up several gigabytes of space.*
 

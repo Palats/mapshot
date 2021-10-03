@@ -27,6 +27,7 @@ type RenderFlags struct {
 	prefix     string
 	resolution int64
 	jpgquality int64
+	surface    string
 }
 
 // Register creates flags for the rendering parameters.
@@ -37,6 +38,7 @@ func (rf *RenderFlags) Register(flags *pflag.FlagSet, prefix string) *RenderFlag
 	flags.StringVar(&rf.prefix, prefix+"prefix", "", "Prefix to add to all generated filenames. If empty, use value from the game.")
 	flags.Int64Var(&rf.resolution, prefix+"resolution", 0, "Pixel size for generated tiles. If 0, use value from the game.")
 	flags.Int64Var(&rf.jpgquality, prefix+"jpgquality", 0, "Compression quality for jpg files. If 0, use value from the game.")
+	flags.StringVar(&rf.surface, prefix+"surface", "", "Game surface to render. If empty, use value from the game.")
 	return rf
 }
 
@@ -59,6 +61,9 @@ func (rf *RenderFlags) genOverrides() map[string]interface{} {
 	}
 	if rf.jpgquality != 0 {
 		ov["jpqquality"] = rf.jpgquality
+	}
+	if rf.surface != "" {
+		ov["surface"] = rf.surface
 	}
 	return ov
 }
@@ -145,8 +150,7 @@ func render(ctx context.Context, factorioSettings *factorio.Settings, rf *Render
 	}
 
 	// Remove done marker if still present
-	var doneFile string
-	doneFile = filepath.Join(fact.ScriptOutput(), "mapshot-done-"+runID)
+	doneFile := filepath.Join(fact.ScriptOutput(), "mapshot-done-"+runID)
 	err = os.Remove(doneFile)
 	glog.Infof("removed done-file %q: %v", doneFile, err)
 

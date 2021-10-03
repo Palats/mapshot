@@ -15,6 +15,10 @@ function build_params(player)
     params[k] = v.value
   end
 
+  if (params.surface == nil or params.surface == "") then
+    params.surface = "nauvis"
+  end
+
   for k,v in pairs(game.json_to_table(overrides)) do
     params[k] = v
   end
@@ -51,7 +55,7 @@ end
 function mapshot(params)
   log("mapshot params:\n" .. serpent.block(params))
 
-  local unique_id = gen_unique_id()
+  local unique_id = gen_unique_id(params)
   local map_id = gen_map_id()
   local savename = params.savename
   if (savename == nil or #savename == 0) then
@@ -65,7 +69,11 @@ function mapshot(params)
   log("Mapshot data target " .. data_prefix)
   log("Mapshot unique id " .. unique_id)
 
-  local surface = game.surfaces["nauvis"]
+  for name, _ in pairs(game.surfaces) do
+    log("Available surface: " .. name)
+  end
+  log("Using surface: " .. params.surface)
+  local surface = game.surfaces[params.surface]
 
   -- Determine map min & max world coordinates based on existing chunks.
   local world_min = { x = 2^30, y = 2^30 }
@@ -140,6 +148,7 @@ function mapshot(params)
     savename = params.savename,
     unique_id = unique_id,
     map_id = map_id,
+    surface = params.surface,
     tick = game.tick,
     ticks_played = game.ticks_played,
     tile_size = math.pow(2, tile_range_max),
@@ -171,7 +180,7 @@ function mapshot(params)
   for tile_range = tile_range_max, tile_range_min, -1 do
     local tile_size = math.pow(2, tile_range)
     local render_zoom = tile_range_max - tile_range
-    gen_layer(params, tile_size, render_size, world_min, world_max, data_prefix .. "zoom_" .. render_zoom .. "/")
+    gen_layer(params, tile_size, render_size, world_min, world_max, data_prefix .. "zoom_" .. render_zoom .. "/", surface)
   end
 
   game.print("Mapshot done at " .. data_prefix)
@@ -180,7 +189,7 @@ function mapshot(params)
   return data_prefix
 end
 
-function gen_layer(params, tile_size, render_size, world_min, world_max, data_prefix)
+function gen_layer(params, tile_size, render_size, world_min, world_max, data_prefix, surface)
   local tile_min = { x = math.floor(world_min.x / tile_size), y = math.floor(world_min.y / tile_size) }
   local tile_max = { x = math.floor(world_max.x / tile_size), y = math.floor(world_max.y / tile_size) }
 
@@ -192,6 +201,7 @@ function gen_layer(params, tile_size, render_size, world_min, world_max, data_pr
     for tile_x = tile_min.x, tile_max.x do
       local top_left = { x = tile_x * tile_size, y = tile_y * tile_size }
       game.take_screenshot{
+        surface = surface,
         position = {
           x = top_left.x + tile_size / 2,
           y = top_left.y + tile_size / 2,
@@ -210,8 +220,8 @@ function gen_layer(params, tile_size, render_size, world_min, world_max, data_pr
 end
 
 -- Create a unique ID of the generated mapshot.
-function gen_unique_id()
-  local data = generated.version_hash .. " " .. tostring(game.tick) .. " " .. game.get_map_exchange_string()
+function gen_unique_id(params)
+  local data = generated.version_hash .. " " .. tostring(game.tick) .. " " .. game.get_map_exchange_string() .. " " .. params.surface
   -- sha256 produces 64 digits. We're not looking for crypto secure hashing, and instead
   -- just a short unique string - so pick up a subset.
   local idx = 10

@@ -63,6 +63,8 @@ export interface MapshotJSON {
     map_exchange?: string,
     // A short ID of the map, derived from map_exchange.
     map_id: string,
+    // The name of the game surface that was rendered.
+    surface: string,
 
     // Size of a tile in in-game units for the least detailed layer.
     tile_size: number,
@@ -100,6 +102,7 @@ export interface ShotsJSONInfo {
     name: string;
     path: string;
     ticks_played: number;
+    surface: string;
 }
 
 export function parseNumber(v: any, defvalue: number): number {
