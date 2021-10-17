@@ -60,6 +60,15 @@ data:extend({
         localised_description = "Compression quality for jpg files.",
         order = "201",
     },
+    {
+        type = "string-setting",
+        name = "surface",
+        setting_type = "runtime-per-user",
+        default_value = "_all_",
+        localised_name = "Surface",
+        localised_description = "Name of the game surface to render. If set to _all_, render all surfaces.",
+        order = "301",
+    },
 
     -- following settings are largely internal, for driving
     -- from CLI.

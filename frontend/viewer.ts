@@ -47,8 +47,22 @@ function leafletHack() {
 leafletHack();
 
 function run(config: common.MapshotConfig, info: common.MapshotJSON) {
+    const queryParams = new URLSearchParams(window.location.search);
+    // For now, only very very minimal support for selecting the surface - no UI.
+    let surface = info.surfaces[0];
+    if (queryParams.has("s")) {
+        const k = queryParams.get("s");
+        const idx = Number(k);  // can be NaN when specifying surface names.
+        for (const si of info.surfaces) {
+            if (si.surface_idx == idx || si.surface_name == k) {
+                surface = si;
+                break;
+            }
+        }
+    }
+
     const worldToLatLng = function (x: number, y: number) {
-        const ratio = info.render_size / info.tile_size;
+        const ratio = surface.render_size / surface.tile_size;
         return L.latLng(
             -y * ratio,
             x * ratio
@@ -56,7 +70,7 @@ function run(config: common.MapshotConfig, info: common.MapshotJSON) {
     };
 
     const latLngToWorld = function (l: L.LatLng) {
-        const ratio = info.tile_size / info.render_size;
+        const ratio = surface.tile_size / surface.render_size;
         return {
             x: l.lng * ratio,
             y: -l.lat * ratio,
@@ -70,17 +84,17 @@ function run(config: common.MapshotConfig, info: common.MapshotJSON) {
         );
     }
 
-    const baseLayer = L.tileLayer(config.path + "zoom_{z}/tile_{x}_{y}.jpg", {
-        tileSize: info.render_size,
+    const baseLayer = L.tileLayer(config.path + surface.file_prefix + "{z}/tile_{x}_{y}.jpg", {
+        tileSize: surface.render_size,
         bounds: L.latLngBounds(
-            worldToLatLng(info.world_min.x, info.world_min.y),
-            worldToLatLng(info.world_max.x, info.world_max.y),
+            worldToLatLng(surface.world_min.x, surface.world_min.y),
+            worldToLatLng(surface.world_max.x, surface.world_max.y),
         ),
         noWrap: true,
-        maxNativeZoom: info.zoom_max,
-        minNativeZoom: info.zoom_min,
-        minZoom: info.zoom_min - 4,
-        maxZoom: info.zoom_max + 4,
+        maxNativeZoom: surface.zoom_max,
+        minNativeZoom: surface.zoom_min,
+        minZoom: surface.zoom_min - 4,
+        maxZoom: surface.zoom_max + 4,
     });
 
     const mymap = L.map('content', {
@@ -101,8 +115,8 @@ function run(config: common.MapshotConfig, info: common.MapshotJSON) {
 
     // Layer: train stations
     let stationsLayers = [];
-    if (common.isIterable(info.stations)) {
-        for (const station of info.stations) {
+    if (common.isIterable(surface.stations)) {
+        for (const station of surface.stations) {
             stationsLayers.push(L.marker(
                 midPointToLatLng(station.bounding_box),
                 { title: station.backer_name },
@@ -113,8 +127,8 @@ function run(config: common.MapshotConfig, info: common.MapshotJSON) {
 
     // Layer: tags
     let tagsLayers = [];
-    if (common.isIterable(info.tags)) {
-        for (const tag of info.tags) {
+    if (common.isIterable(surface.tags)) {
+        for (const tag of surface.tags) {
             tagsLayers.push(L.marker(
                 worldToLatLng(tag.position.x, tag.position.y),
                 { title: `${tag.force_name}: ${tag.text}` },
@@ -128,8 +142,8 @@ function run(config: common.MapshotConfig, info: common.MapshotJSON) {
         L.marker([0, 0], { title: "Start" }).bindPopup("Starting point"),
     ]
 
-    if (common.isIterable(info.players)) {
-        for (const player of info.players) {
+    if (common.isIterable(surface.players)) {
+        for (const player of surface.players) {
             debugLayers.push(
                 L.marker(
                     worldToLatLng(player.position.x, player.position.y),
@@ -144,15 +158,15 @@ function run(config: common.MapshotConfig, info: common.MapshotJSON) {
         }
     }
 
-    if(info.player) {
-        debugLayers.push(L.marker(worldToLatLng(info.player.x, info.player.y), {title: "Player"}).bindPopup("Player"));
+    if (surface.player) {
+        debugLayers.push(L.marker(worldToLatLng(surface.player.x, surface.player.y), { title: "Player" }).bindPopup("Player"));
     }
 
     debugLayers.push(
-        L.marker(worldToLatLng(info.world_min.x, info.world_min.y), { title: `${info.world_min.x}, ${info.world_min.y}` }),
-        L.marker(worldToLatLng(info.world_min.x, info.world_max.y), { title: `${info.world_min.x}, ${info.world_max.y}` }),
-        L.marker(worldToLatLng(info.world_max.x, info.world_min.y), { title: `${info.world_max.x}, ${info.world_min.y}` }),
-        L.marker(worldToLatLng(info.world_max.x, info.world_max.y), { title: `${info.world_max.x}, ${info.world_max.y}` }),
+        L.marker(worldToLatLng(surface.world_min.x, surface.world_min.y), { title: `${surface.world_min.x}, ${surface.world_min.y}` }),
+        L.marker(worldToLatLng(surface.world_min.x, surface.world_max.y), { title: `${surface.world_min.x}, ${surface.world_max.y}` }),
+        L.marker(worldToLatLng(surface.world_max.x, surface.world_min.y), { title: `${surface.world_max.x}, ${surface.world_min.y}` }),
+        L.marker(worldToLatLng(surface.world_max.x, surface.world_max.y), { title: `${surface.world_max.x}, ${surface.world_max.y}` }),
     );
     registerLayer("ld", "Debug", L.layerGroup(debugLayers));
 
@@ -162,7 +176,6 @@ function run(config: common.MapshotConfig, info: common.MapshotJSON) {
     }).addTo(mymap);
 
     // Set original view (position/zoom/layers).
-    const queryParams = new URLSearchParams(window.location.search);
     let x = common.parseNumber(queryParams.get("x"), 0);
     let y = common.parseNumber(queryParams.get("y"), 0);
     let z = common.parseNumber(queryParams.get("z"), 0);
@@ -215,6 +228,30 @@ function load(config: common.MapshotConfig) {
     fetch(config.path + 'mapshot.json')
         .then(resp => resp.json())
         .then((info: common.MapshotJSON) => {
+            // Backward compatibility - try to load mapshot.json from data before
+            // support for multiple surfaces.
+
+            if (info.surfaces === undefined) {
+                // No surfaces defined, that's an old format.
+                const raw = info as any;
+                info.surfaces = [{
+                    surface_name: "nauvis",
+                    surface_idx: 1,
+                    file_prefix: "zoom_",
+
+                    tile_size: raw.tile_size,
+                    render_size: raw.render_size,
+                    world_min: raw.world_min,
+                    world_max: raw.world_max,
+                    zoom_min: raw.zoom_min,
+                    zoom_max: raw.zoom_max,
+                    player: raw.player,
+                    players: raw.players,
+                    stations: raw.stations,
+                    tags: raw.tags,
+                }];
+            }
+
             console.log("Map info", info);
             run(config, info);
         });

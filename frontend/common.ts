@@ -64,6 +64,20 @@ export interface MapshotJSON {
     // A short ID of the map, derived from map_exchange.
     map_id: string,
 
+    // Rendering info per surface.
+    surfaces: MapshotSurfaceJSON[];
+}
+
+// Information about a single exported rendered surface.
+export interface MapshotSurfaceJSON {
+    // The name of the game surface that was rendered.
+    surface_name: string,
+    // The in-game index of that surface.
+    surface_idx: number,
+
+    // Prefix for where to find the tile file.
+    file_prefix: string,
+
     // Size of a tile in in-game units for the least detailed layer.
     tile_size: number,
     // Size of a tile, in pixels.

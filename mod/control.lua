@@ -5,6 +5,8 @@ local hash = require("hash")
 
 local factorio_min_zoom = 0.031250
 
+local all_surfaces = "_all_"
+
 -- Read all settings and update the params var, incl. overrides.
 function build_params(player)
   local params = {}
@@ -13,6 +15,10 @@ function build_params(player)
   local s = settings.get_player_settings(player)
   for k, v in pairs(s) do
     params[k] = v.value
+  end
+
+  if (params.surface == nil or params.surface == "") then
+    params.surface = all_surfaces
   end
 
   for k,v in pairs(game.json_to_table(overrides)) do
@@ -65,8 +71,52 @@ function mapshot(params)
   log("Mapshot data target " .. data_prefix)
   log("Mapshot unique id " .. unique_id)
 
-  local surface = game.surfaces["nauvis"]
+  local surface_infos = {}
+  for _, surface in pairs(game.surfaces) do
+    log("Available surface: " .. surface.index .. " " .. surface.name)
+    table.insert(surface_infos, gen_surface_info(params, surface))
+  end
 
+  -- Write metadata.
+  game.write_file(data_prefix .. "mapshot.json", game.table_to_json({
+    savename = params.savename,
+    unique_id = unique_id,
+    map_id = map_id,
+    tick = game.tick,
+    ticks_played = game.ticks_played,
+    seed = game.default_map_gen_settings.seed,
+    map_exchange = game.get_map_exchange_string(),
+    surfaces = surface_infos,
+  }))
+
+  -- Create the serving html.
+  for fname, contentfunc in pairs(generated.files) do
+    local content = contentfunc()
+    if (fname == "index.html") then
+      local config = {
+        path = data_dir,
+      }
+      content = string.gsub(content, "__MAPSHOT_CONFIG_TOKEN__", game.table_to_json(config))
+    end
+    local r = game.write_file(prefix .. fname, content)
+  end
+
+  -- Generate all the tiles.
+  for _, surface_info in ipairs(surface_infos) do
+    for render_zoom = surface_info.zoom_min, surface_info.zoom_max do
+      local tile_size = surface_info.tile_size / math.pow(2, render_zoom)
+      local layer_prefix = data_prefix .. surface_info.file_prefix .. render_zoom .. "/"
+      gen_layer(params, tile_size, surface_info.render_size, surface_info.world_min, surface_info.world_max, layer_prefix, game.surfaces[surface_info.surface_idx])
+    end
+  end
+
+  game.print("Mapshot done at " .. data_prefix)
+  log("Mapshot done at " .. data_prefix)
+
+  return data_prefix
+end
+
+function gen_surface_info(params, surface)
   -- Determine map min & max world coordinates based on existing chunks.
   local world_min = { x = 2^30, y = 2^30 }
   local world_max = { x = -2^30, y = -2^30 }
@@ -128,59 +178,33 @@ function mapshot(params)
 
   local players = {}
   for _, player in pairs(game.players) do
-    table.insert(players, {
-      name = player.name,
-      color = player.color,
-      position = player.position,
-    })
+    -- Make sure the player is on the current surface.
+    if player.surface == surface then
+      table.insert(players, {
+        name = player.name,
+        color = player.color,
+        position = player.position,
+      })
+    end
   end
 
-  -- Write metadata.
-  game.write_file(data_prefix .. "mapshot.json", game.table_to_json({
-    savename = params.savename,
-    unique_id = unique_id,
-    map_id = map_id,
-    tick = game.tick,
-    ticks_played = game.ticks_played,
+  return {
+    surface_name = surface.name,
+    surface_idx = surface.index,
+    file_prefix = "s" .. surface.index .. "zoom_",
     tile_size = math.pow(2, tile_range_max),
     render_size = render_size,
     world_min = world_min,
     world_max = world_max,
     zoom_min = 0,
     zoom_max = tile_range_max - tile_range_min,
-    seed = game.default_map_gen_settings.seed,
-    map_exchange = game.get_map_exchange_string(),
     players = players,
     stations = stations,
     tags = tags,
-  }))
-
-  -- Create the serving html.
-  for fname, contentfunc in pairs(generated.files) do
-    local content = contentfunc()
-    if (fname == "index.html") then
-      local config = {
-        path = data_dir,
-      }
-      content = string.gsub(content, "__MAPSHOT_CONFIG_TOKEN__", game.table_to_json(config))
-    end
-    local r = game.write_file(prefix .. fname, content)
-  end
-
-  -- Generate all the tiles.
-  for tile_range = tile_range_max, tile_range_min, -1 do
-    local tile_size = math.pow(2, tile_range)
-    local render_zoom = tile_range_max - tile_range
-    gen_layer(params, tile_size, render_size, world_min, world_max, data_prefix .. "zoom_" .. render_zoom .. "/")
-  end
-
-  game.print("Mapshot done at " .. data_prefix)
-  log("Mapshot done at " .. data_prefix)
-
-  return data_prefix
+  }
 end
 
-function gen_layer(params, tile_size, render_size, world_min, world_max, data_prefix)
+function gen_layer(params, tile_size, render_size, world_min, world_max, data_prefix, surface)
   local tile_min = { x = math.floor(world_min.x / tile_size), y = math.floor(world_min.y / tile_size) }
   local tile_max = { x = math.floor(world_max.x / tile_size), y = math.floor(world_max.y / tile_size) }
 
@@ -192,6 +216,7 @@ function gen_layer(params, tile_size, render_size, world_min, world_max, data_pr
     for tile_x = tile_min.x, tile_max.x do
       local top_left = { x = tile_x * tile_size, y = tile_y * tile_size }
       game.take_screenshot{
+        surface = surface,
         position = {
           x = top_left.x + tile_size / 2,
           y = top_left.y + tile_size / 2,
