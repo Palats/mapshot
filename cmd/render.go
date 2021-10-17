@@ -32,7 +32,7 @@ type RenderFlags struct {
 
 // Register creates flags for the rendering parameters.
 func (rf *RenderFlags) Register(flags *pflag.FlagSet, prefix string) *RenderFlags {
-	flags.StringVar(&rf.area, prefix+"area", "", "How to pick the area to render. `all`=all existing chunks; `entities`=chunks including artifical build. If empty, use value from the game.")
+	flags.StringVar(&rf.area, prefix+"area", "", "How to pick the area to render. all=all existing chunks; entities=chunks including artifical build. If empty, use value from the game.")
 	flags.Int64Var(&rf.tilemin, prefix+"tilemin", 0, "Size in in-game units of a tile for the most zoomed layer. If 0, use value from the game.")
 	flags.Int64Var(&rf.tilemax, prefix+"tilemax", 0, "Size in in-game units of a tile for the least zoomed layer. If 0, use value from the game.")
 	flags.StringVar(&rf.prefix, prefix+"prefix", "", "Prefix to add to all generated filenames. If empty, use value from the game.")

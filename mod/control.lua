@@ -74,7 +74,10 @@ function mapshot(params)
   local surface_infos = {}
   for _, surface in pairs(game.surfaces) do
     log("Available surface: " .. surface.index .. " " .. surface.name)
-    table.insert(surface_infos, gen_surface_info(params, surface))
+    local si = gen_surface_info(params, surface)
+    if si then
+      table.insert(surface_infos, si)
+    end
   end
 
   -- Write metadata.
@@ -118,21 +121,40 @@ end
 
 function gen_surface_info(params, surface)
   -- Determine map min & max world coordinates based on existing chunks.
+  -- When requested to match only entities, fallback using all chunks
+  -- if no entities are found at all.
+  local try_ent_only = params.area == "entities"
   local world_min = { x = 2^30, y = 2^30 }
   local world_max = { x = -2^30, y = -2^30 }
   local chunk_count = 0
+  local ent_world_min = { x = 2^30, y = 2^30 }
+  local ent_world_max = { x = -2^30, y = -2^30 }
+  local ent_chunk_count = 0
   for chunk in surface.get_chunks() do
-    local c = surface.is_chunk_generated(chunk)
-    if params.area == "entities" then
-      c = c and surface.count_entities_filtered({ area = chunk.area, limit = 1, type = entities.includes}) > 0
-    end
-    if c then
+    local in_all = surface.is_chunk_generated(chunk)
+    if in_all then
       world_min.x = math.min(world_min.x, chunk.area.left_top.x)
       world_min.y = math.min(world_min.y, chunk.area.left_top.y)
       world_max.x = math.max(world_max.x, chunk.area.right_bottom.x)
       world_max.y = math.max(world_max.y, chunk.area.right_bottom.y)
       chunk_count = chunk_count + 1
+
+      if try_ent_only then
+        in_ent = surface.count_entities_filtered({ area = chunk.area, limit = 1, type = entities.includes}) > 0
+        if in_ent then
+          ent_world_min.x = math.min(ent_world_min.x, chunk.area.left_top.x)
+          ent_world_min.y = math.min(ent_world_min.y, chunk.area.left_top.y)
+          ent_world_max.x = math.max(ent_world_max.x, chunk.area.right_bottom.x)
+          ent_world_max.y = math.max(ent_world_max.y, chunk.area.right_bottom.y)
+          ent_chunk_count = ent_chunk_count + 1
+        end
+      end
     end
+  end
+  if try_ent_only and ent_chunk_count > 0 then
+    world_min = ent_world_min
+    world_max = ent_world_max
+    chunk_count = ent_chunk_count
   end
   if chunk_count == 0 then
     log("no matching chunk")

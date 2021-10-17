@@ -2,6 +2,9 @@
 Version: 0.0.14
   Features:
     - Support exporting Game surface beside nauvis; useful for Space Exploration mod and others.
+  Rendering:
+    - When requesting to render only chunks with entities (default behavior), fallback to all
+      available chunks if no entities are found.
   UI:
     - Selection of which game surface to display; shows `nauvis` by default.
   Internal:
