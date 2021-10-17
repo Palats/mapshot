@@ -1,7 +1,9 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.0.14
   Features:
-    - Support exporting Game surface beside nauvis; useful for Space Exploration mod.
+    - Support exporting Game surface beside nauvis; useful for Space Exploration mod and others.
+  UI:
+    - Selection of which game surface to display; shows `nauvis` by default.
   Internal:
     - Large change in mapshot.json format. The viewer is still backward compatible, but
       old viewers will not be able to load new renders.

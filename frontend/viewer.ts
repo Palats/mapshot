@@ -46,129 +46,151 @@ function leafletHack() {
 }
 leafletHack();
 
-function run(config: common.MapshotConfig, info: common.MapshotJSON) {
-    const queryParams = new URLSearchParams(window.location.search);
-    // For now, only very very minimal support for selecting the surface - no UI.
-    let surface = info.surfaces[0];
-    if (queryParams.has("s")) {
-        const k = queryParams.get("s");
-        const idx = Number(k);  // can be NaN when specifying surface names.
-        for (const si of info.surfaces) {
-            if (si.surface_idx == idx || si.surface_name == k) {
-                surface = si;
-                break;
+class Surface {
+    surfaceInfo: common.MapshotSurfaceJSON;
+    baseLayer: L.TileLayer;
+    trainLayer: L.LayerGroup;
+    tagsLayer: L.LayerGroup;
+    debugLayer: L.LayerGroup;
+
+    constructor(config: common.MapshotConfig, si: common.MapshotSurfaceJSON) {
+        this.surfaceInfo = si;
+
+        this.baseLayer = L.tileLayer(config.path + si.file_prefix + "{z}/tile_{x}_{y}.jpg", {
+            tileSize: si.render_size,
+            bounds: L.latLngBounds(
+                this.worldToLatLng(si.world_min.x, si.world_min.y),
+                this.worldToLatLng(si.world_max.x, si.world_max.y),
+            ),
+            noWrap: true,
+            maxNativeZoom: si.zoom_max,
+            minNativeZoom: si.zoom_min,
+            minZoom: si.zoom_min - 4,
+            maxZoom: si.zoom_max + 4,
+        });
+
+        // Layer: train stations
+        let stationsLayers = [];
+        if (common.isIterable(si.stations)) {
+            for (const station of si.stations) {
+                stationsLayers.push(L.marker(
+                    this.midPointToLatLng(station.bounding_box),
+                    { title: station.backer_name },
+                ).bindTooltip(station.backer_name, { permanent: true }))
             }
         }
+        this.trainLayer = L.layerGroup(stationsLayers);
+
+        // Layer: tags
+        let tagsLayers = [];
+        if (common.isIterable(si.tags)) {
+            for (const tag of si.tags) {
+                tagsLayers.push(L.marker(
+                    this.worldToLatLng(tag.position.x, tag.position.y),
+                    { title: `${tag.force_name}: ${tag.text}` },
+                ).bindTooltip(tag.text, { permanent: true }))
+            }
+        }
+        this.tagsLayer = L.layerGroup(tagsLayers);
+
+        // Layer: debug
+        const debugLayers = [
+            L.marker([0, 0], { title: "Start" }).bindPopup("Starting point"),
+        ]
+        if (common.isIterable(si.players)) {
+            for (const player of si.players) {
+                debugLayers.push(
+                    L.marker(
+                        this.worldToLatLng(player.position.x, player.position.y),
+                        {
+                            title: player.name,
+                            alt: `Player: ${player.name}`
+                        },
+                    ).bindTooltip(player.name, {
+                        permanent: true
+                    })
+                )
+            }
+        }
+        if (si.player) {
+            debugLayers.push(L.marker(this.worldToLatLng(si.player.x, si.player.y), { title: "Player" }).bindPopup("Player"));
+        }
+        debugLayers.push(
+            L.marker(this.worldToLatLng(si.world_min.x, si.world_min.y), { title: `${si.world_min.x}, ${si.world_min.y}` }),
+            L.marker(this.worldToLatLng(si.world_min.x, si.world_max.y), { title: `${si.world_min.x}, ${si.world_max.y}` }),
+            L.marker(this.worldToLatLng(si.world_max.x, si.world_min.y), { title: `${si.world_max.x}, ${si.world_min.y}` }),
+            L.marker(this.worldToLatLng(si.world_max.x, si.world_max.y), { title: `${si.world_max.x}, ${si.world_max.y}` }),
+        );
+        this.debugLayer = L.layerGroup(debugLayers);
     }
 
-    const worldToLatLng = function (x: number, y: number) {
-        const ratio = surface.render_size / surface.tile_size;
+    worldToLatLng(x: number, y: number) {
+        const ratio = this.surfaceInfo.render_size / this.surfaceInfo.tile_size;
         return L.latLng(
             -y * ratio,
             x * ratio
         );
     };
 
-    const latLngToWorld = function (l: L.LatLng) {
-        const ratio = surface.tile_size / surface.render_size;
+    latLngToWorld(l: L.LatLng) {
+        const ratio = this.surfaceInfo.tile_size / this.surfaceInfo.render_size;
         return {
             x: l.lng * ratio,
             y: -l.lat * ratio,
         }
     }
 
-    const midPointToLatLng = function (bbox: common.FactorioBoundingBox) {
-        return worldToLatLng(
+    midPointToLatLng(bbox: common.FactorioBoundingBox) {
+        return this.worldToLatLng(
             (bbox.left_top.x + bbox.right_bottom.x) / 2,
             (bbox.left_top.y + bbox.right_bottom.y) / 2,
         );
     }
 
-    const baseLayer = L.tileLayer(config.path + surface.file_prefix + "{z}/tile_{x}_{y}.jpg", {
-        tileSize: surface.render_size,
-        bounds: L.latLngBounds(
-            worldToLatLng(surface.world_min.x, surface.world_min.y),
-            worldToLatLng(surface.world_max.x, surface.world_max.y),
-        ),
-        noWrap: true,
-        maxNativeZoom: surface.zoom_max,
-        minNativeZoom: surface.zoom_min,
-        minZoom: surface.zoom_min - 4,
-        maxZoom: surface.zoom_max + 4,
-    });
+}
+
+function run(config: common.MapshotConfig, info: common.MapshotJSON) {
+    const layerControl = L.control.layers();
+
+    const surfaces: Surface[] = [];
+    const surfaceByKey: Map<string, Surface> = new Map();
+    for (const si of info.surfaces) {
+        const s = new Surface(config, si);
+        surfaces.push(s);
+        layerControl.addBaseLayer(s.baseLayer, si.surface_name);
+        surfaceByKey.set(s.surfaceInfo.surface_idx.toString(), s);
+        surfaceByKey.set(s.surfaceInfo.surface_name, s);
+    }
+
+    const trainLayer = L.layerGroup();
+    const tagsLayer = L.layerGroup();
+    const debugLayer = L.layerGroup();
+    layerControl.addOverlay(trainLayer, "Train stations");
+    layerControl.addOverlay(tagsLayer, "Tags");
+    layerControl.addOverlay(debugLayer, "Debug");
+    const overlayKeys = new Map<L.Layer, string>();
+    overlayKeys.set(trainLayer, "lt");
+    overlayKeys.set(tagsLayer, "lg");
+    overlayKeys.set(debugLayer, "ld");
+
+    const updateOverlays = (s: Surface) => {
+        trainLayer.clearLayers();
+        trainLayer.addLayer(s.trainLayer);
+        tagsLayer.clearLayers();
+        tagsLayer.addLayer(s.tagsLayer);
+        debugLayer.clearLayers();
+        debugLayer.addLayer(s.debugLayer);
+    }
 
     const mymap = L.map('content', {
         crs: L.CRS.Simple,
-        layers: [baseLayer],
+        layers: [],
         zoomSnap: 0.1,
         zoomsliderControl: true,
         zoomControl: false,
         zoomDelta: 1.0,
     });
-    const layerControl = L.control.layers().addTo(mymap);
-
-    const layerKeys = new Map<L.Layer, string>();
-    const registerLayer = function (key: string, name: string, layer: L.Layer) {
-        layerControl.addOverlay(layer, name);
-        layerKeys.set(layer, key);
-    }
-
-    // Layer: train stations
-    let stationsLayers = [];
-    if (common.isIterable(surface.stations)) {
-        for (const station of surface.stations) {
-            stationsLayers.push(L.marker(
-                midPointToLatLng(station.bounding_box),
-                { title: station.backer_name },
-            ).bindTooltip(station.backer_name, { permanent: true }))
-        }
-    }
-    registerLayer("lt", "Train stations", L.layerGroup(stationsLayers));
-
-    // Layer: tags
-    let tagsLayers = [];
-    if (common.isIterable(surface.tags)) {
-        for (const tag of surface.tags) {
-            tagsLayers.push(L.marker(
-                worldToLatLng(tag.position.x, tag.position.y),
-                { title: `${tag.force_name}: ${tag.text}` },
-            ).bindTooltip(tag.text, { permanent: true }))
-        }
-    }
-    registerLayer("lg", "Tags", L.layerGroup(tagsLayers));
-
-    // Layer: debug
-    const debugLayers = [
-        L.marker([0, 0], { title: "Start" }).bindPopup("Starting point"),
-    ]
-
-    if (common.isIterable(surface.players)) {
-        for (const player of surface.players) {
-            debugLayers.push(
-                L.marker(
-                    worldToLatLng(player.position.x, player.position.y),
-                    {
-                        title: player.name,
-                        alt: `Player: ${player.name}`
-                    },
-                ).bindTooltip(player.name, {
-                    permanent: true
-                })
-            )
-        }
-    }
-
-    if (surface.player) {
-        debugLayers.push(L.marker(worldToLatLng(surface.player.x, surface.player.y), { title: "Player" }).bindPopup("Player"));
-    }
-
-    debugLayers.push(
-        L.marker(worldToLatLng(surface.world_min.x, surface.world_min.y), { title: `${surface.world_min.x}, ${surface.world_min.y}` }),
-        L.marker(worldToLatLng(surface.world_min.x, surface.world_max.y), { title: `${surface.world_min.x}, ${surface.world_max.y}` }),
-        L.marker(worldToLatLng(surface.world_max.x, surface.world_min.y), { title: `${surface.world_max.x}, ${surface.world_min.y}` }),
-        L.marker(worldToLatLng(surface.world_max.x, surface.world_max.y), { title: `${surface.world_max.x}, ${surface.world_max.y}` }),
-    );
-    registerLayer("ld", "Debug", L.layerGroup(debugLayers));
+    layerControl.addTo(mymap);
 
     // Add a control to zoom to a region.
     L.Control.boxzoom({
@@ -176,11 +198,16 @@ function run(config: common.MapshotConfig, info: common.MapshotJSON) {
     }).addTo(mymap);
 
     // Set original view (position/zoom/layers).
+    const queryParams = new URLSearchParams(window.location.search);
+    let currentSurface = surfaceByKey.get(queryParams.get("s") ?? "1") ?? surfaces[0];
+    mymap.addLayer(currentSurface.baseLayer);
+    updateOverlays(currentSurface);
+
     let x = common.parseNumber(queryParams.get("x"), 0);
     let y = common.parseNumber(queryParams.get("y"), 0);
     let z = common.parseNumber(queryParams.get("z"), 0);
-    mymap.setView(worldToLatLng(x, y), z);
-    layerKeys.forEach((key, layer) => {
+    mymap.setView(currentSurface.worldToLatLng(x, y), z);
+    overlayKeys.forEach((key, layer) => {
         const p = queryParams.get(key);
         if (p == "0") {
             mymap.removeLayer(layer);
@@ -190,10 +217,24 @@ function run(config: common.MapshotConfig, info: common.MapshotJSON) {
         }
     });
 
+    // Update URL & current surface when base layer changed
+    mymap.on('baselayerchange', (e: L.LayersControlEvent) => {
+        const s = surfaceByKey.get(e.name);
+        if (!s) {
+            console.log("unknown layer", e.name);
+            return;
+        }
+        currentSurface = s;
+        updateOverlays(currentSurface);
+        const queryParams = new URLSearchParams(window.location.search);
+        queryParams.set("s", currentSurface.surfaceInfo.surface_idx.toString());
+        history.replaceState(null, "", "?" + queryParams.toString());
+    });
+
     // Update URL when position/view changes.
     const onViewChange = (e: L.LeafletEvent) => {
         const z = mymap.getZoom();
-        const { x, y } = latLngToWorld(mymap.getCenter());
+        const { x, y } = currentSurface.latLngToWorld(mymap.getCenter());
         const queryParams = new URLSearchParams(window.location.search);
         queryParams.set("x", x.toFixed(1));
         queryParams.set("y", y.toFixed(1));
@@ -206,7 +247,7 @@ function run(config: common.MapshotConfig, info: common.MapshotJSON) {
 
     // Update URL when overlays are added/removed.
     const onLayerChange = (e: L.LayersControlEvent) => {
-        const key = layerKeys.get(e.layer);
+        const key = overlayKeys.get(e.layer);
         if (!key) {
             console.log("unknown layer", e.name);
             return;
