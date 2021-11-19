@@ -50,7 +50,7 @@ This commands takes the list of mods to load from the current active list in Fac
 
 If your Factorio data dir or binary location are not detected automatically, you can specify them with `--factorio_datadir` and `--factorio_binary`. You can also override the rendering parameters - see CLI help for the specific flag names.
 
-Steam version of Factorio is not supported for now. If you have only a Steam version, you can still get a standalone version on factorio.com by linking your Steam account.
+Steam version of Factorio is not supported for now - see https://github.com/Palats/mapshot/issues/21 for more details. If you have only a Steam version, you can still get a standalone version on factorio.com by linking your Steam account.
 
 ### Parameters
 
