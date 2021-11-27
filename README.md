@@ -52,6 +52,8 @@ If your Factorio data dir or binary location are not detected automatically, you
 
 Steam version of Factorio is not supported for now - see https://github.com/Palats/mapshot/issues/21 for more details. If you have only a Steam version, you can still get a standalone version on factorio.com by linking your Steam account.
 
+Headless version of Factorio is not supported at all - it lacks the ability to render any image.
+
 ### Parameters
 
 You can tune parameters such as many layers to generate, their resolution and a few more details. Those parameters are:
