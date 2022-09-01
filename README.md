@@ -175,4 +175,4 @@ script-output/mapshot/  <--- output directory
 
 ## Development
 
-See [DEVELOPMENT.md](#DEVELOPMENT.md) in the repository.
+See [DEVELOPMENT.md](https://github.com/Palats/mapshot/blob/master/DEVELOPMENT.md) in the repository.

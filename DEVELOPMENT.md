@@ -88,14 +88,11 @@ Generated files are not committed to git.
 
 ## Updating example
 
-Example is at https://mapshot.palats.xyz/ . It serves through Cloudflare, with the data:
-* `index.html` and Javascript on $server.
-* Data files in `mapshot-example` backblaze bucket.
+Example is at https://mapshot.palats.xyz/ , served by $server.
 
 To update it:
 * Generate content: `./generate.sh`
 * Regenerate a map, using `go run mapshot.go render --tilemin 16 <savename>`.
 * Copy files from `frontend/dist` to $server.
-* In `index.html`, replace `MAPSHOT_CONFIG={}` by something like `MAPSHOT_CONFIG={'path':'https://mapshot-data.palats.xyz/file/mapshot-example/d-d5798a93/'}`.
-* Copy `script-output/mapshot/<savename>/d-<hash>` to Backblaze, incl. the `d-<hash>` subdirectory. E.g., `rclone copy d-d5798a93 backblaze:mapshot-example/d-d5798a93`.
-* Might want to drop the cache in Cloudflare (for the few not hashed changed files, such as `index.html`).
+* In `index.html`, replace `MAPSHOT_CONFIG={}` by something like `MAPSHOT_CONFIG={'path':'data/d-d5798a93/'}`.
+* Copy `script-output/mapshot/<savename>/d-<hash>` to a subdirectory in $server.
