@@ -34,7 +34,6 @@ func devFactorio(ctx context.Context, fact *factorio.Factorio, checkoutDir strin
 
 	factorioArgs := []string{
 		"--disable-audio",
-		"--disable-prototype-history",
 		"--mod-directory", dstMods,
 	}
 

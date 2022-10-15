@@ -156,7 +156,6 @@ func render(ctx context.Context, factorioSettings *factorio.Settings, rf *Render
 
 	factorioArgs := []string{
 		"--disable-audio",
-		"--disable-prototype-history",
 		"--load-game", dstSavegame,
 		"--mod-directory", dstMods,
 	}
