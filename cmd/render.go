@@ -207,7 +207,7 @@ func render(ctx context.Context, factorioSettings *factorio.Settings, rf *Render
 	// Wait for Factorio to terminate.
 	err = <-errCh
 	if err != nil {
-		return fmt.Errorf("error while running Factorio: %w", err)
+		glog.Warningf("Factorio finished with an error; ignoring as rendering was done. Error: %v", err)
 	}
 
 	return nil
