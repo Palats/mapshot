@@ -72,11 +72,15 @@ function mapshot(params)
   log("Mapshot unique id " .. unique_id)
 
   local surface_infos = {}
+  log("Request surface(s): " .. params.surface)
   for _, surface in pairs(game.surfaces) do
-    log("Available surface: " .. surface.index .. " " .. surface.name)
-    local si = gen_surface_info(params, surface)
-    if si then
-      table.insert(surface_infos, si)
+    local include_surface = should_render_surface(params, surface.name)
+    log("Available surface: idx=" .. surface.index .. " name=" .. surface.name .. " include=" .. tostring(include_surface))
+    if (include_surface) then
+      local si = gen_surface_info(params, surface)
+      if si then
+        table.insert(surface_infos, si)
+      end
     end
   end
 
@@ -117,6 +121,29 @@ function mapshot(params)
   log("Mapshot done at " .. data_prefix)
 
   return data_prefix
+end
+
+-- Check if a surface should be rendered.
+function should_render_surface(params, surface_name)
+  if(params.surface == all_surfaces) then
+    return true
+  end
+
+  -- Strip begin/end spaces from the input.
+  surface_name = string.match(surface_name, "^%s*(.*)%s*$")
+
+  -- Split params.surface into a list of surface names.
+  local fields = {}
+  string.gsub(params.surface, "([^,]+)", function(c) fields[#fields + 1] = c end)
+
+  -- Check if the list contains the requested surface name.
+  for _, f in ipairs(fields) do
+    if (string.match(f, "^%s*(.*)%s*$") == surface_name) then
+      return true
+    end
+  end
+
+  return false
 end
 
 function gen_surface_info(params, surface)

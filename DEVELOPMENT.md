@@ -32,7 +32,7 @@ This will:
  - The mapshot mod will link directly the files in the checkout - so
    modifications of the lua files will be reflected when loading a savegame in
    Factorio.
- - A HTTP server will run in backgrdound to access generated content.
+ - A HTTP server accessible on localhost:8080 will run in backgrdound to access generated content.
  - The UI frontend will use the file watched by the `npm` command - so any
    changes to the frontend code will be reflected on a page reload.
 

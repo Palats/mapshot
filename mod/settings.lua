@@ -66,7 +66,7 @@ data:extend({
         setting_type = "runtime-per-user",
         default_value = "_all_",
         localised_name = "Surface",
-        localised_description = "Name of the game surface to render. If set to _all_, render all surfaces.",
+        localised_description = "Comma separated list of surfaces (e.g., 'nauvis') to render. If set to _all_, render all surfaces.",
         order = "301",
     },
 
