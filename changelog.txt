@@ -1,5 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.0.17
+Date: 2022.12.17
   Rendering/bug:
     - Fix `surface` setting: it is now possible to select which surfaces to render (was a no-op).
 

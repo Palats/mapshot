@@ -1,6 +1,6 @@
 {
   "name": "mapshot",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "Web frontend for Mapshot, a Factorio screenshot generator.",
   "main": "index.js",
   "scripts": {
