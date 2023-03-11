@@ -25,6 +25,7 @@ The optional CLI is used for serving generated mapshots and generating mapshots 
  * Windows: For convenience, if the `.exe` file is launched directly from Explorer, it will automatically start the serving mode. Otherwise, you need a way to give the tool parameters - either by launching it from the `cmd` console, or by creating a shortcut (with extra parameters in the properties).
  * MacOS: A binary is provided ("darwin" version), but is completely untested as I have no access to a MacOS system.
 
+An externally maintained package for Arch [is also available](https://aur.archlinux.org/packages/mapshot), thanks to [Sharparam](https://github.com/Sharparam).
 
 ## Creating a mapshot
 
