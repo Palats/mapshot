@@ -117,8 +117,8 @@ function mapshot(params)
     end
   end
 
-  game.print("Mapshot done at " .. data_prefix)
-  log("Mapshot done at " .. data_prefix)
+  game.print("Mapshot: all screenshots started, might take a while to render; location: " .. data_prefix)
+  log("Mapshot: all screenshots started, might take a while to render; location: " .. data_prefix)
 
   return data_prefix
 end
