@@ -9,7 +9,6 @@
   ],
   "background_color": "#000000",
   "display": "standalone",
-  "start_url": "./?",
   "theme_color": "#000000",
   "description": "Factorio map viewer"
 }
