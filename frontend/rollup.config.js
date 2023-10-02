@@ -38,6 +38,9 @@ export default [{
         copy({
             targets: [{ src: '../thumbnail.png', dest: 'dist/viewer' }]
         }),
+        copy({
+            targets: [{ src: "manifest.json", dest: "dist/viewer" }],
+        }),
     ].concat(plugins),
 }, {
     input: 'listing.html',
@@ -51,9 +54,6 @@ export default [{
     plugins: [
         copy({
             targets: [{ src: '../thumbnail.png', dest: 'dist/listing' }]
-        }),
-        copy({
-            targets: [{ src: '../manifest.json', dest: 'dist/manifest.json' }]
         }),
     ].concat(plugins),
 }];
