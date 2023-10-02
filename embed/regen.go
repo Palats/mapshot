@@ -313,6 +313,7 @@ func main() {
 	viewerFiles := sortFiles(append(append(
 		loader.LoadTextGlob("frontend/dist/viewer/*.js", nil),
 		loader.LoadTextFile("frontend/dist/viewer/index.html"),
+		loader.LoadTextFile("frontend/dist/viewer/manifest.json"),
 		loader.LoadBinaryFile("thumbnail.png"),
 	), loader.LoadTextGlob("frontend/dist/viewer/*.svg", nil)...))
 
