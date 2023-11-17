@@ -56,7 +56,7 @@ class Surface {
     constructor(config: common.MapshotConfig, si: common.MapshotSurfaceJSON) {
         this.surfaceInfo = si;
 
-        this.baseLayer = L.tileLayer(config.path + si.file_prefix + "{z}/tile_{x}_{y}.jpg", {
+        this.baseLayer = L.tileLayer.fallback(config.path + si.file_prefix + "{z}/tile_{x}_{y}.jpg", {
             tileSize: si.render_size,
             bounds: L.latLngBounds(
                 this.worldToLatLng(si.world_min.x, si.world_min.y),

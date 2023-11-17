@@ -61,6 +61,17 @@ data:extend({
         order = "201",
     },
     {
+        type = "int-setting",
+        name = "minjpgquality",
+        setting_type = "runtime-per-user",
+        default_value = 75,
+        minimum_value = 0,
+        maximum_value = 100,
+        localised_name = "Minimum JPG quality",
+        localised_description = "Compression quality for jpg files when no player entities. Set to 0 to skip that tile.",
+        order = "202",
+    },
+    {
         type = "string-setting",
         name = "surface",
         setting_type = "runtime-per-user",
