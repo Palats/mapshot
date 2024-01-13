@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.0.20
-Date: ???
+Date: 2024.01.13
   Features:
     - Added min jpg quality when tile has no entities. When 0 value is used, tile is skipped.
 
