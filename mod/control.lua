@@ -264,21 +264,26 @@ function gen_layer(params, tile_size, render_size, world_min, world_max, data_pr
   for tile_y = tile_min.y, tile_max.y do
     for tile_x = tile_min.x, tile_max.x do
       local top_left = { x = tile_x * tile_size, y = tile_y * tile_size }
-      game.take_screenshot{
-        surface = surface,
-        position = {
-          x = top_left.x + tile_size / 2,
-          y = top_left.y + tile_size / 2,
-        },
-        resolution = {render_size, render_size},
-        zoom = factorio_zoom(render_size, tile_size),
-        path = data_prefix .. "tile_" .. tile_x .. "_" .. tile_y .. ".jpg",
-        show_gui = false,
-        show_entity_info = true,
-        quality = params.jpgquality,
-        daytime = 0,
-        water_tick = 0,
-      }
+      local bottom_right = { x = top_left.x + tile_size, y = top_left.y + tile_size }
+      local has_entities = surface.count_entities_filtered({ area = {top_left, bottom_right}, limit = 1, type = entities.includes}) > 0
+      local quality_to_use = has_entities and params.jpgquality or math.min(params.minjpgquality, params.jpgquality)
+      if quality_to_use > 0 then
+        game.take_screenshot{
+          surface = surface,
+          position = {
+            x = top_left.x + tile_size / 2,
+            y = top_left.y + tile_size / 2,
+          },
+          resolution = {render_size, render_size},
+          zoom = factorio_zoom(render_size, tile_size),
+          path = data_prefix .. "tile_" .. tile_x .. "_" .. tile_y .. ".jpg",
+          show_gui = false,
+          show_entity_info = true,
+          quality = quality_to_use,
+          daytime = 0,
+          water_tick = 0,
+        }
+      end
     end
   end
 end
