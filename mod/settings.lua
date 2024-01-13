@@ -68,7 +68,7 @@ data:extend({
         minimum_value = 0,
         maximum_value = 100,
         localised_name = "Minimum JPG quality",
-        localised_description = "Compression quality for jpg files when no player entities. Set to 0 to skip that tile.",
+        localised_description = "Compression quality for jpg files when no player entities are present. Set to 0 to skip the tile entirely.",
         order = "202",
     },
     {
