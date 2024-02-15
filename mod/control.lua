@@ -104,7 +104,7 @@ function mapshot(params)
     map_exchange = game.get_map_exchange_string(),
     surfaces = surface_infos,
     game_version = game_version,
-    active_mods = active_mods
+    active_mods = active_mods,
   }))
 
   -- Create the serving html.
