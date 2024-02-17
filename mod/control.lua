@@ -84,6 +84,15 @@ function mapshot(params)
     end
   end
 
+  -- collect game version and active mod versions
+  local game_version = game.active_mods["base"]
+  local active_mods = {}
+  for name, version in pairs(game.active_mods) do
+    if name ~= "base" then
+      active_mods[name] = version
+    end
+  end
+
   -- Write metadata.
   game.write_file(data_prefix .. "mapshot.json", game.table_to_json({
     savename = params.savename,
@@ -94,6 +103,8 @@ function mapshot(params)
     seed = game.default_map_gen_settings.seed,
     map_exchange = game.get_map_exchange_string(),
     surfaces = surface_infos,
+    game_version = game_version,
+    active_mods = active_mods,
   }))
 
   -- Create the serving html.
