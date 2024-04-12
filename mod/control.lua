@@ -325,11 +325,17 @@ end
 -- Detects if an on-startup screenshot is requested.
 script.on_event(defines.events.on_tick, function(evt)
   log("onstartup check @" .. evt.tick)
+  local player = game.get_player(1)
+
+  -- on multiplayer servers, it's possible there is no player connected yet
+  -- we just return in this case and try again until a player has connected
+  if player == nil then 
+    return
+  end
   -- Needs to run only once, so unregister immediately.
   script.on_event(defines.events.on_tick, nil)
 
   -- Assume player index 1 during startup.
-  local player = game.get_player(1)
   local params = build_params(player)
 
   if params.onstartup ~= "" then
@@ -358,7 +364,19 @@ end)
 -- It seems that on_init+on_load sometime don't trigger (neither of them) when
 -- doing weird things with --mod-directory and list of active mods.
 commands.add_command("mapshot", "screenshot the whole map", function(evt)
-  local player = game.get_player(evt.player_index)
+  local player = nil
+  -- if this command is run from the server console, there will not be a player
+  -- try to pick the first player instead
+  if evt.player_index == nil then 
+    player = game.get_player(1)
+  else
+    player = game.get_player(evt.player_index)
+  end
+  -- if the command is run from the server console and nobody has logged in yet, then just return early
+  if player == nil then 
+    rcon.print("No players found, skipping mapshot")
+    return
+  end
   local params = build_params(player)
   if evt.parameter ~= nil and #evt.parameter > 0 then
     params.savename = evt.parameter
