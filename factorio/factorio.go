@@ -321,6 +321,7 @@ func (s *Settings) Binary() (string, error) {
 		// Steam is a bit tricky to start/stop automatically, so ignore it for now.
 		// `~/Library/Application Support/Steam/steamapps/common/Factorio/factorio.app/Contents`,
 		`/opt/factorio/bin/x64/factorio`,
+		`/usr/bin/factorio`,
 		`~/factorio/bin/x64/factorio`,
 		`~/.factorio/bin/x64/factorio`,
 		`/Applications/factorio.app/Contents`,
