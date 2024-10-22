@@ -21,7 +21,7 @@ function build_params(player)
     params.surface = all_surfaces
   end
 
-  for k,v in pairs(game.json_to_table(overrides)) do
+  for k,v in pairs(helpers.json_to_table(overrides)) do
     params[k] = v
   end
 
@@ -85,16 +85,16 @@ function mapshot(params)
   end
 
   -- collect game version and active mod versions
-  local game_version = game.active_mods["base"]
+  local game_version = script.active_mods["base"]
   local active_mods = {}
-  for name, version in pairs(game.active_mods) do
+  for name, version in pairs(script.active_mods) do
     if name ~= "base" then
       active_mods[name] = version
     end
   end
 
   -- Write metadata.
-  game.write_file(data_prefix .. "mapshot.json", game.table_to_json({
+  helpers.write_file(data_prefix .. "mapshot.json", helpers.table_to_json({
     savename = params.savename,
     unique_id = unique_id,
     map_id = map_id,
@@ -114,9 +114,9 @@ function mapshot(params)
       local config = {
         path = data_dir,
       }
-      content = string.gsub(content, "__MAPSHOT_CONFIG_TOKEN__", game.table_to_json(config))
+      content = string.gsub(content, "__MAPSHOT_CONFIG_TOKEN__", helpers.table_to_json(config))
     end
-    local r = game.write_file(prefix .. fname, content)
+    local r = helpers.write_file(prefix .. fname, content)
   end
 
   -- Generate all the tiles.
@@ -355,7 +355,7 @@ script.on_event(defines.events.on_tick, function(evt)
     script.on_event(defines.events.on_tick, function(evt)
       log("marking as done @" .. evt.tick)
       script.on_event(defines.events.on_tick, nil)
-      game.write_file("mapshot-done-" .. params.onstartup, data_prefix)
+      helpers.write_file("mapshot-done-" .. params.onstartup, data_prefix)
     end)
   end
 end)
