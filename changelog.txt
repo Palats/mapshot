@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.0.23
+Date: 2024.10.22
+  Bug:
+    - Fix for API changes in Space Age
+    - Some methods have moved from LuaGameScript class to LuaHelpers  and LuaBootstrap 
+
+---------------------------------------------------------------------------------------------------
 Version: 0.0.22
 Date: 2024.04.15
   Bug:

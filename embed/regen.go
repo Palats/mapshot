@@ -73,7 +73,7 @@ func genLua(viewerFiles []*FileInfo, version, versionHash string) {
 
 		if fi.Binary {
 			content := factorio.Encode(fi.Content)
-			writeLn(fmt.Sprintf(`data.files[%q] = function() return game.decode_string(table.concat({`, key))
+			writeLn(fmt.Sprintf(`data.files[%q] = function() return helpers.decode_string(table.concat({`, key))
 			begin := 0
 			end := 78
 			for begin < len(content) {
