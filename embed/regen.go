@@ -1,3 +1,4 @@
+//go:build ignore
 // +build ignore
 
 // Regenerate the mod data for embedding in Go/Lua.
@@ -317,11 +318,11 @@ func main() {
 		loader.LoadBinaryFile("thumbnail.png"),
 	), loader.LoadTextGlob("frontend/dist/viewer/*.svg", nil)...))
 
-	listingFiles := sortFiles(append(append(
+	listingFiles := sortFiles(append(
 		loader.LoadTextGlob("frontend/dist/listing/*.js", nil),
 		loader.LoadTextFile("frontend/dist/listing/index.html"),
 		loader.LoadBinaryFile("thumbnail.png"),
-	)))
+	))
 
 	modFiles := sortFiles(append(
 		loader.LoadTextGlob("mod/*.lua", []string{"mod/generated.lua"}),
