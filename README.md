@@ -53,7 +53,9 @@ If your Factorio data dir or binary location are not detected automatically, you
 
 Steam version of Factorio is not supported for now - see https://github.com/Palats/mapshot/issues/21 for more details. If you have only a Steam version, you can still get a standalone version on factorio.com by linking your Steam account.
 
-Headless version of Factorio is not supported at all - it lacks the ability to render any image.
+> [!WARNING]
+> Headless version of Factorio is not supported as it lacks the ability to render any image.
+> Most common symptom is Factorio failing with `Option ‘disable-audio’ does not exist`.
 
 ### Parameters
 
