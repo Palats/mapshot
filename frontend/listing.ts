@@ -66,6 +66,13 @@ class MapshotListing extends LitElement {
             return html`No mapshots have been found. Create some and re-start mapshot server.`;
         }
 
+        // The encoded_path gets itself encoded - i.e., double encoding. Reason
+        // is that we really want to get the encoded path on the receiving page.
+        // So, without encodeURI, the encoded path would get decoded, and
+        // provide a raw path. That in turn would potentiall fail to get data
+        // from the Go server, as it would then do a partial encoding (spaces
+        // but not square bracket) which Go mux routing seems to have trouble
+        // with.
         return html`
                 ${this.shots.all.map((save) => html`
                     <div class="savename">
@@ -76,7 +83,7 @@ class MapshotListing extends LitElement {
                         <ul>
                             ${save.versions.map((si) => html`
                                 <li>
-                                    <a href="map?path=${si.path}"><factorio-relticks .ticks=${si.ticks_played} .refticks=${save.versions[0].ticks_played}></factorio-relticks></a>
+                                    <a href="map?path=${encodeURI(si.encoded_path)}"><factorio-relticks .ticks=${si.ticks_played} .refticks=${save.versions[0].ticks_played}></factorio-relticks></a>
                                     (<factorio-ticks .ticks=${si.ticks_played}></factorio-ticks>)
                                 </li>`)}
                         </ul>

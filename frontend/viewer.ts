@@ -57,7 +57,7 @@ class Surface {
         this.surfaceInfo = si;
 
         // .fallback comes from leaflet.tilelayer.fallback, which does not have types.
-        this.baseLayer = (L.tileLayer as any).fallback(config.path + si.file_prefix + "{z}/tile_{x}_{y}.jpg", {
+        this.baseLayer = (L.tileLayer as any).fallback(config.encoded_path + si.file_prefix + "{z}/tile_{x}_{y}.jpg", {
             tileSize: si.render_size,
             bounds: L.latLngBounds(
                 this.worldToLatLng(si.world_min.x, si.world_min.y),
@@ -267,7 +267,7 @@ function run(config: common.MapshotConfig, info: common.MapshotJSON) {
 function load(config: common.MapshotConfig) {
     console.log("Config", config);
 
-    fetch(config.path + 'mapshot.json')
+    fetch(config.encoded_path + 'mapshot.json')
         .then(resp => resp.json())
         .then((info: common.MapshotJSON) => {
             // Backward compatibility - try to load mapshot.json from data before
@@ -313,9 +313,9 @@ if (params.get("l")) {
 } else {
     const config = JSON.parse(JSON.stringify(MAPSHOT_CONFIG ?? {}));
 
-    config.path = params.get("path") ?? config.path ?? "";
-    if (!!config.path && config.path[config.path.length - 1] != "/") {
-        config.path = config.path + "/";
+    config.encoded_path = params.get("path") ?? config.encoded_path ?? "";
+    if (!!config.encoded_path && config.encoded_path[config.encoded_path.length - 1] != "/") {
+        config.encoded_path = config.encoded_path + "/";
     }
     load(config);
 }

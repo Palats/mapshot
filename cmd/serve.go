@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
@@ -22,8 +23,10 @@ import (
 // shotInfo gives internal information about a single mapshot.
 type shotInfo struct {
 	name string
-	// HTTP path were the tiles & data is served.
-	path string
+	// HTTP encodedPath were the tiles & data is served.
+	encodedPath string
+	// Path the mux should use to server the HTTP path
+	muxPath string
 	// Name of the save. Always uses slashes.
 	savename string
 	json     *MapshotJSON
@@ -45,7 +48,7 @@ type ShotsJSONSave struct {
 // ShotsJSONInfo is part of ShotsJSONSave.
 type ShotsJSONInfo struct {
 	Name        string `json:"name,omitempty"`
-	Path        string `json:"path,omitempty"`
+	EncodedPath string `json:"encoded_path,omitempty"`
 	TicksPlayed int64  `json:"ticks_played,omitempty"`
 }
 
@@ -57,7 +60,16 @@ type MapshotJSON struct {
 
 // MapshotConfigJSON is a representation of the viewer configuration.
 type MapshotConfigJSON struct {
-	Path string `json:"path"`
+	EncodedPath string `json:"encoded_path"`
+}
+
+// splitPath split a path string into its individual components.
+func splitPath(s string) []string {
+	dir, file := filepath.Split(filepath.Clean(s))
+	if dir == "" {
+		return []string{file}
+	}
+	return append(splitPath(filepath.Clean(dir)), file)
 }
 
 func findShots(baseDir string) ([]shotInfo, error) {
@@ -95,12 +107,25 @@ func findShots(baseDir string) ([]shotInfo, error) {
 		}
 		savename := filepath.ToSlash(filepath.Dir(relpath))
 
+		// Generate access path as seen from the client and suitable for the Go mux.
+		// This is manipulating proper paths - so slashes must be kept as such.
+		// However, path components (in between slashes) must be encoded when the client does a request.
+		// But it Golang mux expect the fully encoded path - and takes care of the decoding of the
+		// request itself.
+		muxPath := "/data/"
+		encodedPath := "/data/"
+		for _, sp := range splitPath(relpath) {
+			encodedPath += url.PathEscape(sp) + "/"
+			muxPath += sp + "/"
+		}
+
 		shots = append(shots, shotInfo{
-			fsPath:   shotPath,
-			name:     filepath.ToSlash(relpath),
-			savename: savename,
-			json:     mapshotData,
-			path:     "/data/" + filepath.ToSlash(relpath) + "/",
+			fsPath:      shotPath,
+			name:        filepath.ToSlash(relpath),
+			savename:    savename,
+			json:        mapshotData,
+			encodedPath: encodedPath,
+			muxPath:     muxPath,
 		})
 		return nil
 	})
@@ -169,7 +194,7 @@ func (s *Server) updateMux() {
 		}
 		kwShots[shot.savename].Versions = append(kwShots[shot.savename].Versions, &ShotsJSONInfo{
 			Name:        shot.name,
-			Path:        shot.path,
+			EncodedPath: shot.encodedPath,
 			TicksPlayed: shot.json.TicksPlayed,
 		})
 	}
@@ -189,7 +214,7 @@ func (s *Server) updateMux() {
 	// Serve each shot data
 	mux := http.NewServeMux()
 	for _, shot := range shots {
-		mux.Handle(shot.path, http.StripPrefix(shot.path, http.FileServer(http.Dir(shot.fsPath))))
+		mux.Handle(shot.muxPath, http.StripPrefix(shot.muxPath, http.FileServer(http.Dir(shot.fsPath))))
 	}
 
 	// Serve pointer to latest
@@ -201,7 +226,7 @@ func (s *Server) updateMux() {
 		latest := versions.Versions[0]
 
 		cfg := &MapshotConfigJSON{
-			Path: latest.Path,
+			EncodedPath: latest.EncodedPath,
 		}
 		jsonCfg, err := json.Marshal(cfg)
 		if err != nil {

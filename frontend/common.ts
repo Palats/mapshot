@@ -1,7 +1,7 @@
 // Config for mapshot UI.
 export interface MapshotConfig {
     // Where to find the mapshot to load (not including `mapshot.json`).
-    path?: string;
+    encoded_path?: string;
 }
 
 export interface FactorioColor {
@@ -112,7 +112,7 @@ export interface ShotsJSONSave {
 
 export interface ShotsJSONInfo {
     name: string;
-    path: string;
+    encoded_path: string;
     ticks_played: number;
 }
 
