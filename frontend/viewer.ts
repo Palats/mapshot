@@ -73,7 +73,7 @@ class Surface {
         // Layer: train stations
         let stationsLayers = [];
         if (common.isIterable(si.stations)) {
-            for (const station of si.stations) {
+            for (const station of si.stations as Iterable<common.FactorioStation>) {
                 stationsLayers.push(L.marker(
                     this.midPointToLatLng(station.bounding_box),
                     { title: station.backer_name },
@@ -85,7 +85,7 @@ class Surface {
         // Layer: tags
         let tagsLayers = [];
         if (common.isIterable(si.tags)) {
-            for (const tag of si.tags) {
+            for (const tag of si.tags as Iterable<common.FactorioTag>) {
                 tagsLayers.push(L.marker(
                     this.worldToLatLng(tag.position.x, tag.position.y),
                     { title: `${tag.force_name}: ${tag.text}` },
@@ -99,7 +99,7 @@ class Surface {
             L.marker([0, 0], { title: "Start" }).bindPopup("Starting point"),
         ]
         if (common.isIterable(si.players)) {
-            for (const player of si.players) {
+            for (const player of si.players as Iterable<common.FactorioPlayer>) {
                 debugLayers.push(
                     L.marker(
                         this.worldToLatLng(player.position.x, player.position.y),
