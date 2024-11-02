@@ -95,6 +95,7 @@ It can be a bit fiddly with OpenGL; a few tips:
 * Make sure you have a recent version of Xvfb / distro. For example, on Ubuntu 18.04 there are issues with OpenGL, while it works fine on Ubuntu 20.04.
 * I had some success running it in Docker, using an Ubuntu 20.04 image.
 * https://github.com/Palats/mapshot/issues/8 has a suggestion using virtualgl.
+* https://github.com/Palats/mapshot/issues/16 has other suggestions.
 * For Factorio 1.1.36 (and probably later, until fixed), https://github.com/Palats/mapshot/issues/16#issuecomment-883306221 has a suggested solution.
 
 ## Serving the maps
