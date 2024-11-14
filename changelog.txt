@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.0.25
-Date:
+Date: 2024.11.14
   Bug:
     - Fix static per-shot index.html, which has been broken when fixing encoding issues.
 
