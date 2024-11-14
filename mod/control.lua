@@ -66,6 +66,15 @@ function mapshot(params)
   local prefix = params.prefix .. savename .. "/"
   local data_dir = "d-" .. unique_id
   local data_prefix = prefix .. data_dir .. "/"
+
+  -- Check if the target folder already exists
+  if params.exitIfTargetExists and game.is_directory(data_prefix) then
+    local msg = "Target folder " .. data_prefix .. " already exists. Exiting."
+    game.print(msg)
+    log(msg)
+    return nil
+  end
+
   game.print("Mapshot '" .. prefix .. "' ...")
   log("Mapshot target " .. prefix)
   log("Mapshot data target " .. data_prefix)

@@ -21,14 +21,15 @@ import (
 
 // RenderFlags holds parameters to the rendering.
 type RenderFlags struct {
-	area          string
-	tilemin       int64
-	tilemax       int64
-	prefix        string
-	resolution    int64
-	jpgquality    int64
-	minjpgquality int64
-	surface       string
+	area          		string
+	tilemin       		int64
+	tilemax       		int64
+	prefix        		string
+	resolution    		int64
+	jpgquality    		int64
+	minjpgquality 		int64
+	surface       		string
+	exitIfTargetExists 	bool
 }
 
 // Register creates flags for the rendering parameters.
@@ -41,6 +42,7 @@ func (rf *RenderFlags) Register(flags *pflag.FlagSet, prefix string) *RenderFlag
 	flags.Int64Var(&rf.jpgquality, prefix+"jpgquality", 0, "Compression quality for jpg files. If 0, use value from the game.")
 	flags.Int64Var(&rf.minjpgquality, prefix+"minjpgquality", -1, "Compression quality for jpg files when no player entities are present. Set to 0 to skip the tile entirely.")
 	flags.StringVar(&rf.surface, prefix+"surface", "", "Game surface to render. If empty, use value from the game. Use _all_ for render all surfaces (default behavior).")
+	flags.BoolVar(&rf.exitIfTargetExists, prefix+"exitIfTargetExists", false, "Exit if the target folder already exists.")
 	return rf
 }
 
@@ -69,6 +71,9 @@ func (rf *RenderFlags) genOverrides() map[string]interface{} {
 	}
 	if rf.surface != "" {
 		ov["surface"] = rf.surface
+	}
+	if rf.exitIfTargetExists != "" {
+		ov["exitIfTargetExists"] = rf.exitIfTargetExists
 	}
 	return ov
 }
