@@ -64,6 +64,7 @@ function mapshot(params)
     savename = "map-" .. map_id
   end
   local prefix = params.prefix .. savename .. "/"
+  -- data_dir needs to be URL friendly, as that allows to avoid having to do URL encoding on it.
   local data_dir = "d-" .. unique_id
   local data_prefix = prefix .. data_dir .. "/"
   game.print("Mapshot '" .. prefix .. "' ...")
@@ -112,7 +113,13 @@ function mapshot(params)
     local content = contentfunc()
     if (fname == "index.html") then
       local config = {
-        path = data_dir,
+        -- The viewer requires the exact path to use to load the mapshot.json.
+        -- This means something already URL encoded. The path contains slashes
+        -- which are expected as-is, while other characters need to be
+        -- encoded - so no broad naive encoding is possible.
+        -- data_dir is created in this script and made to not require URL encoding.
+        -- This way, we can use it as-is, without needing URL encoding logic.
+        encoded_path = data_dir,
       }
       content = string.gsub(content, "__MAPSHOT_CONFIG_TOKEN__", helpers.table_to_json(config))
     end
@@ -304,6 +311,7 @@ function gen_unique_id()
   local data = generated.version_hash .. " " .. tostring(game.tick) .. " " .. game.get_map_exchange_string()
   -- sha256 produces 64 digits. We're not looking for crypto secure hashing, and instead
   -- just a short unique string - so pick up a subset.
+  -- It also needs to be URL friendly, as that allows to avoid having to do URL encoding on it.
   local idx = 10
   local len = 8
   local h = string.sub(hash.hash256(data), idx, idx + len - 1)
