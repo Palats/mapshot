@@ -337,7 +337,7 @@ script.on_event(defines.events.on_tick, function(evt)
 
   -- on multiplayer servers, it's possible there is no player connected yet
   -- we just return in this case and try again until a player has connected
-  if player == nil then 
+  if player == nil then
     return
   end
   -- Needs to run only once, so unregister immediately.
@@ -375,13 +375,13 @@ commands.add_command("mapshot", "screenshot the whole map", function(evt)
   local player = nil
   -- if this command is run from the server console, there will not be a player
   -- try to pick the first player instead
-  if evt.player_index == nil then 
+  if evt.player_index == nil then
     player = game.get_player(1)
   else
     player = game.get_player(evt.player_index)
   end
   -- if the command is run from the server console and nobody has logged in yet, then just return early
-  if player == nil then 
+  if player == nil then
     rcon.print("No players found, skipping mapshot")
     return
   end
