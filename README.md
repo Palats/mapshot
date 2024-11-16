@@ -81,7 +81,11 @@ Parameters:
 
 ### Headless server
 
-NOTE: This is hacky and you need some familiarity with Linux; also, you are mostly on your own.
+> [!TIP]
+> martydingo has [a repository on Github](https://github.com/martydingo/factorio-mapshot-docker) with Docker/Kubernetes configurations for generating and serving mapshot.
+
+> [!WARNING]
+> The following is hacky and you need some familiarity with Linux; also, you are mostly on your own.
 
 Mapshot requires a running Factorio with UI to do the rendering - this is a constraint of Factorio itself. On Linux, this means a X server must be available. On a Linux headless server, it is still possible to do renders using [Xvfb](https://en.wikipedia.org/wiki/Xvfb).
 
@@ -116,6 +120,9 @@ The viewer has the following URL query parameters:
 * `x`, `y`: float, center position in Factorio coordinates.
 * `z` : float, zoom level.
 * `lt`, `lg`, `ld`: "0"|"1", show/hide various layers (train stations, tags, debug).
+
+> [!TIP]
+> martydingo has [a repository on Github](https://github.com/martydingo/factorio-mapshot-docker) with Docker/Kubernetes configurations for generating and serving mapshot.
 
 
 ## Generated content
