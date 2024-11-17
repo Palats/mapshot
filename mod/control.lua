@@ -7,6 +7,10 @@ local factorio_min_zoom = 0.031250
 
 local all_surfaces = "_all_"
 
+-- List of surface to restore "show_clouds" for.
+-- Key is surface object, value is show_cloud value.
+local original_surface_show_clouds = {}
+
 -- Read all settings and update the params var, incl. overrides.
 function build_params(player)
   local params = {}
@@ -78,6 +82,9 @@ function mapshot(params)
     local include_surface = should_render_surface(params, surface.name)
     log("Available surface: idx=" .. surface.index .. " name=" .. surface.name .. " include=" .. tostring(include_surface))
     if (include_surface) then
+      original_surface_show_clouds[surface] = surface.show_clouds
+      surface.show_clouds = false
+
       local si = gen_surface_info(params, surface)
       if si then
         table.insert(surface_infos, si)
@@ -330,6 +337,17 @@ function gen_map_id()
   return h
 end
 
+-- Restore the surface.show_clouds which have been changed
+-- by mapshot() function.
+-- As tested in Factorio 2.0.15, it seems that waiting for set_wait_for_screenshots_to_finish
+-- is not enough - the clouds will still appear. However, waiting for the next tick
+-- seems enough to restore the show_clouds parameters without impacting the map.
+function restore_surface_show_clouds()
+  for surface, show_clouds in pairs(original_surface_show_clouds) do
+    surface.show_clouds = show_clouds
+  end
+end
+
 -- Detects if an on-startup screenshot is requested.
 script.on_event(defines.events.on_tick, function(evt)
   log("onstartup check @" .. evt.tick)
@@ -361,6 +379,8 @@ script.on_event(defines.events.on_tick, function(evt)
     -- set_wait_for_screenshots_to_finish is used, this is likely unnecessary -
     -- but before removing it, more testing is needed.
     script.on_event(defines.events.on_tick, function(evt)
+      restore_surface_show_clouds()
+
       log("marking as done @" .. evt.tick)
       script.on_event(defines.events.on_tick, nil)
       helpers.write_file("mapshot-done-" .. params.onstartup, data_prefix)
@@ -390,4 +410,11 @@ commands.add_command("mapshot", "screenshot the whole map", function(evt)
     params.savename = evt.parameter
   end
   mapshot(params)
+
+  -- Restore state of surfaces show_clouds.
+  -- Unfortunately, it means the screenshots will contain the clouds.
+  -- As of Factorio 2.0.15, even blocking on set_wait_for_screenshots_to_finish
+  -- and letting an extra tick go through is not enough it seems.
+  -- See https://github.com/Palats/mapshot/issues/50
+  restore_surface_show_clouds()
 end)
