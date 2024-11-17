@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.0.26
-Date:
+Date: 2024.11.17
   Bug:
     - Remove cloudis when rendering. This works only when using CLI, not from in-game `/mapshot`.
 
