@@ -192,7 +192,7 @@ function gen_surface_info(params, surface)
       chunk_count = chunk_count + 1
 
       if try_ent_only then
-        in_ent = surface.count_entities_filtered({ area = chunk.area, limit = 1, type = entities.includes}) > 0
+        in_ent = surface.count_entities_filtered({ area = chunk.area, limit = 1, force = 'player'}) > 0
         if in_ent then
           ent_world_min.x = math.min(ent_world_min.x, chunk.area.left_top.x)
           ent_world_min.y = math.min(ent_world_min.y, chunk.area.left_top.y)
@@ -290,7 +290,7 @@ function gen_layer(params, tile_size, render_size, world_min, world_max, data_pr
     for tile_x = tile_min.x, tile_max.x do
       local top_left = { x = tile_x * tile_size, y = tile_y * tile_size }
       local bottom_right = { x = top_left.x + tile_size, y = top_left.y + tile_size }
-      local has_entities = surface.count_entities_filtered({ area = {top_left, bottom_right}, limit = 1, type = entities.includes}) > 0
+      local has_entities = surface.count_entities_filtered({ area = {top_left, bottom_right}, limit = 1, force = 'player'}) > 0
       local quality_to_use = has_entities and params.jpgquality or math.min(params.minjpgquality, params.jpgquality)
       if quality_to_use > 0 then
         game.take_screenshot{
