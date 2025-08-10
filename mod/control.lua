@@ -176,6 +176,7 @@ function gen_surface_info(params, surface)
   -- When requested to match only entities, fallback using all chunks
   -- if no entities are found at all.
   local try_ent_only = params.area == "entities"
+  local player_force_mode = params.area == "player"
   local world_min = { x = 2^30, y = 2^30 }
   local world_max = { x = -2^30, y = -2^30 }
   local chunk_count = 0
@@ -191,8 +192,17 @@ function gen_surface_info(params, surface)
       world_max.y = math.max(world_max.y, chunk.area.right_bottom.y)
       chunk_count = chunk_count + 1
 
-      if try_ent_only then
-        in_ent = surface.count_entities_filtered({ area = chunk.area, limit = 1, force = 'player'}) > 0
+      if player_force_mode then
+        local in_ent = surface.count_entities_filtered({ area = chunk.area, limit = 1, force = 'player'}) > 0
+        if in_ent then
+          ent_world_min.x = math.min(ent_world_min.x, chunk.area.left_top.x)
+          ent_world_min.y = math.min(ent_world_min.y, chunk.area.left_top.y)
+          ent_world_max.x = math.max(ent_world_max.x, chunk.area.right_bottom.x)
+          ent_world_max.y = math.max(ent_world_max.y, chunk.area.right_bottom.y)
+          ent_chunk_count = ent_chunk_count + 1
+        end
+      elseif try_ent_only then
+        local in_ent = surface.count_entities_filtered({ area = chunk.area, limit = 1, type = entities.includes}) > 0
         if in_ent then
           ent_world_min.x = math.min(ent_world_min.x, chunk.area.left_top.x)
           ent_world_min.y = math.min(ent_world_min.y, chunk.area.left_top.y)
@@ -203,7 +213,7 @@ function gen_surface_info(params, surface)
       end
     end
   end
-  if try_ent_only and ent_chunk_count > 0 then
+  if (try_ent_only or player_force_mode) and ent_chunk_count > 0 then
     world_min = ent_world_min
     world_max = ent_world_max
     chunk_count = ent_chunk_count
@@ -286,11 +296,18 @@ function gen_layer(params, tile_size, render_size, world_min, world_max, data_pr
   game.print(msg)
   log(msg)
 
+  local player_force_mode = params.area == "player"
+
   for tile_y = tile_min.y, tile_max.y do
     for tile_x = tile_min.x, tile_max.x do
       local top_left = { x = tile_x * tile_size, y = tile_y * tile_size }
       local bottom_right = { x = top_left.x + tile_size, y = top_left.y + tile_size }
-      local has_entities = surface.count_entities_filtered({ area = {top_left, bottom_right}, limit = 1, force = 'player'}) > 0
+      local has_entities
+      if player_force_mode then
+        has_entities = surface.count_entities_filtered({ area = {top_left, bottom_right}, limit = 1, force = 'player'}) > 0
+      else
+        has_entities = surface.count_entities_filtered({ area = {top_left, bottom_right}, limit = 1, type = entities.includes}) > 0
+      end
       local quality_to_use = has_entities and params.jpgquality or math.min(params.minjpgquality, params.jpgquality)
       if quality_to_use > 0 then
         game.take_screenshot{

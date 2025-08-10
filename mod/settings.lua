@@ -3,10 +3,10 @@ data:extend({
         type = "string-setting",
         name = "area",
         setting_type = "runtime-per-user",
-        default_value = "entities",
-        allowed_values = {"all", "entities"},
+        default_value = "player",
+        allowed_values = {"all", "player", "entities"},
         localised_name = "Area",
-        localised_description = "How to pick the area to render. `all`=all existing chunks; `entities`=chunks including artifical build.",
+        localised_description = "How to pick the area to render. `all`=all existing chunks; `player`=chunks including entities of 'player' force; `entities`=chunks including whitelisted entities to match artificial builds.",
         order = "000",
     },
     {

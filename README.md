@@ -67,7 +67,8 @@ You can tune parameters such as many layers to generate, their resolution and a 
 Parameters:
 
 * _Area_ (`area`) : What to include in the mapshot. Options:
-  * `entities` [default]: Include all chunks which contain at least one entity of some interest. This should capture the base in practice. When no entities are found, all chunks are rendered.
+  * `player` [default]: Include all chunks containing items belonging to the 'player' force.
+  * `entities`: Include all chunks which contain at least one entity of some interest. This should capture the base in practice. When no entities are found, all chunks are rendered.
   * `all`: All chunks.
 * _Smallest tile size_ (`tilemin`) : Indicates the number of in-game units the most detailed layer should contain per generated tile. For example, if it is set to 256 while the "Tile Resolution" is 1024, it means that the most detailed layer will use 4 pixels (=1024/256) per in-game tile. Many assets in Factorio seem to allow for up to 64 pixels per game tile - so, to have the maximum resolution, you will want to have "Smallest tile size" set to 16 (=1024/64) - careful, that is slow.
 * _Largest tile size_ (`tilemax`) : Number of in-game units per generated tile for the least detailed layer. See `tilemin` for more details. Mapshot will generates all layers from `tilemax` to `tilemin` (included).
