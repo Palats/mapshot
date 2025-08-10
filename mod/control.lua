@@ -1,5 +1,6 @@
 local generated = require("generated")
 local overrides = require("overrides")
+local entities = require("entities")
 local hash = require("hash")
 
 local factorio_min_zoom = 0.031250
