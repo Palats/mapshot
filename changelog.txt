@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.0.27
+Date: 2025.08.13
+  Changes:
+    - Changed behavior for selecting which chunks to render, which work better by default in more
+      cases. Old behavior is accessible through the settings.
+
+---------------------------------------------------------------------------------------------------
 Version: 0.0.26
 Date: 2024.11.17
   Bug:
