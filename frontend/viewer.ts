@@ -429,7 +429,7 @@ function createCustomIcon(url: string, size = [16, 16]): L.Icon {
 function replaceItemAndFluidTags(text: string): string {
     return text.replace(/\[(item|fluid|recipe)=(.*?)\]/g,
         (match, type, name) =>
-            `<img class="icon" src="https://raw.githubusercontent.com/ungaul/factorio-resources/main/icons/64x64/${name}.png" alt="${name}" title="${name}">`
+            `<img class="icon" src="https://raw.githubusercontent.com/ungaul/factorio-resources/main/graphics/icons/64x64/${name}.png" alt="${name}" title="${name}">`
     );
 }
 
@@ -498,9 +498,9 @@ function run(config: common.MapshotConfig, info: common.MapshotJSON) {
                 : "cargo-pod";
             let displayName =
                 `<span class="${item.className}">
-                <img src="https://raw.githubusercontent.com/ungaul/factorio-resources/main/icons/64x64/${icon}.png"
+                <img src="https://raw.githubusercontent.com/ungaul/factorio-resources/main/graphics/icons/64x64/${icon}.png"
                      width="16" height="16" style="vertical-align: middle; margin-right: 5px;"
-                     onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/ungaul/factorio-resources/main/icons/64x64/cargo-pod.png';">
+                     onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/ungaul/factorio-resources/main/graphics/icons/64x64/cargo-pod.png';">
                 ${item.name}
             </span>`;
             layerControl.addBaseLayer(item.layer, displayName);
