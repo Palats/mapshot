@@ -1,0 +1,252 @@
+:root {
+    --first: #000;
+    --second: #fff;
+    --third: #292929;
+    --link-cursor: pointer;
+}
+
+* {
+    color: var(--second);
+    font-family: DejaVu Sans, sans-serif;
+    user-select: none;
+}
+
+body {
+    background: var(--first);
+}
+
+#content {
+    height: 100%;
+}
+
+.leaflet-control-boxzoom,
+.leaflet-control-zoomslider {
+    display: none;
+}
+
+#menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: #252425;
+    z-index: 1000;
+}
+
+#menu div {
+    background: #161516;
+}
+
+.leaflet-control.leaflet-control-layers {
+    background: #252425;
+    border-radius: 0;
+    border: 1px solid var(--third);
+    padding: 0;
+}
+
+input[type="radio"] {
+    display: none;
+}
+
+span {
+    text-transform: capitalize;
+}
+
+.leaflet-control-layers-separator {
+    display: none;
+}
+
+.leaflet-control-layers-list::before {
+    content: "Surfaces";
+    font-size: 15px;
+}
+
+#planets::before {
+    content: "Planets";
+}
+
+#platforms::before {
+    content: "Platforms";
+}
+
+label,
+.leaflet-control-layers-list::before,
+#planets::before,
+#platforms::before {
+    border-bottom: 1px solid #161516;
+    padding: 2px 7px;
+    display: flex !important;
+    align-items: center;
+}
+
+label div,
+label span {
+    display: flex;
+    width: 100%;
+    gap: 5px;
+}
+
+.leaflet-control-layers-overlays label,
+.leaflet-control-layers-overlays div {
+    width: 30px;
+    height: 30px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+}
+
+.leaflet-control-layers-overlays img,
+.leaflet-control-layers-overlays span {
+    align-items: center;
+    justify-content: center;
+    display: flex;
+}
+
+label:hover {
+    background: #ffc75a;
+    cursor: var(--link-cursor);
+}
+
+label:hover span {
+    color: var(--first);
+}
+
+.leaflet-right {
+    left: 0 !important;
+    right: unset !important;
+}
+
+.leaflet-control-layers-overlays {
+    position: fixed;
+    right: 0;
+    top: 0;
+    background: #252425;
+    box-shadow: 0 0 10px var(--first);
+    /* border: 2px solid var(--first); */
+}
+
+/* .leaflet-control-layers-base label:nth-child(6)::before {
+    content: "Platforms";
+} */
+
+.leaflet-control-layers-list::before,
+#planets::before,
+#platforms::before {
+    color: #f8ecc1;
+}
+
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+    border: none;
+}
+
+.leaflet-control-layers-list {
+    box-shadow: 0 0 10px var(--first);
+    /* border: 2px solid var(--first); */
+    outline: none;
+    width: 200px;
+}
+
+.leaflet-left .leaflet-control,
+.leaflet-top .leaflet-control {
+    margin: 0 !important;
+}
+
+label.active {
+    background: #ffc75a;
+}
+
+label.active span {
+    color: var(--first);
+}
+
+.icon {
+    width: 14px;
+    height: 14px;
+}
+
+.leaflet-tooltip {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: none;
+    border: none;
+    color: var(--second);
+    box-shadow: none;
+    text-shadow:
+        -2px -2px 0 black,
+        2px -2px 0 black,
+        -2px 2px 0 black,
+        2px 2px 0 black;
+}
+
+.leaflet-tooltip:before {
+    display: none;
+}
+
+.layer-toggle {
+    display: flex;
+    align-items: center;
+    background: #333;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    margin: 5px;
+    cursor: pointer;
+}
+
+.layer-toggle.active {
+    background: #ffc75a;
+}
+
+.layer-icon {
+    width: 20px;
+    object-fit: contain;
+    height: 20px;
+}
+
+input[type="checkbox"] {
+    display: none;
+}
+
+.leaflet-bottom.leaflet-right {
+    display: none;
+}
+
+.active span div {
+    background: #ffc75a;
+}
+
+label:has(span.active) {
+    background: #ffc75a;
+}
+
+label:has(input[type="checkbox"]:checked) {
+    background: #ffc75a;
+}
+
+span.active {
+    color: var(--first);
+}
+
+#download {
+    position: fixed;
+    bottom: 20px;
+    font-size: 40px;
+    right: 20px;
+    z-index: 1000;
+    border-radius: 100px;
+    cursor: var(--link-cursor);
+    background: var(--third);
+    transition: 0.3s;
+}
+
+#download:hover {
+    filter: brightness(0.9);
+}
+
+@media screen and (max-width: 768px) {
+    .leaflet-control-layers-list{
+        width: 120px;
+    }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "Mapshot",
+  "icons": [
+    {
+      "src": "thumbnail.png",
+      "type": "image/png",
+      "sizes": "144x144"
+    }
+  ],
+  "background_color": "#000000",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "description": "Factorio map viewer"
+}
