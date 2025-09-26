@@ -333,7 +333,7 @@ class Surface {
                         this.midPointToLatLng(station.bounding_box),
                         {
                             title: station.backer_name,
-                            icon: createCustomIcon("https://raw.githubusercontent.com/ungaul/factorio-resources/main/bonus/64x64/station.png")
+                            icon: createCustomIcon("https://raw.githubusercontent.com/ungaul/factorio-resources/main/bonus/station.png")
                         }
                     ).bindTooltip(tooltipContent, { permanent: true })
                 );
@@ -351,7 +351,7 @@ class Surface {
                         this.worldToLatLng(tag.position.x, tag.position.y),
                         {
                             title: `${tag.force_name}: ${tag.text}`,
-                            icon: createCustomIcon("https://raw.githubusercontent.com/ungaul/factorio-resources/main/bonus/64x64/tag.png")
+                            icon: createCustomIcon("https://raw.githubusercontent.com/ungaul/factorio-resources/main/bonus/tag.png")
                         }
                     ).bindTooltip(tooltipContent, { permanent: true })
                 );
@@ -361,7 +361,7 @@ class Surface {
 
         // Layer: debug
         const debugLayers = [
-            L.marker([0, 0], { title: "Start", icon: createCustomIcon("https://raw.githubusercontent.com/ungaul/factorio-resources/main/bonus/64x64/debug.png") }).bindPopup("Starting point"),
+            L.marker([0, 0], { title: "Start", icon: createCustomIcon("https://raw.githubusercontent.com/ungaul/factorio-resources/main/bonus/debug.png") }).bindPopup("Starting point"),
         ];
 
         if (common.isIterable(si.players)) {
@@ -372,7 +372,7 @@ class Surface {
                         {
                             title: player.name,
                             alt: `Player: ${player.name}`,
-                            icon: createCustomIcon("https://raw.githubusercontent.com/ungaul/factorio-resources/main/bonus/64x64/debug.png")
+                            icon: createCustomIcon("https://raw.githubusercontent.com/ungaul/factorio-resources/main/bonus/debug.png")
                         }
                     ).bindTooltip(player.name, { permanent: true })
                 );
@@ -380,7 +380,7 @@ class Surface {
         }
         if (si.player) {
             debugLayers.push(
-                L.marker(this.worldToLatLng(si.player.x, si.player.y), { title: "Player", icon: createCustomIcon("https://raw.githubusercontent.com/ungaul/factorio-resources/main/bonus/64x64/debug.png") }).bindPopup("Player")
+                L.marker(this.worldToLatLng(si.player.x, si.player.y), { title: "Player", icon: createCustomIcon("https://raw.githubusercontent.com/ungaul/factorio-resources/main/bonus/debug.png") }).bindPopup("Player")
             );
         }
         debugLayers.push(
@@ -514,15 +514,15 @@ function run(config: common.MapshotConfig, info: common.MapshotJSON) {
     const debugLayer = L.layerGroup();
     layerControl.addOverlay(
         trainLayer,
-        "<img class='layer-icon' src='https://raw.githubusercontent.com/ungaul/factorio-resources/main/bonus/64x64/station.png'>"
+        "<img class='layer-icon' src='https://raw.githubusercontent.com/ungaul/factorio-resources/main/bonus/station.png'>"
     );
     layerControl.addOverlay(
         tagsLayer,
-        "<img class='layer-icon' src='https://raw.githubusercontent.com/ungaul/factorio-resources/main/bonus/64x64/tag.png'>"
+        "<img class='layer-icon' src='https://raw.githubusercontent.com/ungaul/factorio-resources/main/bonus/tag.png'>"
     );
     layerControl.addOverlay(
         debugLayer,
-        "<img class='layer-icon' src='https://raw.githubusercontent.com/ungaul/factorio-resources/main/bonus/64x64/debug.png'>"
+        "<img class='layer-icon' src='https://raw.githubusercontent.com/ungaul/factorio-resources/main/bonus/debug.png'>"
     );
     const overlayKeys = new Map<L.Layer, string>();
     overlayKeys.set(trainLayer, "lt");
