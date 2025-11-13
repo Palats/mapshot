@@ -158,7 +158,7 @@ function run(config: common.MapshotConfig, info: common.MapshotJSON) {
     for (const si of info.surfaces) {
         const s = new Surface(config, si);
         surfaces.push(s);
-        layerControl.addBaseLayer(s.baseLayer, si.surface_name);
+        layerControl.addBaseLayer(s.baseLayer, si.surface_localised_name ?? si.surface_name);
         surfaceByKey.set(s.surfaceInfo.surface_idx.toString(), s);
         surfaceByKey.set(s.surfaceInfo.surface_name, s);
     }

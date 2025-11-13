@@ -75,6 +75,14 @@ export interface MapshotSurfaceJSON {
     // The in-game index of that surface.
     surface_idx: number,
 
+    // The localised name of this surface. If it's a planet or a space platform,
+    // then the corresponding name is used here instead.
+    surface_localised_name?: string,
+    // Is this surface a planet?
+    is_planet?: boolean,
+    // Is this surface a space platform?
+    is_space_platform?: boolean,
+
     // Prefix for where to find the tile file.
     file_prefix: string,
 
