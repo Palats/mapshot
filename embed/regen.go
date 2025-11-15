@@ -267,10 +267,12 @@ func (l *Loader) LoadTextGlob(glob string, excludes []string) []*FileInfo {
 
 	ex := map[string]bool{}
 	for _, e := range excludes {
+		e = filepath.Clean(e)
 		ex[e] = true
 	}
 
 	for _, m := range matches {
+		m = filepath.Clean(m)
 		if ex[m] {
 			continue
 		}
