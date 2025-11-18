@@ -25,7 +25,7 @@ function build_params(player)
     params.surface = all_surfaces
   end
 
-  for k,v in pairs(helpers.json_to_table(overrides)) do
+  for k,v in pairs(helpers.json_to_table(overrides) --[[@as table]]) do
     params[k] = v
   end
 
