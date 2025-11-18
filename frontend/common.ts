@@ -78,10 +78,10 @@ export interface MapshotSurfaceJSON {
     // The localised name of this surface. If it's a planet or a space platform,
     // then the corresponding name is used here instead.
     surface_localised_name?: string,
-    // Is this surface a planet?
-    is_planet?: boolean,
-    // Is this surface a space platform?
-    is_space_platform?: boolean,
+
+    // The type of surface this is.
+    // Defaults to unkown, unless a planet or platform is attached to the surface.
+    surface_type?: "planet" | "platform" | "unknown",
 
     // Prefix for where to find the tile file.
     file_prefix: string,
